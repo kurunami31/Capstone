@@ -138,7 +138,16 @@ function AppContent() {
                   </svg>
                   Home
                 </button>
-                <span style={{ fontSize: 13, color: '#64748b', marginLeft: 8 }}>{user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name}</span>
+                {user.avatar ? (
+                  <img src={user.avatar} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.15)' }} />
+                ) : (
+                  <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                )}
+                <span style={{ fontSize: 13, color: '#64748b' }}>{user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name}</span>
                 <button onClick={handleShowFAQ} style={{
                   background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
                   fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
