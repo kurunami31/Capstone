@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
 import { pool, initDB } from './db.js'
+import { GoogleGenAI } from '@google/genai'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -288,6 +289,79 @@ app.post('/api/profile/picture', authenticate, async (req, res) => {
   } catch (err) {
     console.error('Picture upload error:', err)
     res.status(500).json({ error: 'Server error uploading picture.' })
+  }
+})
+
+const SYSTEM_PROMPT = `You are a helpful assistant for the DOrSU (Davao Oriental State University) College Program Recommender System.
+
+Your role is to answer questions about:
+- How the recommender system works (assessments across SHS strand, grades, SUAST, Holland personality, interests, skills)
+- The assessment steps (consent, welcome, strand, grades, suast, holland, interest, skills, results)
+- The Holland Code / RIASEC personality types (Realistic, Investigative, Artistic, Social, Enterprising, Conventional)
+- The SUST aptitude exam simulation
+- Data privacy under RA 10173 (Data Privacy Act of 2012)
+- DOrSU college programs and how matches are calculated
+- Account registration, login, profile editing, and password changes
+- General questions about DOrSU and its programs
+
+Keep answers concise, friendly, and helpful. If you don't know something, say so honestly. Do not make up information about specific program details you are not sure about. When asked about technical issues, suggest contacting the system administrator.`
+
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { message, history } = req.body
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'Message is required.' })
+    }
+
+    const apiKey = process.env.GOOGLE_API_KEY
+    if (!apiKey) {
+      const faqReplies = {
+        'what is this': 'This is the DOrSU College Program Recommender System, a web-based tool that helps you find the best college programs at Davao Oriental State University based on your SHS strand, grades, aptitude, personality, interests, and skills.',
+        'how does it work': 'The assessment has 8 steps: consent, welcome form, SHS strand selection, grade input, SUAST exam simulation, Holland personality quiz, interests, and skills. After completion, you get a ranked list of recommended programs.',
+        'how do i start': 'Register an account, log in, then click "Get Started" on the landing page. You will be guided through each step of the assessment.',
+        'privacy': 'The system complies with the Data Privacy Act of 2012 (RA 10173). Your data is stored securely and used only for generating recommendations. You must consent before proceeding.',
+        'holland': 'The Holland Code (RIASEC) has six personality types: Realistic (R), Investigative (I), Artistic (A), Social (S), Enterprising (E), and Conventional (C). Your combination helps match you to compatible programs.',
+        'suast': 'SUAST is the DOrSU Scholastic Aptitude Test simulation built into the system. It assesses your aptitude across several areas to help find programs that match your academic strengths.',
+      }
+
+      const lower = message.toLowerCase()
+      let reply = null
+      for (const [key, val] of Object.entries(faqReplies)) {
+        if (lower.includes(key)) { reply = val; break }
+      }
+
+      if (reply) return res.json({ reply })
+
+      return res.json({ reply: 'I\'m running in offline mode. Please set the GOOGLE_API_KEY environment variable to enable AI-powered responses. In the meantime, check the FAQ page for common questions.' })
+    }
+
+    const ai = new GoogleGenAI({ apiKey })
+
+    const contents = []
+    if (history && Array.isArray(history)) {
+      for (const h of history) {
+        if (h.role && h.text) {
+          contents.push({ role: h.role, parts: [{ text: h.text }] })
+        }
+      }
+    }
+    contents.push({ role: 'user', parts: [{ text: message }] })
+
+    const result = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents,
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        maxOutputTokens: 500,
+        temperature: 0.7,
+      },
+    })
+
+    const reply = result.text || 'Sorry, I could not generate a response.'
+    res.json({ reply })
+  } catch (err) {
+    console.error('Chat error:', err)
+    res.status(500).json({ error: 'Failed to get AI response.' })
   }
 })
 

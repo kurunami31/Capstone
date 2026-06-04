@@ -12,6 +12,8 @@ import InterestStep from './components/InterestStep.jsx'
 import SkillsStep from './components/SkillsStep.jsx'
 import Results from './components/Results.jsx'
 import ProfilePage from './components/ProfilePage.jsx'
+import FAQPage from './components/FAQPage.jsx'
+import ChatWidget from './components/ChatWidget.jsx'
 import { calculateRecommendations } from './engine/scoring.js'
 import { calculateHollandCode } from './engine/holland.js'
 import programs from './data/programs.json'
@@ -29,6 +31,7 @@ function AppContent() {
   const { user, loading, logout } = useAuth()
   const [showLanding, setShowLanding] = useState(true)
   const [showProfile, setShowProfile] = useState(false)
+  const [showFAQ, setShowFAQ] = useState(false)
   const [step, setStep] = useState(0)
   const [studentData, setStudentData] = useState({
     name: '', school: '', strand: '',
@@ -68,7 +71,8 @@ function AppContent() {
 
   if (!user) return <AuthPage />
 
-  if (showProfile) return <ProfilePage onBack={handleBackFromProfile} />
+  if (showProfile) return <><ProfilePage onBack={handleBackFromProfile} /><ChatWidget /></>
+  if (showFAQ) return <><FAQPage onBack={handleBackFromFAQ} /><ChatWidget /></>
 
   const updateData = (updates) => {
     setStudentData(prev => ({ ...prev, ...updates }))
@@ -90,6 +94,8 @@ function AppContent() {
 
   const handleShowProfile = () => setShowProfile(true)
   const handleBackFromProfile = () => setShowProfile(false)
+  const handleShowFAQ = () => setShowFAQ(true)
+  const handleBackFromFAQ = () => setShowFAQ(false)
 
   const renderStep = () => {
     switch (currentStep) {
@@ -116,17 +122,33 @@ function AppContent() {
   }
 
   if (showLanding) {
-    return <LandingPage onGetStarted={handleGetStarted} user={user} onLogout={logout} onShowProfile={handleShowProfile} />
+    return (
+      <>
+        <LandingPage onGetStarted={handleGetStarted} user={user} onLogout={logout} onShowProfile={handleShowProfile} onShowFAQ={handleShowFAQ} />
+        <ChatWidget />
+      </>
+    )
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)' }}>
+    <>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)' }}>
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 16px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
         {currentStep !== 'results' && (
           <div style={{ padding: '20px 0 12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ fontSize: 13, color: '#64748b' }}>{user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name}</span>
+                <button onClick={handleShowFAQ} style={{
+                  background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
+                  fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  FAQ
+                </button>
                 <button onClick={handleShowProfile} style={{
                   background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
                   fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
@@ -170,6 +192,8 @@ function AppContent() {
         </div>
       </div>
     </div>
+      <ChatWidget />
+    </>
   )
 }
 
