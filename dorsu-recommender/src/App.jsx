@@ -169,13 +169,17 @@ export default function App() {
           </div>
         )}
 
-        <div style={{
-          backgroundColor: '#fff', borderRadius: 12, padding: 32,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginTop: currentStep === 'welcome' ? 60 : 16,
-          marginBottom: 40
-        }}>
-          {renderStep()}
-        </div>
+        {currentStep === 'welcome' ? (
+          renderStep()
+        ) : (
+          <div style={{
+            backgroundColor: '#fff', borderRadius: 12, padding: 32,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginTop: 16,
+            marginBottom: 40
+          }}>
+            {renderStep()}
+          </div>
+        )}
       </div>
     </div>
   )
