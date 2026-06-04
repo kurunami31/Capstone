@@ -33,7 +33,7 @@ function AppContent() {
   const { user, loading, logout } = useAuth()
   const [systemSettings, setSystemSettings] = useState({})
   const [activePrograms, setActivePrograms] = useState(null)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)')

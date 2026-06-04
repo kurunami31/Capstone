@@ -17,7 +17,6 @@ function HamburgerIcon({ open }) {
 export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onFAQ, onAdmin, onLogout, open, onToggle, isMobile }) {
   const navItems = [
     { id: 'home', label: 'Home', icon: 'home', action: onHome },
-    { id: 'assessment', label: 'Assessment', icon: 'clipboard', action: onAssessment },
     { id: 'profile', label: 'Profile', icon: 'user', action: onProfile },
   ]
 
@@ -37,7 +36,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
   }
 
   const barStyle = {
-    width: '100%', display: 'flex', alignItems: 'center', justifyContent: open && !isMobile ? 'flex-start' : 'center',
+    width: '100%', display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : (open ? 'flex-start' : 'center'),
     padding: isMobile ? '12px 10px' : '10px 0',
     border: 'none', borderRadius: 8, cursor: 'pointer',
     background: 'transparent',
