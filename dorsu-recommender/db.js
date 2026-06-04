@@ -40,6 +40,10 @@ async function initDB() {
     ALTER TABLE users DROP COLUMN IF EXISTS name
   `).catch(() => {})
 
+  await pool.query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user'
+  `).catch(() => {})
+
   console.log('Database initialized.')
 }
 

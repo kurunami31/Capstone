@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000
 const JWT_SECRET = process.env.JWT_SECRET || 'dorsu-recommender-secret-change-in-production'
 const SALT_ROUNDS = 12
 const TOKEN_EXPIRY = '1h'
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
 
 const rateLimitStore = {}
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000
@@ -47,6 +48,7 @@ function generateToken(user) {
   return jwt.sign({
     id: user.id,
     email: user.email,
+    role: user.role || 'user',
     firstName: user.firstName || user.first_name || '',
     lastName: user.lastName || user.last_name || '',
     name: [user.firstName || user.first_name || '', user.lastName || user.last_name || ''].filter(Boolean).join(' '),
@@ -99,16 +101,18 @@ app.post('/api/register', rateLimit, async (req, res) => {
     const hashed = bcrypt.hashSync(password, SALT_ROUNDS)
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 
+    const role = ADMIN_EMAILS.includes(lowerEmail) ? 'admin' : 'user'
+
     const result = await pool.query(
-      `INSERT INTO users (id, email, first_name, last_name, middle_initial, extension_name, password, avatar, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, '', NOW(), NOW())
-       RETURNING id, email, first_name, last_name, middle_initial, extension_name, avatar, created_at, updated_at`,
-      [id, lowerEmail, firstName.trim(), lastName.trim(), middleInitial?.trim() || '', extensionName?.trim() || '', hashed]
+      `INSERT INTO users (id, email, first_name, last_name, middle_initial, extension_name, password, avatar, role, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, '', $8, NOW(), NOW())
+       RETURNING id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at`,
+      [id, lowerEmail, firstName.trim(), lastName.trim(), middleInitial?.trim() || '', extensionName?.trim() || '', hashed, role]
     )
 
     const row = result.rows[0]
     const user = {
-      id: row.id, email: row.email, avatar: row.avatar,
+      id: row.id, email: row.email, avatar: row.avatar, role: row.role,
       firstName: row.first_name, lastName: row.last_name,
       middleInitial: row.middle_initial, extensionName: row.extension_name,
       name: [row.first_name, row.last_name].filter(Boolean).join(' '),
@@ -125,7 +129,7 @@ app.post('/api/register', rateLimit, async (req, res) => {
 
 function mapUser(row) {
   return {
-    id: row.id, email: row.email, avatar: row.avatar,
+    id: row.id, email: row.email, avatar: row.avatar, role: row.role,
     firstName: row.first_name, lastName: row.last_name,
     middleInitial: row.middle_initial, extensionName: row.extension_name,
     name: [row.first_name, row.last_name].filter(Boolean).join(' '),
@@ -141,14 +145,21 @@ app.post('/api/login', rateLimit, async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' })
     }
 
+    const lowerEmail = email.toLowerCase()
+
     const result = await pool.query(
-      'SELECT id, email, first_name, last_name, middle_initial, extension_name, password, avatar, created_at, updated_at FROM users WHERE email = $1',
-      [email.toLowerCase()]
+      'SELECT id, email, first_name, last_name, middle_initial, extension_name, password, avatar, role, created_at, updated_at FROM users WHERE email = $1',
+      [lowerEmail]
     )
 
     const row = result.rows[0]
     if (!row || !bcrypt.compareSync(password, row.password)) {
       return res.status(401).json({ error: 'Invalid email or password.' })
+    }
+
+    if (ADMIN_EMAILS.includes(lowerEmail) && row.role !== 'admin') {
+      await pool.query('UPDATE users SET role = $1 WHERE id = $2', ['admin', row.id])
+      row.role = 'admin'
     }
 
     const { password: _, ...safe } = row
@@ -170,7 +181,7 @@ app.post('/api/logout', (_, res) => {
 app.get('/api/me', authenticate, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at FROM users WHERE id = $1',
       [req.user.id]
     )
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
@@ -224,7 +235,7 @@ app.put('/api/profile', authenticate, async (req, res) => {
 
     if (updates.length === 0) {
       const current = await pool.query(
-        'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, created_at, updated_at FROM users WHERE id = $1',
+        'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at FROM users WHERE id = $1',
         [req.user.id]
       )
       return res.json({ user: mapUser(current.rows[0]) })
@@ -235,7 +246,7 @@ app.put('/api/profile', authenticate, async (req, res) => {
 
     const result = await pool.query(
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}
-       RETURNING id, email, first_name, last_name, middle_initial, extension_name, avatar, created_at, updated_at`,
+       RETURNING id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at`,
       values
     )
 
@@ -371,6 +382,95 @@ app.post('/api/chat', async (req, res) => {
   } catch (err) {
     console.error('Chat error:', err)
     res.status(500).json({ error: 'Failed to get AI response.' })
+  }
+})
+
+function requireAdmin(req, res, next) {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required.' })
+  }
+  next()
+}
+
+app.get('/api/admin/stats', authenticate, requireAdmin, async (_, res) => {
+  try {
+    const totalUsers = await pool.query('SELECT COUNT(*) FROM users')
+    const totalAssessments = await pool.query("SELECT COUNT(*) FROM users WHERE gwa > 0 OR strand != ''")
+    const adminCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin'")
+    const recentUsers = await pool.query(
+      'SELECT id, email, first_name, last_name, avatar, role, created_at FROM users ORDER BY created_at DESC LIMIT 5'
+    )
+    res.json({
+      totalUsers: parseInt(totalUsers.rows[0].count),
+      totalAssessments: parseInt(totalAssessments.rows[0].count),
+      adminCount: parseInt(adminCount.rows[0].count),
+      recentUsers: recentUsers.rows.map(r => ({
+        id: r.id, email: r.email, firstName: r.first_name, lastName: r.last_name,
+        avatar: r.avatar, role: r.role, createdAt: r.created_at,
+      })),
+    })
+  } catch (err) {
+    console.error('Admin stats error:', err)
+    res.status(500).json({ error: 'Server error fetching stats.' })
+  }
+})
+
+app.get('/api/admin/users', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20))
+    const offset = (page - 1) * limit
+    const search = req.query.search || ''
+
+    let countQuery = 'SELECT COUNT(*) FROM users'
+    let dataQuery = 'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at FROM users'
+    const params = []
+    let paramIdx = 1
+
+    if (search) {
+      const filter = ` WHERE (LOWER(first_name) LIKE $${paramIdx} OR LOWER(last_name) LIKE $${paramIdx} OR LOWER(email) LIKE $${paramIdx})`
+      countQuery += filter
+      dataQuery += filter
+      params.push(`%${search.toLowerCase()}%`)
+      paramIdx++
+    }
+
+    dataQuery += ' ORDER BY created_at DESC LIMIT $' + paramIdx + ' OFFSET $' + (paramIdx + 1)
+    params.push(limit, offset)
+
+    const [countResult, dataResult] = await Promise.all([
+      pool.query(countQuery, search ? [`%${search.toLowerCase()}%`] : []),
+      pool.query(dataQuery, params),
+    ])
+
+    res.json({
+      users: dataResult.rows.map(r => ({
+        id: r.id, email: r.email, firstName: r.first_name, lastName: r.last_name,
+        middleInitial: r.middle_initial, extensionName: r.extension_name,
+        avatar: r.avatar, role: r.role, createdAt: r.created_at, updatedAt: r.updated_at,
+      })),
+      total: parseInt(countResult.rows[0].count),
+      page, limit,
+    })
+  } catch (err) {
+    console.error('Admin users error:', err)
+    res.status(500).json({ error: 'Server error fetching users.' })
+  }
+})
+
+app.delete('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    if (req.params.id === req.user.id) {
+      return res.status(400).json({ error: 'You cannot delete your own account.' })
+    }
+    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [req.params.id])
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found.' })
+    }
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Admin delete user error:', err)
+    res.status(500).json({ error: 'Server error deleting user.' })
   }
 })
 

@@ -1,57 +1,12 @@
 import './LandingPage.css'
 
-export default function LandingPage({ onGetStarted, user, onLogout, onShowProfile, onShowFAQ }) {
+export default function LandingPage({ onGetStarted }) {
   return (
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
     }}>
-      <div style={{
-        display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12,
-        padding: '16px 24px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {user?.avatar ? (
-            <img src={user.avatar} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.15)' }} />
-          ) : (
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
-          )}
-          <span style={{ fontSize: 13, color: '#64748b' }}>{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.name}</span>
-        </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button onClick={onShowFAQ} style={{
-            background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
-            fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 4,
-          }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            FAQ
-          </button>
-          <button onClick={onShowProfile} style={{
-            background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
-            fontSize: 12, padding: '4px 14px', borderRadius: 6, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 5,
-          }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-            Profile
-          </button>
-          <button onClick={onLogout} style={{
-            background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
-            fontSize: 12, padding: '4px 14px', borderRadius: 6, cursor: 'pointer',
-          }}>
-            Sign Out
-          </button>
-        </div>
-      </div>
       <div className="hero-fade" style={{
         textAlign: 'center', color: '#fff',
         padding: '60px 24px 0',
@@ -90,6 +45,7 @@ export default function LandingPage({ onGetStarted, user, onLogout, onShowProfil
         >
           Get Started
         </button>
+        <div style={{ height: 120 }} />
       </div>
 
       <div className="section-fade" style={{
