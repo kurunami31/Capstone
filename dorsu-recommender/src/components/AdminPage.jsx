@@ -103,7 +103,6 @@ export default function AdminPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 24 }}>
             {[
               { label: 'Total Users', value: stats.totalUsers, color: '#3b82f6' },
-              { label: 'Assessments', value: stats.totalAssessments, color: '#8b5cf6' },
               { label: 'Admins', value: stats.adminCount, color: '#06b6d4' },
             ].map(s => (
               <div key={s.label} style={{ ...cardStyle, padding: '20px 24px', textAlign: 'center' }}>

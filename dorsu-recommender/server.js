@@ -395,15 +395,13 @@ function requireAdmin(req, res, next) {
 
 app.get('/api/admin/stats', authenticate, requireAdmin, async (_, res) => {
   try {
-    const totalUsers = await pool.query('SELECT COUNT(*) FROM users')
-    const totalAssessments = await pool.query("SELECT COUNT(*) FROM users WHERE gwa > 0 OR strand != ''")
-    const adminCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin'")
+    const totalUsers = await pool.query("SELECT COUNT(*) FROM users WHERE email != 'admin@dorsu.edu.ph'")
+    const adminCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND email != 'admin@dorsu.edu.ph'")
     const recentUsers = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar, role, created_at FROM users ORDER BY created_at DESC LIMIT 5'
+      "SELECT id, email, first_name, last_name, avatar, role, created_at FROM users WHERE email != 'admin@dorsu.edu.ph' ORDER BY created_at DESC LIMIT 5"
     )
     res.json({
       totalUsers: parseInt(totalUsers.rows[0].count),
-      totalAssessments: parseInt(totalAssessments.rows[0].count),
       adminCount: parseInt(adminCount.rows[0].count),
       recentUsers: recentUsers.rows.map(r => ({
         id: r.id, email: r.email, firstName: r.first_name, lastName: r.last_name,
@@ -423,13 +421,13 @@ app.get('/api/admin/users', authenticate, requireAdmin, async (req, res) => {
     const offset = (page - 1) * limit
     const search = req.query.search || ''
 
-    let countQuery = 'SELECT COUNT(*) FROM users'
-    let dataQuery = 'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at FROM users'
+    let countQuery = "SELECT COUNT(*) FROM users WHERE email != 'admin@dorsu.edu.ph'"
+    let dataQuery = "SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at FROM users WHERE email != 'admin@dorsu.edu.ph'"
     const params = []
     let paramIdx = 1
 
     if (search) {
-      const filter = ` WHERE (LOWER(first_name) LIKE $${paramIdx} OR LOWER(last_name) LIKE $${paramIdx} OR LOWER(email) LIKE $${paramIdx})`
+      const filter = ` AND (LOWER(first_name) LIKE $${paramIdx} OR LOWER(last_name) LIKE $${paramIdx} OR LOWER(email) LIKE $${paramIdx})`
       countQuery += filter
       dataQuery += filter
       params.push(`%${search.toLowerCase()}%`)
@@ -463,6 +461,10 @@ app.delete('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) 
   try {
     if (req.params.id === req.user.id) {
       return res.status(400).json({ error: 'You cannot delete your own account.' })
+    }
+    const target = await pool.query('SELECT email FROM users WHERE id = $1', [req.params.id])
+    if (target.rows.length > 0 && target.rows[0].email === 'admin@dorsu.edu.ph') {
+      return res.status(400).json({ error: 'Cannot delete the built-in admin account.' })
     }
     const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [req.params.id])
     if (result.rows.length === 0) {
