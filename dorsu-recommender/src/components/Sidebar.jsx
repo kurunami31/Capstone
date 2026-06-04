@@ -45,7 +45,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
     gap: 10,
   }
 
-  const sidebarWidth = isMobile ? 240 : (open ? 220 : 80)
+  const sidebarWidth = isMobile ? 240 : (open ? 220 : 92)
 
   return (
     <>
@@ -70,7 +70,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
         zIndex: 100,
         transition: 'left 0.3s ease, width 0.3s ease',
       }}>
-          <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '20px 16px 16px' : '10px 4px'), borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '20px 16px 16px' : '10px 10px'), borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10, flexShrink: 0,
               background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
