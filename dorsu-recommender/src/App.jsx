@@ -67,6 +67,7 @@ function AppContent() {
   const handleBackFromProfile = () => setShowProfile(false)
   const handleShowFAQ = () => setShowFAQ(true)
   const handleBackFromFAQ = () => setShowFAQ(false)
+  const handleGoHome = () => { setShowLanding(true); setShowProfile(false); setShowFAQ(false) }
 
   if (loading) {
     return (
@@ -83,8 +84,8 @@ function AppContent() {
 
   if (!user) return <AuthPage />
 
-  if (showProfile) return <><ProfilePage onBack={handleBackFromProfile} /><ChatWidget /></>
-  if (showFAQ) return <><FAQPage onBack={handleBackFromFAQ} /><ChatWidget /></>
+  if (showProfile) return <><ProfilePage onBack={handleBackFromProfile} onHome={handleGoHome} /><ChatWidget /></>
+  if (showFAQ) return <><FAQPage onBack={handleBackFromFAQ} onHome={handleGoHome} /><ChatWidget /></>
 
   const renderStep = () => {
     switch (currentStep) {
@@ -127,7 +128,17 @@ function AppContent() {
           <div style={{ padding: '20px 0 12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 13, color: '#64748b' }}>{user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name}</span>
+                <button onClick={handleGoHome} style={{
+                  background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
+                  fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                  Home
+                </button>
+                <span style={{ fontSize: 13, color: '#64748b', marginLeft: 8 }}>{user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name}</span>
                 <button onClick={handleShowFAQ} style={{
                   background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
                   fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
