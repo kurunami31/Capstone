@@ -11,6 +11,7 @@ import HollandQuiz from './components/HollandQuiz.jsx'
 import InterestStep from './components/InterestStep.jsx'
 import SkillsStep from './components/SkillsStep.jsx'
 import Results from './components/Results.jsx'
+import ProfilePage from './components/ProfilePage.jsx'
 import { calculateRecommendations } from './engine/scoring.js'
 import { calculateHollandCode } from './engine/holland.js'
 import programs from './data/programs.json'
@@ -27,6 +28,7 @@ const STEP_LABELS = [
 function AppContent() {
   const { user, loading, logout } = useAuth()
   const [showLanding, setShowLanding] = useState(true)
+  const [showProfile, setShowProfile] = useState(false)
   const [step, setStep] = useState(0)
   const [studentData, setStudentData] = useState({
     name: '', school: '', strand: '',
@@ -66,6 +68,8 @@ function AppContent() {
 
   if (!user) return <AuthPage />
 
+  if (showProfile) return <ProfilePage onBack={handleBackFromProfile} />
+
   const updateData = (updates) => {
     setStudentData(prev => ({ ...prev, ...updates }))
   }
@@ -83,6 +87,9 @@ function AppContent() {
     setShowLanding(false)
     setStep(0)
   }
+
+  const handleShowProfile = () => setShowProfile(true)
+  const handleBackFromProfile = () => setShowProfile(false)
 
   const renderStep = () => {
     switch (currentStep) {
@@ -109,7 +116,7 @@ function AppContent() {
   }
 
   if (showLanding) {
-    return <LandingPage onGetStarted={handleGetStarted} user={user} onLogout={logout} />
+    return <LandingPage onGetStarted={handleGetStarted} user={user} onLogout={logout} onShowProfile={handleShowProfile} />
   }
 
   return (
@@ -118,13 +125,25 @@ function AppContent() {
         {currentStep !== 'results' && (
           <div style={{ padding: '20px 0 12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <span style={{ fontSize: 13, color: '#64748b' }}>{user.name}</span>
-              <button onClick={logout} style={{
-                background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
-                fontSize: 12, padding: '4px 12px', borderRadius: 6, cursor: 'pointer',
-              }}>
-                Sign Out
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 13, color: '#64748b' }}>{user.name}</span>
+                <button onClick={handleShowProfile} style={{
+                  background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
+                  fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  Profile
+                </button>
+                <button onClick={logout} style={{
+                  background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
+                  fontSize: 12, padding: '4px 12px', borderRadius: 6, cursor: 'pointer',
+                }}>
+                  Sign Out
+                </button>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
               {STEPS.slice(0, -1).map((s, i) => (

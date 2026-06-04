@@ -88,7 +88,7 @@ export default function AuthPage() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={mode === 'register' ? 'DOrSU email or personal email' : 'you@example.com'}
                 style={inputStyle}
                 autoFocus={mode === 'login'}
               />

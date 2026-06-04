@@ -50,7 +50,7 @@ function rateLimit(req, res, next) {
   next()
 }
 
-app.use(express.json())
+app.use(express.json({ limit: '1mb' }))
 app.use(cookieParser())
 
 app.use((req, res, next) => {
@@ -113,14 +113,16 @@ app.post('/api/register', rateLimit, (req, res) => {
     email: email.toLowerCase(),
     name: name.trim(),
     password: hashed,
+    avatar: '',
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   }
   users.push(user)
   writeUsers(users)
 
   const token = generateToken(user)
   setTokenCookie(res, token)
-  res.json({ user: { id: user.id, email: user.email, name: user.name } })
+  res.json({ user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar || '' } })
 })
 
 app.post('/api/login', rateLimit, (req, res) => {
@@ -138,7 +140,7 @@ app.post('/api/login', rateLimit, (req, res) => {
 
   const token = generateToken(user)
   setTokenCookie(res, token)
-  res.json({ user: { id: user.id, email: user.email, name: user.name } })
+  res.json({ user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar || '' } })
 })
 
 app.post('/api/logout', (_, res) => {
@@ -147,7 +149,65 @@ app.post('/api/logout', (_, res) => {
 })
 
 app.get('/api/me', authenticate, (req, res) => {
-  res.json({ user: req.user })
+  const users = readUsers()
+  const fullUser = users.find(u => u.id === req.user.id)
+  if (!fullUser) return res.status(404).json({ error: 'User not found' })
+  const { password, ...safe } = fullUser
+  res.json({ user: safe })
+})
+
+app.put('/api/profile', authenticate, (req, res) => {
+  const { name, email } = req.body
+  const users = readUsers()
+  const idx = users.findIndex(u => u.id === req.user.id)
+  if (idx === -1) return res.status(404).json({ error: 'User not found' })
+
+  if (name !== undefined) {
+    if (name.trim().length < 2) return res.status(400).json({ error: 'Name must be at least 2 characters.' })
+    users[idx].name = name.trim()
+  }
+  if (email !== undefined) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email format.' })
+    const lower = email.toLowerCase()
+    if (lower !== users[idx].email && users.find(u => u.email === lower)) {
+      return res.status(409).json({ error: 'Email already in use.' })
+    }
+    users[idx].email = lower
+  }
+  users[idx].updatedAt = new Date().toISOString()
+  writeUsers(users)
+  const { password, ...safe } = users[idx]
+  res.json({ user: safe })
+})
+
+app.put('/api/profile/password', authenticate, (req, res) => {
+  const { currentPassword, newPassword } = req.body
+  const users = readUsers()
+  const idx = users.findIndex(u => u.id === req.user.id)
+  if (idx === -1) return res.status(404).json({ error: 'User not found' })
+  if (!bcrypt.compareSync(currentPassword, users[idx].password)) {
+    return res.status(401).json({ error: 'Current password is incorrect.' })
+  }
+  if (!newPassword || newPassword.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters.' })
+  }
+  users[idx].password = bcrypt.hashSync(newPassword, SALT_ROUNDS)
+  users[idx].updatedAt = new Date().toISOString()
+  writeUsers(users)
+  res.json({ success: true })
+})
+
+app.post('/api/profile/picture', authenticate, (req, res) => {
+  const { avatar } = req.body
+  if (!avatar) return res.status(400).json({ error: 'Avatar data is required.' })
+  if (avatar.length > 500000) return res.status(400).json({ error: 'Image too large. Max 500KB.' })
+  const users = readUsers()
+  const idx = users.findIndex(u => u.id === req.user.id)
+  if (idx === -1) return res.status(404).json({ error: 'User not found' })
+  users[idx].avatar = avatar
+  users[idx].updatedAt = new Date().toISOString()
+  writeUsers(users)
+  res.json({ avatar })
 })
 
 app.use(express.static(join(__dirname, 'dist')))

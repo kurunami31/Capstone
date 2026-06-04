@@ -1,6 +1,6 @@
 import './LandingPage.css'
 
-export default function LandingPage({ onGetStarted, user, onLogout }) {
+export default function LandingPage({ onGetStarted, user, onLogout, onShowProfile }) {
   return (
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -12,12 +12,24 @@ export default function LandingPage({ onGetStarted, user, onLogout }) {
         padding: '16px 24px',
       }}>
         <span style={{ fontSize: 13, color: '#64748b' }}>{user?.name}</span>
-        <button onClick={onLogout} style={{
-          background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
-          fontSize: 12, padding: '4px 14px', borderRadius: 6, cursor: 'pointer',
-        }}>
-          Sign Out
-        </button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button onClick={onShowProfile} style={{
+            background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
+            fontSize: 12, padding: '4px 14px', borderRadius: 6, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 5,
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            Profile
+          </button>
+          <button onClick={onLogout} style={{
+            background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
+            fontSize: 12, padding: '4px 14px', borderRadius: 6, cursor: 'pointer',
+          }}>
+            Sign Out
+          </button>
+        </div>
       </div>
       <div className="hero-fade" style={{
         textAlign: 'center', color: '#fff',
