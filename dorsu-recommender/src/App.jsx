@@ -21,16 +21,18 @@ import { calculateHollandCode } from './engine/holland.js'
 import programs from './data/programs.json'
 
 const STEPS = [
-  'consent', 'welcome', 'strand', 'grades', 'suast', 'holland', 'interest', 'skills', 'results'
+  'welcome', 'strand', 'grades', 'suast', 'holland', 'interest', 'skills', 'results'
 ]
 
 const STEP_LABELS = [
-  'Consent', 'Welcome', 'SHS Strand', 'Grades', 'SUAST Exam',
+  'Welcome', 'SHS Strand', 'Grades', 'SUAST Exam',
   'Personality', 'Interests', 'Skills', 'Results'
 ]
 
 function AppContent() {
   const { user, loading, logout } = useAuth()
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [consented, setConsented] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showProfile, setShowProfile] = useState(false)
   const [showFAQ, setShowFAQ] = useState(false)
@@ -63,8 +65,7 @@ function AppContent() {
     setStudentData(prev => ({ ...prev, ...updates }))
   }
 
-  const handleConsent = () => { setStep(1) }
-  const handleStart = (name, school) => { updateData({ name, school }); setStep(2) }
+  const handleStart = (name, school) => { updateData({ name, school }); setStep(1) }
   const handleGetStarted = () => { setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0) }
   const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false) }
   const handleBackFromProfile = () => setShowProfile(false)
@@ -88,6 +89,8 @@ function AppContent() {
   }
 
   if (!user) return <AuthPage />
+
+  if (!consented) return <ConsentPage onConsent={() => setConsented(true)} />
 
   let activePage = 'home'
   if (showProfile) activePage = 'profile'
@@ -119,14 +122,13 @@ function AppContent() {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 'consent': return <ConsentPage onConsent={handleConsent} />
       case 'welcome': return <Welcome onStart={handleStart} />
-      case 'strand': return <StrandStep data={studentData} onUpdate={updateData} onNext={() => setStep(3)} />
-      case 'grades': return <GradesStep data={studentData} onUpdate={updateData} onNext={() => setStep(4)} onBack={() => setStep(2)} />
-      case 'suast': return <SUASTStep data={studentData} onUpdate={updateData} onNext={() => setStep(5)} onBack={() => setStep(3)} />
-      case 'holland': return <HollandQuiz data={studentData} onUpdate={updateData} onNext={() => setStep(6)} onBack={() => setStep(4)} />
-      case 'interest': return <InterestStep data={studentData} onUpdate={updateData} onNext={() => setStep(7)} onBack={() => setStep(5)} />
-      case 'skills': return <SkillsStep data={studentData} onUpdate={updateData} onNext={() => setStep(8)} onBack={() => setStep(6)} />
+      case 'strand': return <StrandStep data={studentData} onUpdate={updateData} onNext={() => setStep(2)} />
+      case 'grades': return <GradesStep data={studentData} onUpdate={updateData} onNext={() => setStep(3)} onBack={() => setStep(1)} />
+      case 'suast': return <SUASTStep data={studentData} onUpdate={updateData} onNext={() => setStep(4)} onBack={() => setStep(2)} />
+      case 'holland': return <HollandQuiz data={studentData} onUpdate={updateData} onNext={() => setStep(5)} onBack={() => setStep(3)} />
+      case 'interest': return <InterestStep data={studentData} onUpdate={updateData} onNext={() => setStep(6)} onBack={() => setStep(4)} />
+      case 'skills': return <SkillsStep data={studentData} onUpdate={updateData} onNext={() => setStep(7)} onBack={() => setStep(5)} />
       case 'results': return null
       default: return null
     }
@@ -179,8 +181,10 @@ function AppContent() {
         onFAQ={handleShowFAQ}
         onAdmin={handleShowAdmin}
         onLogout={logout}
+        open={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
-      <div style={{ flex: 1, marginLeft: 220, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+      <div style={{ flex: 1, marginLeft: sidebarOpen ? 220 : 0, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', transition: 'margin-left 0.3s ease' }}>
         {mainContent}
       </div>
       <ChatWidget />
