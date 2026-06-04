@@ -1,3 +1,19 @@
+function HamburgerIcon({ open }) {
+  const bar = {
+    position: 'absolute', left: 2, right: 2, height: 2,
+    borderRadius: 1, backgroundColor: 'currentColor',
+    transition: 'all 0.3s ease',
+  }
+
+  return (
+    <div style={{ position: 'relative', width: 16, height: 16, flexShrink: 0 }}>
+      <span style={{ ...bar, top: open ? 7 : 3, transform: open ? 'rotate(45deg)' : 'rotate(0)' }} />
+      <span style={{ ...bar, top: 7, opacity: open ? 0 : 1 }} />
+      <span style={{ ...bar, top: open ? 7 : 11, transform: open ? 'rotate(-45deg)' : 'rotate(0)' }} />
+    </div>
+  )
+}
+
 export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onFAQ, onAdmin, onLogout, open, onToggle }) {
   const navItems = [
     { id: 'home', label: 'Home', icon: 'home', action: onHome },
@@ -63,9 +79,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#94a3b8', padding: 0,
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+            <HamburgerIcon open={open} />
           </button>
         </div>
       ) : (
@@ -76,9 +90,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#94a3b8', padding: 0,
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
+            <HamburgerIcon open={open} />
           </button>
         </div>
       )}
