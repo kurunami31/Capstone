@@ -54,7 +54,7 @@ export default function LandingPage({ onGetStarted, user, onLogout, onShowProfil
       </div>
       <div className="hero-fade" style={{
         textAlign: 'center', color: '#fff',
-        padding: '80px 24px 40px',
+        padding: '60px 24px 0',
         background: 'radial-gradient(ellipse at 50% 0%, rgba(37,99,235,0.15) 0%, transparent 60%)',
       }}>
         <img src="./logo.png" alt="DOrSU Logo" className="hero-logo" style={{ height: 140, marginBottom: 20 }} />
@@ -74,7 +74,7 @@ export default function LandingPage({ onGetStarted, user, onLogout, onShowProfil
           Find the best college programs at Davao Oriental State University
           that match your unique strengths and interests.
         </p>
-        <p className="hero-tagline" style={{ fontSize: 14, opacity: 0.65, marginBottom: 40, letterSpacing: '0.02em' }}>
+        <p className="hero-tagline" style={{ fontSize: 14, opacity: 0.65, marginBottom: 24, letterSpacing: '0.02em' }}>
           SHS Strand &bull; Grades &bull; Aptitude &bull; Personality &bull; Interests &bull; Skills
         </p>
         <button
@@ -93,7 +93,7 @@ export default function LandingPage({ onGetStarted, user, onLogout, onShowProfil
       </div>
 
       <div className="section-fade" style={{
-        maxWidth: 900, margin: '0 auto', padding: '20px 24px 80px',
+        maxWidth: 900, margin: '0 auto', padding: '0 24px 80px',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
           <span style={{
