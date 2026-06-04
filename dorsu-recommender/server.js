@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
 import { pool, initDB } from './db.js'
 import { GoogleGenAI } from '@google/genai'
+import programs from './src/data/programs.json' with { type: 'json' }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -740,14 +741,13 @@ initDB().then(async () => {
   // Auto-populate program_settings with all programs enabled by default
   const progCount = await pool.query('SELECT COUNT(*)::int AS cnt FROM program_settings')
   if (progCount.rows[0].cnt === 0) {
-    const programs = await pool.query('SELECT code FROM programs')
-    for (const prog of programs.rows) {
+    for (const prog of programs) {
       await pool.query(
         'INSERT INTO program_settings (program_code, active) VALUES ($1, true) ON CONFLICT DO NOTHING',
         [prog.code]
       )
     }
-    console.log(`Auto-populated ${programs.rows.length} program settings.`)
+    console.log(`Auto-populated ${programs.length} program settings.`)
   }
 
   if (!process.env.VERCEL) {
