@@ -96,9 +96,7 @@ function btnStyle(ready) {
   }
 }
 
-function secondaryBtn() {
-  return {
-    padding: '12px 40px', fontSize: 15, fontWeight: 600,
-    backgroundColor: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: 8, cursor: 'pointer'
-  }
+const secondaryBtn = {
+  padding: '12px 40px', fontSize: 15, fontWeight: 600,
+  backgroundColor: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: 8, cursor: 'pointer'
 }
