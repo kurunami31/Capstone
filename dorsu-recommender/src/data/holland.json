@@ -1,0 +1,62 @@
+[
+  {
+    "dimension": "Realistic",
+    "questions": [
+      "I enjoy working with tools and machinery",
+      "I prefer hands-on activities over desk work",
+      "I like building or repairing things",
+      "I enjoy outdoor activities and physical work",
+      "I am good at operating equipment or vehicles"
+    ]
+  },
+  {
+    "dimension": "Investigative",
+    "questions": [
+      "I enjoy solving complex problems and puzzles",
+      "I am curious about how things work",
+      "I like conducting experiments or research",
+      "I enjoy analyzing data and finding patterns",
+      "I prefer tasks that require critical thinking"
+    ]
+  },
+  {
+    "dimension": "Artistic",
+    "questions": [
+      "I enjoy creative activities like writing, drawing, or music",
+      "I appreciate art, design, and aesthetics",
+      "I like expressing myself through creative work",
+      "I enjoy brainstorming and generating new ideas",
+      "I prefer unstructured and flexible environments"
+    ]
+  },
+  {
+    "dimension": "Social",
+    "questions": [
+      "I enjoy teaching or helping others learn",
+      "I am interested in understanding people's feelings",
+      "I like working in teams and collaborating",
+      "I enjoy volunteering or community service",
+      "I am good at listening and counseling others"
+    ]
+  },
+  {
+    "dimension": "Enterprising",
+    "questions": [
+      "I enjoy leading groups and managing projects",
+      "I am comfortable persuading others to my point of view",
+      "I like taking risks and starting new initiatives",
+      "I enjoy public speaking and presentations",
+      "I am motivated by competition and achieving goals"
+    ]
+  },
+  {
+    "dimension": "Conventional",
+    "questions": [
+      "I enjoy organizing data and following procedures",
+      "I like working with numbers and detailed records",
+      "I prefer clear rules and structured tasks",
+      "I am careful about accuracy and attention to detail",
+      "I enjoy maintaining order and systematizing information"
+    ]
+  }
+]
