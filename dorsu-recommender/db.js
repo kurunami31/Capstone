@@ -70,7 +70,8 @@ async function initDB() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS program_settings (
       code TEXT PRIMARY KEY,
-      active BOOLEAN NOT NULL DEFAULT true
+      active BOOLEAN NOT NULL DEFAULT true,
+      updated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `)
 
@@ -84,7 +85,7 @@ async function initDB() {
 
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['academic_weight', '0.45'])
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['suast_weight', '0.30'])
-  await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['personal_fit_weight', '0.25'])
+  await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['personal_weight', '0.25'])
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['holland_match_weight', '0.50'])
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['interest_match_weight', '0.30'])
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['skills_match_weight', '0.20'])

@@ -635,10 +635,10 @@ app.get('/api/admin/activity', authenticate, requireAdmin, async (req, res) => {
 app.put('/api/admin/programs/:code/toggle', authenticate, requireAdmin, async (req, res) => {
   try {
     const { code } = req.params
-    const existing = await pool.query('SELECT * FROM program_settings WHERE program_code = $1', [code])
+    const existing = await pool.query('SELECT * FROM program_settings WHERE code = $1', [code])
     if (existing.rows.length === 0) {
       await pool.query(
-        'INSERT INTO program_settings (program_code, active) VALUES ($1, false)',
+        'INSERT INTO program_settings (code, active) VALUES ($1, false)',
         [code]
       )
       logActivity(req.user.id, 'program_toggle', `Disabled program: ${code}`, req.ip || '')
@@ -646,7 +646,7 @@ app.put('/api/admin/programs/:code/toggle', authenticate, requireAdmin, async (r
     }
     const newActive = !existing.rows[0].active
     await pool.query(
-      'UPDATE program_settings SET active = $1, updated_at = NOW() WHERE program_code = $2',
+      'UPDATE program_settings SET active = $1, updated_at = NOW() WHERE code = $2',
       [newActive, code]
     )
     logActivity(req.user.id, 'program_toggle', `${newActive ? 'Enabled' : 'Disabled'} program: ${code}`, req.ip || '')
@@ -660,10 +660,10 @@ app.put('/api/admin/programs/:code/toggle', authenticate, requireAdmin, async (r
 // ---- Get program active statuses ----
 app.get('/api/programs/status', authenticate, async (_, res) => {
   try {
-    const result = await pool.query('SELECT program_code, active FROM program_settings')
+    const result = await pool.query('SELECT code, active FROM program_settings')
     const map = {}
     for (const row of result.rows) {
-      map[row.program_code] = row.active
+      map[row.code] = row.active
     }
     res.json(map)
   } catch (err) {
@@ -743,7 +743,7 @@ initDB().then(async () => {
   if (progCount.rows[0].cnt === 0) {
     for (const prog of programs) {
       await pool.query(
-        'INSERT INTO program_settings (program_code, active) VALUES ($1, true) ON CONFLICT DO NOTHING',
+        'INSERT INTO program_settings (code, active) VALUES ($1, true) ON CONFLICT DO NOTHING',
         [prog.code]
       )
     }
