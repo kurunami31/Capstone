@@ -6,7 +6,7 @@ export default function LandingPage({ onGetStarted }) {
         color: '#fff', textAlign: 'center',
         padding: '100px 24px 70px',
       }}>
-        <img src="./logo.png" alt="DOrSU Logo" style={{ height: 96, marginBottom: 20 }} />
+        <img src="./logo.png" alt="DOrSU Logo" style={{ height: 140, marginBottom: 20 }} />
         <h1 style={{
           fontSize: 40, fontWeight: 800, marginBottom: 14,
           letterSpacing: '-0.02em', lineHeight: 1.2,
