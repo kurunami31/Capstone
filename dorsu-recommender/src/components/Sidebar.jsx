@@ -60,18 +60,6 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
           }}
         />
       )}
-      {isMobile && !open && (
-        <button onClick={onToggle} style={{
-          position: 'fixed', left: 8, top: 8, zIndex: 100,
-          width: 40, height: 40,
-          background: '#0b1222', border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 8, cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#94a3b8', padding: 0,
-        }}>
-          <HamburgerIcon open={false} />
-        </button>
-      )}
       <div style={{
         position: isMobile ? 'fixed' : 'fixed', left: isMobile ? (open ? 0 : -sidebarWidth) : 0, top: 0, bottom: 0,
         width: sidebarWidth,
@@ -83,13 +71,13 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
         zIndex: 100,
         transition: 'left 0.3s ease, width 0.3s ease',
       }}>
-          <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '16px 12px' : '10px 6px'), borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '20px 16px 16px' : '10px 4px'), borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{
-              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+              width: 36, height: 36, borderRadius: 10, flexShrink: 0,
               background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/>
               </svg>
             </div>
