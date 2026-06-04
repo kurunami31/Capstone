@@ -17,13 +17,13 @@ function HamburgerIcon({ open }) {
 export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onFAQ, onAdmin, onLogout, open, onToggle, isMobile }) {
   const navItems = [
     { id: 'home', label: 'Home', icon: 'home', action: onHome },
+    { id: 'assessment', label: 'Assessment', icon: 'clipboard', action: onAssessment },
     { id: 'profile', label: 'Profile', icon: 'user', action: onProfile },
   ]
 
   if (user?.role === 'admin') {
-    navItems.splice(1, 0, { id: 'admin', label: 'Admin', icon: 'shield', action: onAdmin })
+    navItems.push({ id: 'admin', label: 'Admin', icon: 'shield', action: onAdmin })
   } else {
-    navItems.splice(1, 0, { id: 'assessment', label: 'Assessment', icon: 'clipboard', action: onAssessment })
     navItems.push({ id: 'faq', label: 'FAQ', icon: 'helpCircle', action: onFAQ })
   }
 
