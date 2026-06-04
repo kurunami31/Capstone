@@ -2,12 +2,12 @@ import 'dotenv/config'
 import express from 'express'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import { readFileSync } from 'fs'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
 import { pool, initDB } from './db.js'
 import { GoogleGenAI } from '@google/genai'
-import programs from './src/data/programs.json' with { type: 'json' }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -717,6 +717,8 @@ app.put('/api/admin/settings', authenticate, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Server error.' })
   }
 })
+
+const programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
 
 initDB().then(async () => {
   const ADMIN_EMAIL = 'admin@dorsu.edu.ph'
