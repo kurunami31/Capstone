@@ -750,10 +750,16 @@ initDB().then(async () => {
     console.log(`Auto-populated ${programs.rows.length} program settings.`)
   }
 
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-  })
+  if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`)
+    })
+  }
 }).catch(err => {
-  console.error('Failed to initialize database:', err)
-  process.exit(1)
+  if (!process.env.VERCEL) {
+    console.error('Failed to initialize database:', err)
+    process.exit(1)
+  }
 })
+
+export default app

@@ -83,7 +83,6 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
         zIndex: 100,
         transition: 'left 0.3s ease, width 0.3s ease',
       }}>
-        {(!isMobile || open) && (
           <div style={{ padding: isMobile ? '16px 12px 12px' : '20px 16px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
               <div style={{
@@ -95,7 +94,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
                   <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/>
                 </svg>
               </div>
-              <div style={{ opacity: isMobile || open ? 1 : 0, transition: 'opacity 0.15s' }}>
+              <div style={{ opacity: isMobile || open ? 1 : 0, transition: 'opacity 0.15s', overflow: 'hidden', width: isMobile || open ? 'auto' : 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2, whiteSpace: 'nowrap' }}>DOrSU</div>
                 <div style={{ fontSize: 10, color: '#475569', lineHeight: 1.2, whiteSpace: 'nowrap' }}>Recommender</div>
               </div>
@@ -109,7 +108,6 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               <HamburgerIcon open={isMobile || open} />
             </button>
           </div>
-        )}
 
         <div style={{ padding: '8px 0', flex: 1, display: 'flex', flexDirection: 'column', alignItems: isMobile || open ? 'stretch' : 'center' }}>
           {navItems.map(item => (
