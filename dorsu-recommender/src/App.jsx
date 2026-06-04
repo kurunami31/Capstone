@@ -35,6 +35,22 @@ function AppContent() {
     interests: {}, skills: {},
   })
 
+  const currentStep = STEPS[step]
+
+  const hollandCode = useMemo(() => {
+    if (studentData.hollandScores && Object.keys(studentData.hollandScores).length > 0) {
+      return calculateHollandCode(studentData.hollandScores)
+    }
+    return null
+  }, [studentData.hollandScores])
+
+  const results = useMemo(() => {
+    if (currentStep === 'results') {
+      return calculateRecommendations({ ...studentData, hollandCode }, programs)
+    }
+    return null
+  }, [currentStep, studentData, hollandCode])
+
   if (loading) {
     return (
       <div style={{
@@ -65,22 +81,6 @@ function AppContent() {
     setShowLanding(false)
     setStep(0)
   }
-
-  const currentStep = STEPS[step]
-
-  const hollandCode = useMemo(() => {
-    if (studentData.hollandScores && Object.keys(studentData.hollandScores).length > 0) {
-      return calculateHollandCode(studentData.hollandScores)
-    }
-    return null
-  }, [studentData.hollandScores])
-
-  const results = useMemo(() => {
-    if (currentStep === 'results') {
-      return calculateRecommendations({ ...studentData, hollandCode }, programs)
-    }
-    return null
-  }, [currentStep === 'results'])
 
   const renderStep = () => {
     switch (currentStep) {
