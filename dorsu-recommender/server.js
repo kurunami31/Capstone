@@ -481,7 +481,26 @@ app.get('/{*path}', (_, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'))
 })
 
-initDB().then(() => {
+initDB().then(async () => {
+  const ADMIN_EMAIL = 'admin@dorsu.edu.ph'
+  const existing = await pool.query('SELECT id FROM users WHERE email = $1', [ADMIN_EMAIL])
+  if (existing.rows.length === 0) {
+    const adminPwd = 'Admin' + Math.random().toString(36).slice(2, 6).toUpperCase()
+    const hashed = bcrypt.hashSync(adminPwd, SALT_ROUNDS)
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+    await pool.query(
+      `INSERT INTO users (id, email, first_name, last_name, password, avatar, role, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, '', 'admin', NOW(), NOW())`,
+      [id, ADMIN_EMAIL, 'Admin', 'User', hashed]
+    )
+    console.log('')
+    console.log('=== DEFAULT ADMIN ACCOUNT ===')
+    console.log(`   Email:    ${ADMIN_EMAIL}`)
+    console.log(`   Password: ${adminPwd}`)
+    console.log('=============================')
+    console.log('')
+  }
+
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
