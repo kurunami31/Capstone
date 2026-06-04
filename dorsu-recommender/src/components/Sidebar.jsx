@@ -19,32 +19,30 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
     logOut: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
   }
 
+  const barStyle = {
+    width: '100%', display: 'flex', alignItems: 'center', justifyContent: open ? 'flex-start' : 'center',
+    padding: '10px 0', border: 'none', borderRadius: 8, cursor: 'pointer',
+    background: 'transparent',
+    fontFamily: 'inherit', textAlign: 'left',
+    transition: 'all 0.15s',
+    gap: 10,
+  }
+
   return (
-    <>
-      <div style={{
-        position: 'fixed', left: 0, top: 0, bottom: 0,
-        width: open ? 220 : 0,
-        overflow: 'hidden',
-        backgroundColor: '#0b1222',
-        borderRight: open ? '1px solid rgba(255,255,255,0.05)' : 'none',
-        display: 'flex', flexDirection: 'column',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        zIndex: 100,
-        transition: 'width 0.3s ease, border-color 0.3s ease',
-        whiteSpace: 'nowrap',
-      }}>
+    <div style={{
+      position: 'fixed', left: 0, top: 0, bottom: 0,
+      width: open ? 220 : 56,
+      overflow: 'hidden',
+      backgroundColor: '#0b1222',
+      borderRight: '1px solid rgba(255,255,255,0.05)',
+      display: 'flex', flexDirection: 'column',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      zIndex: 100,
+      transition: 'width 0.3s ease',
+    }}>
+      {open ? (
         <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={onToggle} style={{
-            width: 28, height: 28, flexShrink: 0,
-            background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 6,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#94a3b8', padding: 0,
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
               background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
@@ -59,45 +57,71 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               <div style={{ fontSize: 10, color: '#475569', lineHeight: 1.2 }}>Recommender</div>
             </div>
           </div>
+          <button onClick={onToggle} style={{
+            width: 28, height: 28, flexShrink: 0,
+            background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 6,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#94a3b8', padding: 0,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
-
-        <div style={{ padding: '12px 8px', flex: 1 }}>
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={item.action}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                padding: '10px 12px', marginBottom: 2,
-                background: activePage === item.id ? 'rgba(59,130,246,0.15)' : 'transparent',
-                border: 'none', borderRadius: 8, cursor: 'pointer',
-                color: activePage === item.id ? '#60a5fa' : '#94a3b8',
-                fontSize: 13, fontWeight: activePage === item.id ? 600 : 400,
-                fontFamily: 'inherit', textAlign: 'left',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0' } }}
-              onMouseLeave={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' } }}
-            >
-              <span style={{ width: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icons[item.icon]}</span>
-              {item.label}
-            </button>
-          ))}
+      ) : (
+        <div style={{ padding: '12px 0', display: 'flex', justifyContent: 'center' }}>
+          <button onClick={onToggle} style={{
+            width: 28, height: 28,
+            background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 6,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#94a3b8', padding: 0,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
         </div>
+      )}
 
-        <div style={{
-          padding: '12px 8px', borderTop: '1px solid rgba(255,255,255,0.05)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', marginBottom: 4 }}>
-            {user?.avatar ? (
-              <img src={user.avatar} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-            ) : (
-              <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
-            )}
+      <div style={{ padding: '8px 0', flex: 1, display: 'flex', flexDirection: 'column', alignItems: open ? 'stretch' : 'center' }}>
+        {navItems.map(item => (
+          <button
+            key={item.id}
+            onClick={item.action}
+            style={{
+              ...barStyle,
+              padding: open ? '10px 12px' : '10px 0',
+              width: open ? '100%' : 36,
+              color: activePage === item.id ? '#60a5fa' : '#94a3b8',
+              fontWeight: activePage === item.id ? 600 : 400,
+              background: activePage === item.id ? 'rgba(59,130,246,0.15)' : 'transparent',
+              borderRadius: open ? 8 : 6,
+            }}
+            onMouseEnter={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0' } }}
+            onMouseLeave={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' } }}
+          >
+            <span style={{ width: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icons[item.icon]}</span>
+            {open && item.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{
+        padding: open ? '12px 8px' : '8px 0',
+        borderTop: '1px solid rgba(255,255,255,0.05)',
+        display: 'flex', flexDirection: 'column', alignItems: open ? 'stretch' : 'center',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: open ? '8px 12px' : '4px 0', justifyContent: open ? 'flex-start' : 'center' }}>
+          {user?.avatar ? (
+            <img src={user.avatar} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+          ) : (
+            <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+          )}
+          {open && (
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.firstName || ''} {user?.lastName || ''}
@@ -106,39 +130,24 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
                 <span style={{ fontSize: 10, color: '#22d3ee', fontWeight: 600 }}>Admin</span>
               )}
             </div>
-          </div>
-          <button
-            onClick={onLogout}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-              padding: '10px 12px', background: 'transparent',
-              border: 'none', borderRadius: 8, cursor: 'pointer',
-              color: '#64748b', fontSize: 13, fontFamily: 'inherit', textAlign: 'left',
-              transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#f87171' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b' }}
-          >
-            <span style={{ width: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icons.logOut}</span>
-            Sign Out
-          </button>
+          )}
         </div>
-      </div>
-
-      {!open && (
-        <button onClick={onToggle} style={{
-          position: 'fixed', left: 8, top: 12, zIndex: 101,
-          width: 36, height: 36, borderRadius: 8,
-          background: '#0b1222', border: '1px solid rgba(255,255,255,0.1)',
-          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#94a3b8', padding: 0,
-          transition: 'all 0.3s ease',
-        }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
+        <button
+          onClick={onLogout}
+          style={{
+            ...barStyle,
+            padding: open ? '10px 12px' : '10px 0',
+            width: open ? '100%' : 36,
+            color: '#64748b',
+            borderRadius: open ? 8 : 6,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#f87171' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b' }}
+        >
+          <span style={{ width: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icons.logOut}</span>
+          {open && 'Sign Out'}
         </button>
-      )}
-    </>
+      </div>
+    </div>
   )
 }
