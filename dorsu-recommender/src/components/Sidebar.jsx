@@ -59,6 +59,18 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
           }}
         />
       )}
+      {isMobile && !open && (
+        <button onClick={onToggle} style={{
+          position: 'fixed', left: 10, top: 10, zIndex: 100,
+          width: 40, height: 40,
+          background: '#0b1222', border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 8, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#94a3b8', padding: 0,
+        }}>
+          <HamburgerIcon open={false} />
+        </button>
+      )}
       <div style={{
         position: isMobile ? 'fixed' : 'fixed', left: isMobile ? (open ? 0 : -sidebarWidth) : 0, top: 0, bottom: 0,
         width: sidebarWidth,
