@@ -4,7 +4,7 @@ import { dirname, join } from 'path'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { pool, initDB } from './db.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -12,26 +12,6 @@ const PORT = process.env.PORT || 3000
 const JWT_SECRET = process.env.JWT_SECRET || 'dorsu-recommender-secret-change-in-production'
 const SALT_ROUNDS = 12
 const TOKEN_EXPIRY = '1h'
-const USERS_FILE = join(__dirname, 'data', 'users.json')
-
-if (!existsSync(join(__dirname, 'data'))) {
-  mkdirSync(join(__dirname, 'data'), { recursive: true })
-}
-if (!existsSync(USERS_FILE)) {
-  writeFileSync(USERS_FILE, '[]', 'utf-8')
-}
-
-function readUsers() {
-  try {
-    return JSON.parse(readFileSync(USERS_FILE, 'utf-8'))
-  } catch {
-    return []
-  }
-}
-
-function writeUsers(users) {
-  writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8')
-}
 
 const rateLimitStore = {}
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000
@@ -86,61 +66,75 @@ function authenticate(req, res, next) {
   }
 }
 
-app.post('/api/register', rateLimit, (req, res) => {
-  const { email, password, name } = req.body
+app.post('/api/register', rateLimit, async (req, res) => {
+  try {
+    const { email, password, name } = req.body
 
-  if (!email || !password || !name) {
-    return res.status(400).json({ error: 'Name, email, and password are required.' })
-  }
-  if (password.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters.' })
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: 'Invalid email format.' })
-  }
-  if (name.trim().length < 2) {
-    return res.status(400).json({ error: 'Name must be at least 2 characters.' })
-  }
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'Name, email, and password are required.' })
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters.' })
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format.' })
+    }
+    if (name.trim().length < 2) {
+      return res.status(400).json({ error: 'Name must be at least 2 characters.' })
+    }
 
-  const users = readUsers()
-  if (users.find(u => u.email === email.toLowerCase())) {
-    return res.status(409).json({ error: 'An account with this email already exists.' })
-  }
+    const lowerEmail = email.toLowerCase()
+    const existing = await pool.query('SELECT id FROM users WHERE email = $1', [lowerEmail])
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'An account with this email already exists.' })
+    }
 
-  const hashed = bcrypt.hashSync(password, SALT_ROUNDS)
-  const user = {
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-    email: email.toLowerCase(),
-    name: name.trim(),
-    password: hashed,
-    avatar: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-  users.push(user)
-  writeUsers(users)
+    const hashed = bcrypt.hashSync(password, SALT_ROUNDS)
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 
-  const token = generateToken(user)
-  setTokenCookie(res, token)
-  res.json({ user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar || '' } })
+    const result = await pool.query(
+      `INSERT INTO users (id, email, name, password, avatar, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, '', NOW(), NOW())
+       RETURNING id, email, name, avatar, created_at, updated_at`,
+      [id, lowerEmail, name.trim(), hashed]
+    )
+
+    const user = result.rows[0]
+    const token = generateToken(user)
+    setTokenCookie(res, token)
+    res.json({ user })
+  } catch (err) {
+    console.error('Register error:', err)
+    res.status(500).json({ error: 'Server error during registration.' })
+  }
 })
 
-app.post('/api/login', rateLimit, (req, res) => {
-  const { email, password } = req.body
+app.post('/api/login', rateLimit, async (req, res) => {
+  try {
+    const { email, password } = req.body
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required.' })
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required.' })
+    }
+
+    const result = await pool.query(
+      'SELECT id, email, name, password, avatar, created_at, updated_at FROM users WHERE email = $1',
+      [email.toLowerCase()]
+    )
+
+    const user = result.rows[0]
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      return res.status(401).json({ error: 'Invalid email or password.' })
+    }
+
+    const token = generateToken(user)
+    setTokenCookie(res, token)
+    const { password: _, ...safe } = user
+    res.json({ user: safe })
+  } catch (err) {
+    console.error('Login error:', err)
+    res.status(500).json({ error: 'Server error during login.' })
   }
-
-  const users = readUsers()
-  const user = users.find(u => u.email === email.toLowerCase())
-  if (!user || !bcrypt.compareSync(password, user.password)) {
-    return res.status(401).json({ error: 'Invalid email or password.' })
-  }
-
-  const token = generateToken(user)
-  setTokenCookie(res, token)
-  res.json({ user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar || '' } })
 })
 
 app.post('/api/logout', (_, res) => {
@@ -148,66 +142,113 @@ app.post('/api/logout', (_, res) => {
   res.json({ success: true })
 })
 
-app.get('/api/me', authenticate, (req, res) => {
-  const users = readUsers()
-  const fullUser = users.find(u => u.id === req.user.id)
-  if (!fullUser) return res.status(404).json({ error: 'User not found' })
-  const { password, ...safe } = fullUser
-  res.json({ user: safe })
+app.get('/api/me', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, email, name, avatar, created_at, updated_at FROM users WHERE id = $1',
+      [req.user.id]
+    )
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
+    res.json({ user: result.rows[0] })
+  } catch (err) {
+    console.error('/api/me error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
 })
 
-app.put('/api/profile', authenticate, (req, res) => {
-  const { name, email } = req.body
-  const users = readUsers()
-  const idx = users.findIndex(u => u.id === req.user.id)
-  if (idx === -1) return res.status(404).json({ error: 'User not found' })
+app.put('/api/profile', authenticate, async (req, res) => {
+  try {
+    const { name, email } = req.body
 
-  if (name !== undefined) {
-    if (name.trim().length < 2) return res.status(400).json({ error: 'Name must be at least 2 characters.' })
-    users[idx].name = name.trim()
-  }
-  if (email !== undefined) {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email format.' })
-    const lower = email.toLowerCase()
-    if (lower !== users[idx].email && users.find(u => u.email === lower)) {
-      return res.status(409).json({ error: 'Email already in use.' })
+    const check = await pool.query('SELECT id, email FROM users WHERE id = $1', [req.user.id])
+    if (check.rows.length === 0) return res.status(404).json({ error: 'User not found' })
+
+    const updates = []
+    const values = []
+    let idx = 1
+
+    if (name !== undefined) {
+      if (name.trim().length < 2) return res.status(400).json({ error: 'Name must be at least 2 characters.' })
+      updates.push(`name = $${idx++}`)
+      values.push(name.trim())
     }
-    users[idx].email = lower
+
+    if (email !== undefined) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email format.' })
+      const lower = email.toLowerCase()
+      if (lower !== check.rows[0].email) {
+        const dup = await pool.query('SELECT id FROM users WHERE email = $1', [lower])
+        if (dup.rows.length > 0) return res.status(409).json({ error: 'Email already in use.' })
+      }
+      updates.push(`email = $${idx++}`)
+      values.push(lower)
+    }
+
+    if (updates.length === 0) {
+      const current = await pool.query('SELECT id, email, name, avatar, created_at, updated_at FROM users WHERE id = $1', [req.user.id])
+      return res.json({ user: current.rows[0] })
+    }
+
+    updates.push(`updated_at = NOW()`)
+    values.push(req.user.id)
+
+    const result = await pool.query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}
+       RETURNING id, email, name, avatar, created_at, updated_at`,
+      values
+    )
+
+    res.json({ user: result.rows[0] })
+  } catch (err) {
+    console.error('Profile update error:', err)
+    res.status(500).json({ error: 'Server error updating profile.' })
   }
-  users[idx].updatedAt = new Date().toISOString()
-  writeUsers(users)
-  const { password, ...safe } = users[idx]
-  res.json({ user: safe })
 })
 
-app.put('/api/profile/password', authenticate, (req, res) => {
-  const { currentPassword, newPassword } = req.body
-  const users = readUsers()
-  const idx = users.findIndex(u => u.id === req.user.id)
-  if (idx === -1) return res.status(404).json({ error: 'User not found' })
-  if (!bcrypt.compareSync(currentPassword, users[idx].password)) {
-    return res.status(401).json({ error: 'Current password is incorrect.' })
+app.put('/api/profile/password', authenticate, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+
+    const result = await pool.query('SELECT password FROM users WHERE id = $1', [req.user.id])
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
+
+    if (!bcrypt.compareSync(currentPassword, result.rows[0].password)) {
+      return res.status(401).json({ error: 'Current password is incorrect.' })
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters.' })
+    }
+
+    await pool.query(
+      'UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2',
+      [bcrypt.hashSync(newPassword, SALT_ROUNDS), req.user.id]
+    )
+
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Password change error:', err)
+    res.status(500).json({ error: 'Server error changing password.' })
   }
-  if (!newPassword || newPassword.length < 8) {
-    return res.status(400).json({ error: 'New password must be at least 8 characters.' })
-  }
-  users[idx].password = bcrypt.hashSync(newPassword, SALT_ROUNDS)
-  users[idx].updatedAt = new Date().toISOString()
-  writeUsers(users)
-  res.json({ success: true })
 })
 
-app.post('/api/profile/picture', authenticate, (req, res) => {
-  const { avatar } = req.body
-  if (!avatar) return res.status(400).json({ error: 'Avatar data is required.' })
-  if (avatar.length > 500000) return res.status(400).json({ error: 'Image too large. Max 500KB.' })
-  const users = readUsers()
-  const idx = users.findIndex(u => u.id === req.user.id)
-  if (idx === -1) return res.status(404).json({ error: 'User not found' })
-  users[idx].avatar = avatar
-  users[idx].updatedAt = new Date().toISOString()
-  writeUsers(users)
-  res.json({ avatar })
+app.post('/api/profile/picture', authenticate, async (req, res) => {
+  try {
+    const { avatar } = req.body
+    if (!avatar) return res.status(400).json({ error: 'Avatar data is required.' })
+    if (avatar.length > 500000) return res.status(400).json({ error: 'Image too large. Max 500KB.' })
+
+    const result = await pool.query(
+      'UPDATE users SET avatar = $1, updated_at = NOW() WHERE id = $2 RETURNING avatar',
+      [avatar, req.user.id]
+    )
+
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
+    res.json({ avatar: result.rows[0].avatar })
+  } catch (err) {
+    console.error('Picture upload error:', err)
+    res.status(500).json({ error: 'Server error uploading picture.' })
+  }
 })
 
 app.use(express.static(join(__dirname, 'dist')))
@@ -216,6 +257,11 @@ app.get('/{*path}', (_, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'))
 })
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+initDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+  })
+}).catch(err => {
+  console.error('Failed to initialize database:', err)
+  process.exit(1)
 })
