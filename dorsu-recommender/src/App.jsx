@@ -56,6 +56,18 @@ function AppContent() {
     return null
   }, [currentStep, studentData, hollandCode])
 
+  const updateData = (updates) => {
+    setStudentData(prev => ({ ...prev, ...updates }))
+  }
+
+  const handleConsent = () => { setStep(1) }
+  const handleStart = (name, school) => { updateData({ name, school }); setStep(2) }
+  const handleGetStarted = () => { setShowLanding(false); setStep(0) }
+  const handleShowProfile = () => setShowProfile(true)
+  const handleBackFromProfile = () => setShowProfile(false)
+  const handleShowFAQ = () => setShowFAQ(true)
+  const handleBackFromFAQ = () => setShowFAQ(false)
+
   if (loading) {
     return (
       <div style={{
@@ -73,29 +85,6 @@ function AppContent() {
 
   if (showProfile) return <><ProfilePage onBack={handleBackFromProfile} /><ChatWidget /></>
   if (showFAQ) return <><FAQPage onBack={handleBackFromFAQ} /><ChatWidget /></>
-
-  const updateData = (updates) => {
-    setStudentData(prev => ({ ...prev, ...updates }))
-  }
-
-  const handleConsent = () => {
-    setStep(1)
-  }
-
-  const handleStart = (name, school) => {
-    updateData({ name, school })
-    setStep(2)
-  }
-
-  const handleGetStarted = () => {
-    setShowLanding(false)
-    setStep(0)
-  }
-
-  const handleShowProfile = () => setShowProfile(true)
-  const handleBackFromProfile = () => setShowProfile(false)
-  const handleShowFAQ = () => setShowFAQ(true)
-  const handleBackFromFAQ = () => setShowFAQ(false)
 
   const renderStep = () => {
     switch (currentStep) {

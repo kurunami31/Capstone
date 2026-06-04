@@ -304,7 +304,9 @@ Your role is to answer questions about:
 - Account registration, login, profile editing, and password changes
 - General questions about DOrSU and its programs
 
-Keep answers concise, friendly, and helpful. If you don't know something, say so honestly. Do not make up information about specific program details you are not sure about. When asked about technical issues, suggest contacting the system administrator.`
+Keep answers concise, friendly, and helpful. If you don't know something, say so honestly. Do not make up information about specific program details you are not sure about. When asked about technical issues, suggest contacting the system administrator.
+
+IMPORTANT: Do NOT use Markdown, bold, italic, or any formatting. Respond in plain text only.`
 
 app.post('/api/chat', async (req, res) => {
   try {
@@ -357,7 +359,14 @@ app.post('/api/chat', async (req, res) => {
       },
     })
 
-    const reply = result.text || 'Sorry, I could not generate a response.'
+    let reply = (result.text || 'Sorry, I could not generate a response.')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1')
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .trim()
     res.json({ reply })
   } catch (err) {
     console.error('Chat error:', err)
