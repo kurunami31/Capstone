@@ -43,7 +43,7 @@ export default function LandingPage({ onGetStarted, user, onLogout, onShowProfil
       </div>
       <div className="hero-fade" style={{
         textAlign: 'center', color: '#fff',
-        padding: '100px 24px 80px',
+        padding: '80px 24px 40px',
         background: 'radial-gradient(ellipse at 50% 0%, rgba(37,99,235,0.15) 0%, transparent 60%)',
       }}>
         <img src="./logo.png" alt="DOrSU Logo" className="hero-logo" style={{ height: 140, marginBottom: 20 }} />
@@ -82,7 +82,7 @@ export default function LandingPage({ onGetStarted, user, onLogout, onShowProfil
       </div>
 
       <div className="section-fade" style={{
-        maxWidth: 900, margin: '0 auto', padding: '70px 24px 80px',
+        maxWidth: 900, margin: '0 auto', padding: '20px 24px 80px',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
           <span style={{
