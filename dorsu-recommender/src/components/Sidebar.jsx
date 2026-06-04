@@ -46,7 +46,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
     gap: 10,
   }
 
-  const sidebarWidth = isMobile ? 240 : (open ? 220 : 76)
+  const sidebarWidth = isMobile ? 240 : (open ? 220 : 80)
 
   return (
     <>
@@ -85,11 +85,11 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
       }}>
           <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '16px 12px' : '10px 6px'), borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 4 }}>
             <div style={{
-              width: open ? 32 : 28, height: open ? 32 : 28, borderRadius: 8, flexShrink: 0,
+              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
               background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <svg width={open ? 16 : 14} height={open ? 16 : 14} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/>
               </svg>
             </div>
