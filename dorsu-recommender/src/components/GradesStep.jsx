@@ -53,8 +53,8 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
       <h3 style={{ fontSize: 16, marginBottom: 12, color: '#cbd5e1' }}>Core Subjects</h3>
       <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
         {CORE.map(s => (
-          <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: '#94a3b8' }}>{s}</label>
+          <div key={s} className="stack-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <label className="full-mobile" style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: '#94a3b8' }}>{s}</label>
             <input
               type="number" min="0" max="100" value={grades[s] ?? ''}
               onChange={e => updateGrade(s, e.target.value)}
@@ -78,8 +78,8 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
       <h3 style={{ fontSize: 16, marginBottom: 12, color: '#cbd5e1' }}>Strand-Specific Subjects ({strand})</h3>
       <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
         {strandSubs.map(s => (
-          <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: '#94a3b8' }}>{s.replace(/_/g, ' ')}</label>
+          <div key={s} className="stack-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <label className="full-mobile" style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: '#94a3b8' }}>{s.replace(/_/g, ' ')}</label>
             <input
               type="number" min="0" max="100" value={strandGrades[s] ?? ''}
               onChange={e => updateStrandGrade(s, e.target.value)}
@@ -90,9 +90,9 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 12 }}>
-        <button onClick={onBack} style={secondaryBtn}>Back</button>
-        <button onClick={onNext} disabled={!allFilled} style={btnStyle(allFilled)}>Next</button>
+      <div className="stack-mobile" style={{ display: 'flex', gap: 12 }}>
+        <button onClick={onBack} style={{ ...secondaryBtn, width: '100%' }}>Back</button>
+        <button onClick={onNext} disabled={!allFilled} style={{ ...btnStyle(allFilled), width: '100%' }}>Next</button>
       </div>
     </div>
   )

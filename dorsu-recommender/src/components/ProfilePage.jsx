@@ -110,7 +110,7 @@ export default function ProfilePage() {
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '32px 16px' }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 28px' }}>Profile</h1>
 
-        <div style={{
+        <div className="card-padding-mobile" style={{
           backgroundColor: 'rgba(255,255,255,0.04)',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 20, padding: 32, marginBottom: 24,
@@ -156,7 +156,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>First Name</label>
               <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name"
@@ -168,7 +168,7 @@ export default function ProfilePage() {
                 style={inputStyle} />
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
+          <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>Middle Initial <span style={{ color: '#64748b', fontWeight: 400 }}>(optional)</span></label>
               <input value={middleInitial} onChange={e => setMiddleInitial(e.target.value)} placeholder="e.g. M"
@@ -199,7 +199,7 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        <div style={{
+        <div className="card-padding-mobile" style={{
           backgroundColor: 'rgba(255,255,255,0.04)',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 20, padding: 32,

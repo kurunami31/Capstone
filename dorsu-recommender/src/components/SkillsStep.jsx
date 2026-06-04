@@ -60,9 +60,9 @@ export default function SkillsStep({ data, onUpdate, onNext, onBack }) {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-        <button onClick={onBack} style={secondaryBtn}>Back</button>
-        <button onClick={onNext} disabled={!allRated} style={btnStyle(allRated)}>
+      <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+        <button onClick={onBack} style={{ ...secondaryBtn, width: '100%' }}>Back</button>
+        <button onClick={onNext} disabled={!allRated} style={{ ...btnStyle(allRated), width: '100%' }}>
           See My Results
         </button>
       </div>

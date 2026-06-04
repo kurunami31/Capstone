@@ -477,6 +477,116 @@ app.delete('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) 
   }
 })
 
+app.post('/api/assessment/save', authenticate, async (req, res) => {
+  try {
+    const { strand, gwa, hollandCode, topPrograms } = req.body
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+    await pool.query(
+      `INSERT INTO assessments (id, user_id, strand, gwa, holland_code, top_programs, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+      [id, req.user.id, strand || '', gwa || 0, hollandCode || '[]', JSON.stringify(topPrograms || [])]
+    )
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Assessment save error:', err)
+    res.status(500).json({ error: 'Server error saving assessment.' })
+  }
+})
+
+app.get('/api/admin/analytics/user-growth', authenticate, requireAdmin, async (_, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        DATE_TRUNC('month', created_at) AS month,
+        COUNT(*)::int AS count
+      FROM users
+      WHERE email != 'admin@dorsu.edu.ph'
+      GROUP BY month
+      ORDER BY month ASC
+      LIMIT 12
+    `)
+    res.json(result.rows.map(r => ({ month: r.month, count: r.count })))
+  } catch (err) {
+    console.error('User growth error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.get('/api/admin/analytics/program-popularity', authenticate, requireAdmin, async (_, res) => {
+  try {
+    const result = await pool.query('SELECT top_programs FROM assessments')
+    const counts = {}
+    let total = 0
+    for (const row of result.rows) {
+      const programs = JSON.parse(row.top_programs || '[]')
+      for (const code of programs) {
+        counts[code] = (counts[code] || 0) + 1
+        total++
+      }
+    }
+    const top = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([program, count]) => ({ program, count, percentage: total > 0 ? Math.round(count / total * 100) : 0 }))
+    res.json(top)
+  } catch (err) {
+    console.error('Program popularity error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.get('/api/admin/analytics/holland-distribution', authenticate, requireAdmin, async (_, res) => {
+  try {
+    const result = await pool.query("SELECT holland_code FROM assessments WHERE holland_code != ''")
+    const counts = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 }
+    for (const row of result.rows) {
+      for (const letter of (row.holland_code || '').toUpperCase()) {
+        if (counts[letter] !== undefined) counts[letter]++
+      }
+    }
+    const total = Object.values(counts).reduce((a, b) => a + b, 0)
+    res.json(Object.entries(counts).map(([code, count]) => ({ code, count, percentage: total > 0 ? Math.round(count / total * 100) : 0 })))
+  } catch (err) {
+    console.error('Holland distribution error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.get('/api/admin/analytics/strand-distribution', authenticate, requireAdmin, async (_, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT strand, COUNT(*)::int AS count
+      FROM assessments
+      WHERE strand != ''
+      GROUP BY strand
+      ORDER BY count DESC
+    `)
+    const total = result.rows.reduce((a, r) => a + r.count, 0) || 1
+    res.json(result.rows.map(r => ({ strand: r.strand, count: r.count, percentage: Math.round(r.count / total * 100) })))
+  } catch (err) {
+    console.error('Strand distribution error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.get('/api/admin/users/export', authenticate, requireAdmin, async (_, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, email, first_name, last_name, middle_initial, extension_name, role, created_at, updated_at FROM users WHERE email != 'admin@dorsu.edu.ph' ORDER BY created_at DESC"
+    )
+    const headers = 'ID,Email,First Name,Last Name,Middle Initial,Extension,Role,Created At,Updated At'
+    const rows = result.rows.map(r =>
+      `"${r.id}","${r.email}","${r.first_name || ''}","${r.last_name || ''}","${r.middle_initial || ''}","${r.extension_name || ''}","${r.role}","${r.created_at?.toISOString?.() || r.created_at || ''}","${r.updated_at?.toISOString?.() || r.updated_at || ''}"`
+    )
+    res.setHeader('Content-Type', 'text/csv')
+    res.setHeader('Content-Disposition', 'attachment; filename=users.csv')
+    res.send([headers, ...rows].join('\n'))
+  } catch (err) {
+    console.error('Export users error:', err)
+    res.status(500).json({ error: 'Server error exporting users.' })
+  }
+})
+
 app.use(express.static(join(__dirname, 'dist')))
 
 app.get('/{*path}', (_, res) => {

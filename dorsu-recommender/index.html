@@ -8,6 +8,18 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { background: #0f172a; min-height: 100%; }
+
+    @media (max-width: 768px) {
+      .hide-mobile { display: none !important; }
+      .full-mobile { width: 100% !important; }
+      .stack-mobile { flex-direction: column !important; }
+      .card-padding-mobile { padding: 24px !important; }
+      .gap-mobile { gap: 8px !important; }
+      .r-grid-2 { grid-template-columns: 1fr !important; }
+      .r-flex-row { flex-direction: row !important; }
+      .r-text-center { text-align: center !important; }
+      .r-mb-8 { margin-bottom: 8px !important; }
+    }
   </style>
 </head>
 <body>

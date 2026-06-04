@@ -87,7 +87,7 @@ export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
                   key={val}
                   onClick={() => setAnswer(qi, val)}
                   style={{
-                    width: 52, height: 40, fontSize: 14, fontWeight: 600,
+                    flex: 1, minWidth: 0, maxWidth: 60, height: 40, fontSize: 14, fontWeight: 600,
                     border: `2px solid ${answers[`${currentDim.dimension}_${qi}`] === val ? '#3b82f6' : 'rgba(255,255,255,0.15)'}`,
                     backgroundColor: answers[`${currentDim.dimension}_${qi}`] === val ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.04)',
                     color: answers[`${currentDim.dimension}_${qi}`] === val ? '#60a5fa' : '#94a3b8',
@@ -106,17 +106,17 @@ export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
-        <button onClick={step > 0 ? handlePrev : onBack} style={secondaryBtn}>
+      <div className="stack-mobile" style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
+        <button onClick={step > 0 ? handlePrev : onBack} style={{ ...secondaryBtn, width: '100%' }}>
           {step > 0 ? 'Previous' : 'Back'}
         </button>
 
         {step < totalSteps - 1 ? (
-          <button onClick={handleNext} disabled={!isStepComplete()} style={btnStyle(isStepComplete())}>
+          <button onClick={handleNext} disabled={!isStepComplete()} style={{ ...btnStyle(isStepComplete()), width: '100%' }}>
             Next Set
           </button>
         ) : (
-          <button onClick={handleFinish} disabled={!allAnswered()} style={btnStyle(allAnswered())}>
+          <button onClick={handleFinish} disabled={!allAnswered()} style={{ ...btnStyle(allAnswered()), width: '100%' }}>
             Finish Assessment
           </button>
         )}

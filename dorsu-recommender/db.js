@@ -44,6 +44,18 @@ async function initDB() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user'
   `).catch(() => {})
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS assessments (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      strand TEXT NOT NULL DEFAULT '',
+      gwa REAL NOT NULL DEFAULT 0,
+      holland_code TEXT NOT NULL DEFAULT '',
+      top_programs TEXT NOT NULL DEFAULT '[]',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+
   console.log('Database initialized.')
 }
 

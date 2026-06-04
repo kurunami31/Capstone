@@ -68,13 +68,13 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
           }}>
             <ClusterIcon name={c.key} />
             <div style={{ flex: 1, fontWeight: 500, color: '#f1f5f9' }}>{c.label}</div>
-            <div style={{ display: 'flex', gap: 4 }}>
+            <div className="full-mobile" style={{ display: 'flex', gap: 4 }}>
               {[1, 2, 3, 4, 5].map(val => (
                 <button
                   key={val}
                   onClick={() => setRating(c.key, val)}
                   style={{
-                    width: 36, height: 36, fontSize: 13, fontWeight: 600,
+                    flex: 1, minWidth: 0, height: 36, fontSize: 13, fontWeight: 600,
                     border: `2px solid ${ratings[c.key] === val ? '#3b82f6' : 'rgba(255,255,255,0.15)'}`,
                     backgroundColor: ratings[c.key] === val ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.04)',
                     color: ratings[c.key] === val ? '#60a5fa' : '#94a3b8',
@@ -89,9 +89,9 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-        <button onClick={onBack} style={secondaryBtn}>Back</button>
-        <button onClick={onNext} style={primaryBtn}>Next</button>
+      <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+        <button onClick={onBack} style={{ ...secondaryBtn, width: '100%' }}>Back</button>
+        <button onClick={onNext} style={{ ...primaryBtn, width: '100%' }}>Next</button>
       </div>
     </div>
   )

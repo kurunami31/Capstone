@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import AuthPage from './components/AuthPage.jsx'
 import Sidebar from './components/Sidebar.jsx'
@@ -32,6 +32,13 @@ const STEP_LABELS = [
 function AppContent() {
   const { user, loading, logout } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const handler = (e) => { setIsMobile(e.matches); if (e.matches) setSidebarOpen(false) }
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
   const [consented, setConsented] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showProfile, setShowProfile] = useState(false)
@@ -60,6 +67,21 @@ function AppContent() {
     }
     return null
   }, [currentStep, studentData, hollandCode])
+
+  useEffect(() => {
+    if (currentStep === 'results' && results && results.length > 0 && user) {
+      fetch('/api/assessment/save', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          strand: studentData.strand || '',
+          gwa: studentData.gwa || 0,
+          hollandCode: hollandCode?.code || '',
+          topPrograms: results.slice(0, 5).map(r => r.program.code),
+        }),
+      }).catch(() => {})
+    }
+  }, [currentStep === 'results'])
 
   const updateData = (updates) => {
     setStudentData(prev => ({ ...prev, ...updates }))
@@ -186,8 +208,9 @@ function AppContent() {
         onLogout={logout}
         open={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
+        isMobile={isMobile}
       />
-      <div style={{ flex: 1, marginLeft: sidebarOpen ? 220 : 0, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', transition: 'margin-left 0.3s ease' }}>
+      <div style={{ flex: 1, marginLeft: !isMobile && sidebarOpen ? 220 : 0, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', transition: 'margin-left 0.3s ease', minWidth: 0 }}>
         {mainContent}
       </div>
       <ChatWidget />

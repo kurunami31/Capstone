@@ -14,7 +14,7 @@ export default function ConsentPage({ onConsent }) {
         width: '100%', maxWidth: 480,
         animation: 'fadeInUp 0.6s ease-out both',
       }}>
-        <div style={{
+        <div className="card-padding-mobile" style={{
           backgroundColor: 'rgba(255,255,255,0.04)',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 20, padding: 40,

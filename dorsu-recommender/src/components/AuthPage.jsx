@@ -46,7 +46,7 @@ export default function AuthPage() {
         width: '100%', maxWidth: 420,
         animation: 'fadeInUp 0.6s ease-out both',
       }}>
-        <div style={{
+        <div className="card-padding-mobile" style={{
           backgroundColor: 'rgba(255,255,255,0.04)',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 20, padding: 40,
@@ -70,7 +70,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit}>
             {mode === 'register' && (
               <div style={{ animation: 'fadeInUp 0.3s ease-out both' }}>
-                <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
                       First Name
@@ -86,7 +86,7 @@ export default function AuthPage() {
                       placeholder="Last name" style={inputStyle} />
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
+                <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
                       Middle Initial <span style={{ color: '#64748b', fontWeight: 400 }}>(optional)</span>

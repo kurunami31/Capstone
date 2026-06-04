@@ -40,8 +40,8 @@ export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
 
       <div style={{ display: 'grid', gap: 10, marginBottom: 20 }}>
         {SUBTESTS.map(s => (
-          <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ width: 160, fontWeight: 500, color: '#cbd5e1' }}>{s.label}</label>
+          <div key={s.key} className="stack-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <label className="full-mobile" style={{ width: 160, fontWeight: 500, color: '#cbd5e1' }}>{s.label}</label>
             <select value={tiers[s.key] || 'not_taken'} onChange={e => update(s.key, e.target.value)} style={selectStyle}>
               {TIERS.map(t => <option key={t.value} value={t.value} style={{ background: '#1e293b', color: '#f1f5f9' }}>{t.label}</option>)}
             </select>
@@ -59,9 +59,9 @@ export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
         </select>
       </div>
 
-      <div style={{ display: 'flex', gap: 12 }}>
-        <button onClick={onBack} style={secondaryBtn}>Back</button>
-        <button onClick={onNext} style={primaryBtn}>Next</button>
+      <div className="stack-mobile" style={{ display: 'flex', gap: 12 }}>
+        <button onClick={onBack} style={{ ...secondaryBtn, width: '100%' }}>Back</button>
+        <button onClick={onNext} style={{ ...primaryBtn, width: '100%' }}>Next</button>
       </div>
     </div>
   )
