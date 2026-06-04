@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import LandingPage from './components/LandingPage.jsx'
 import Welcome from './components/Welcome.jsx'
 import StrandStep from './components/StrandStep.jsx'
 import GradesStep from './components/GradesStep.jsx'
@@ -21,6 +22,7 @@ const STEP_LABELS = [
 ]
 
 export default function App() {
+  const [showLanding, setShowLanding] = useState(true)
   const [step, setStep] = useState(0)
   const [studentData, setStudentData] = useState({
     name: '',
@@ -43,6 +45,11 @@ export default function App() {
   const handleStart = (name, school) => {
     updateData({ name, school })
     setStep(1)
+  }
+
+  const handleGetStarted = () => {
+    setShowLanding(false)
+    setStep(0)
   }
 
   const currentStep = STEPS[step]
@@ -131,6 +138,7 @@ export default function App() {
                 interests: {}, skills: {},
               })
               setStep(0)
+              setShowLanding(true)
             }}
           />
         )
@@ -139,21 +147,29 @@ export default function App() {
     }
   }
 
+  if (showLanding) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#f5f7fa' }}>
+        <LandingPage onGetStarted={handleGetStarted} />
+      </div>
+    )
+  }
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f7fa' }}>
       <div style={{
         maxWidth: 800, margin: '0 auto', padding: '0 16px',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
-        {currentStep !== 'welcome' && currentStep !== 'results' && (
+        {currentStep !== 'results' && (
           <div style={{ padding: '20px 0 12px' }}>
             <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-              {STEPS.slice(1, -1).map((s, i) => (
+              {STEPS.slice(0, -1).map((s, i) => (
                 <div
                   key={s}
                   style={{
                     flex: 1, height: 4, borderRadius: 2,
-                    backgroundColor: i < step - 1 ? '#1a56db' : i === step - 1 ? '#93c5fd' : '#e0e0e0',
+                    backgroundColor: i < step ? '#1a56db' : i === step ? '#93c5fd' : '#e0e0e0',
                     transition: 'background-color 0.3s'
                   }}
                 />
@@ -162,24 +178,20 @@ export default function App() {
             <div style={{
               display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#888'
             }}>
-              {STEP_LABELS.slice(1, -1).map((l, i) => (
-                <span key={l} style={{ fontWeight: i <= step - 1 ? 600 : 400 }}>{l}</span>
+              {STEP_LABELS.slice(0, -1).map((l, i) => (
+                <span key={l} style={{ fontWeight: i <= step ? 600 : 400 }}>{l}</span>
               ))}
             </div>
           </div>
         )}
 
-        {currentStep === 'welcome' ? (
-          renderStep()
-        ) : (
-          <div style={{
-            backgroundColor: '#fff', borderRadius: 12, padding: 32,
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginTop: 16,
-            marginBottom: 40
-          }}>
-            {renderStep()}
-          </div>
-        )}
+        <div style={{
+          backgroundColor: '#fff', borderRadius: 12, padding: 32,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginTop: 16,
+          marginBottom: 40
+        }}>
+          {renderStep()}
+        </div>
       </div>
     </div>
   )
