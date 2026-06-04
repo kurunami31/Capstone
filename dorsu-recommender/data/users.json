@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "mpzmlgur721z7d",
+    "email": "test@test.com",
+    "name": "Test User",
+    "password": "$2b$12$bmahAebVJm2FZV75ElhRMefWnfyPcPQYd.VaWYrWgakRU9rzTt92O",
+    "createdAt": "2026-06-04T15:03:57.843Z"
+  }
+]

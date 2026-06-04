@@ -62,8 +62,6 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use(express.static(join(__dirname, 'dist')))
-
 function generateToken(user) {
   return jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY })
 }
@@ -151,6 +149,8 @@ app.post('/api/logout', (_, res) => {
 app.get('/api/me', authenticate, (req, res) => {
   res.json({ user: req.user })
 })
+
+app.use(express.static(join(__dirname, 'dist')))
 
 app.get('/{*path}', (_, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'))
