@@ -31,6 +31,8 @@ const STEP_LABELS = [
 
 function AppContent() {
   const { user, loading, logout } = useAuth()
+  const [systemSettings, setSystemSettings] = useState({})
+  const [activePrograms, setActivePrograms] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   useEffect(() => {
@@ -39,6 +41,14 @@ function AppContent() {
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [])
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/settings', { credentials: 'include' })
+      .then(r => r.json()).then(setSystemSettings).catch(() => {})
+    fetch('/api/programs/status', { credentials: 'include' })
+      .then(r => r.json()).then(setActivePrograms).catch(() => {})
+  }, [user])
+
   const [consented, setConsented] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showProfile, setShowProfile] = useState(false)
@@ -63,10 +73,15 @@ function AppContent() {
 
   const results = useMemo(() => {
     if (currentStep === 'results') {
-      return calculateRecommendations({ ...studentData, hollandCode }, programs)
+      return calculateRecommendations({ ...studentData, hollandCode }, programs, {
+        academicWeight: parseFloat(systemSettings.academic_weight) || 0.45,
+        suastWeight: parseFloat(systemSettings.suast_weight) || 0.30,
+        personalWeight: parseFloat(systemSettings.personal_weight) || 0.25,
+        activePrograms,
+      })
     }
     return null
-  }, [currentStep, studentData, hollandCode])
+  }, [currentStep, studentData, hollandCode, systemSettings, activePrograms])
 
   useEffect(() => {
     if (currentStep === 'results' && results && results.length > 0 && user) {
@@ -166,7 +181,7 @@ function AppContent() {
   } else if (showFAQ) {
     mainContent = <FAQPage />
   } else if (showAdmin) {
-    mainContent = <AdminPage />
+    mainContent = <AdminPage settings={systemSettings} activePrograms={activePrograms} />
   } else if (showLanding) {
     mainContent = <LandingPage onGetStarted={handleGetStarted} />
   } else {

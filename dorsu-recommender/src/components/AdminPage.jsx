@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import programs from '../data/programs.json'
 
 const CARD = {
   backgroundColor: 'rgba(255,255,255,0.04)',
@@ -123,7 +124,7 @@ function PieChart({ data, labelKey, valueKey, colors }) {
   )
 }
 
-export default function AdminPage() {
+export default function AdminPage({ settings = {}, activePrograms = null }) {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [stats, setStats] = useState(null)
   const [analytics, setAnalytics] = useState({ userGrowth: [], programPopularity: [], hollandDistribution: [], strandDistribution: [] })
@@ -134,6 +135,17 @@ export default function AdminPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [expandedRow, setExpandedRow] = useState(null)
+  const [activityLog, setActivityLog] = useState([])
+  const [localActivePrograms, setLocalActivePrograms] = useState({})
+  const [localSettings, setLocalSettings] = useState({})
+
+  useEffect(() => {
+    setLocalActivePrograms(activePrograms || {})
+  }, [activePrograms])
+
+  useEffect(() => {
+    setLocalSettings(settings)
+  }, [settings])
 
   async function fetchStats() {
     try {
@@ -181,10 +193,26 @@ export default function AdminPage() {
     setAnalytics(prev => ({ ...prev, ...results }))
   }
 
+  async function fetchActivityLog() {
+    try {
+      const res = await fetch('/api/admin/activity?limit=200', { credentials: 'include' })
+      if (res.ok) setActivityLog(await res.json())
+    } catch {}
+  }
+
+  async function fetchProgramStatus() {
+    try {
+      const res = await fetch('/api/programs/status', { credentials: 'include' })
+      if (res.ok) setLocalActivePrograms(await res.json())
+    } catch {}
+  }
+
   useEffect(() => {
     fetchStats()
     fetchUsers(1, '')
     fetchAnalytics()
+    fetchProgramStatus()
+    fetchActivityLog()
   }, [])
 
   async function handleDelete(id) {
@@ -226,26 +254,15 @@ export default function AdminPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px 60px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Admin Panel</h1>
-          <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3 }}>
-            {['dashboard', 'users'].map(tab => (
+          <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3, flexWrap: 'wrap' }}>
+            {['dashboard', 'users', 'activity', 'programs', 'settings'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
-                padding: '7px 18px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
                 fontSize: 13, fontWeight: 600, textTransform: 'capitalize',
                 background: activeTab === tab ? 'rgba(59,130,246,0.25)' : 'transparent',
                 color: activeTab === tab ? '#60a5fa' : '#64748b',
                 transition: 'all 0.2s',
               }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, verticalAlign: 'middle' }}>
-                  {tab === 'dashboard' ? (
-                    <>
-                      <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-                    </>
-                  ) : (
-                    <>
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </>
-                  )}
-                </svg>
                 {tab}
               </button>
             ))}
@@ -481,6 +498,196 @@ export default function AdminPage() {
                 >Next</button>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'activity' && (
+          <div style={{ ...CARD, padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Activity Log</h2>
+              <button onClick={fetchActivityLog} style={{ ...BTN_SECONDARY, fontSize: 12, padding: '5px 12px' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4, verticalAlign: 'middle' }}>
+                  <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg>
+                Refresh
+              </button>
+            </div>
+            {activityLog.length === 0 ? (
+              <div style={{ color: '#475569', fontSize: 13, padding: 20, textAlign: 'center' }}>No activity recorded yet.</div>
+            ) : (
+              <div style={{ overflowX: 'auto', maxHeight: 500, overflowY: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                  <thead style={{ position: 'sticky', top: 0 }}>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#1e3a5f' }}>
+                      <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>User</th>
+                      <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Action</th>
+                      <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Details</th>
+                      <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>IP</th>
+                      <th style={{ textAlign: 'right', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activityLog.map(entry => (
+                      <tr key={entry.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                        <td style={{ padding: '8px 12px', color: '#e2e8f0' }}>
+                          {entry.first_name ? `${entry.first_name} ${entry.last_name || ''}`.trim() : entry.email || 'System'}
+                        </td>
+                        <td style={{ padding: '8px 12px' }}>
+                          <span style={{
+                            display: 'inline-block', padding: '2px 7px', borderRadius: 8,
+                            fontSize: 10, fontWeight: 600,
+                            background: entry.action_type === 'login' ? 'rgba(34,197,94,0.15)' :
+                              entry.action_type === 'register' ? 'rgba(59,130,246,0.15)' :
+                              entry.action_type === 'assessment_save' ? 'rgba(168,85,247,0.15)' :
+                              entry.action_type === 'settings_update' || entry.action_type === 'program_toggle' ? 'rgba(6,182,212,0.15)' :
+                              'rgba(255,255,255,0.06)',
+                            color: entry.action_type === 'login' ? '#4ade80' :
+                              entry.action_type === 'register' ? '#60a5fa' :
+                              entry.action_type === 'assessment_save' ? '#c084fc' :
+                              entry.action_type === 'settings_update' || entry.action_type === 'program_toggle' ? '#22d3ee' :
+                              '#94a3b8',
+                          }}>
+                            {entry.action_type.replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td style={{ padding: '8px 12px', color: '#94a3b8', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {entry.details || '-'}
+                        </td>
+                        <td style={{ padding: '8px 12px', color: '#64748b', fontSize: 11 }}>{entry.ip_address || '-'}</td>
+                        <td style={{ padding: '8px 12px', color: '#64748b', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          {entry.created_at ? new Date(entry.created_at).toLocaleString() : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'programs' && (
+          <div style={{ ...CARD, padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Program Management</h2>
+              <span style={{ fontSize: 12, color: '#64748b' }}>Toggle programs on/off for recommendations</span>
+            </div>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {programs.map(prog => {
+                const active = localActivePrograms[prog.code] !== false
+                return (
+                  <div key={prog.code} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 14px', borderRadius: 10,
+                    background: active ? 'rgba(34,197,94,0.06)' : 'rgba(248,113,113,0.06)',
+                    border: `1px solid ${active ? 'rgba(34,197,94,0.15)' : 'rgba(248,113,113,0.15)'}`,
+                  }}>
+                    <div>
+                      <div style={{ color: '#e2e8f0', fontSize: 14, fontWeight: 600 }}>{prog.name}</div>
+                      <div style={{ color: '#64748b', fontSize: 11 }}>{prog.code} — {prog.college}</div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/api/admin/programs/${prog.code}/toggle`, { method: 'PUT', credentials: 'include' })
+                          if (res.ok) {
+                            const data = await res.json()
+                            setLocalActivePrograms(prev => ({ ...prev, [data.code]: data.active }))
+                            fetchActivityLog()
+                          }
+                        } catch {}
+                      }}
+                      style={{
+                        padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                        fontSize: 12, fontWeight: 600,
+                        background: active ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
+                        color: active ? '#f87171' : '#4ade80',
+                      }}
+                    >
+                      {active ? 'Disable' : 'Enable'}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div style={{ ...CARD, padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Scoring Weights</h2>
+              <span style={{ fontSize: 12, color: '#64748b' }}>Adjust how recommendation scores are calculated</span>
+            </div>
+            {(() => {
+              const weightFields = [
+                { key: 'academic_weight', label: 'Academic Weight', defaultVal: 0.45, step: 0.05, min: 0, max: 1 },
+                { key: 'suast_weight', label: 'SUAST Weight', defaultVal: 0.30, step: 0.05, min: 0, max: 1 },
+                { key: 'personal_weight', label: 'Personal Fit Weight', defaultVal: 0.25, step: 0.05, min: 0, max: 1 },
+              ]
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {weightFields.map(field => (
+                    <div key={field.key}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <label style={{ color: '#94a3b8', fontSize: 13 }}>{field.label}</label>
+                        <span style={{ color: '#60a5fa', fontSize: 13, fontWeight: 600 }}>
+                          {parseFloat(localSettings[field.key]) || field.defaultVal}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={field.min}
+                        max={field.max}
+                        step={field.step}
+                        value={parseFloat(localSettings[field.key]) || field.defaultVal}
+                        onChange={e => setLocalSettings(prev => ({ ...prev, [field.key]: e.target.value }))}
+                        style={{ width: '100%', accentColor: '#3b82f6' }}
+                      />
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+                    <button
+                      onClick={async () => {
+                        const res = await fetch('/api/admin/settings', {
+                          method: 'PUT', credentials: 'include',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ settings: localSettings }),
+                        })
+                        if (res.ok) {
+                          fetchActivityLog()
+                        }
+                      }}
+                      style={{
+                        background: '#3b82f6', border: 'none', color: '#fff',
+                        padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                      }}
+                    >
+                      Save Weights
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const defaults = { academic_weight: '0.45', suast_weight: '0.30', personal_weight: '0.25' }
+                        setLocalSettings(defaults)
+                        const res = await fetch('/api/admin/settings', {
+                          method: 'PUT', credentials: 'include',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ settings: defaults }),
+                        })
+                        if (res.ok) {
+                          fetchActivityLog()
+                        }
+                      }}
+                      style={{
+                        ...BTN_SECONDARY, padding: '8px 20px', fontSize: 13,
+                      }}
+                    >
+                      Reset Defaults
+                    </button>
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         )}
       </div>

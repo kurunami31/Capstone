@@ -1,12 +1,28 @@
 import { hollandMatchScore } from './holland.js'
 
-export function calculateRecommendations(studentData, programs) {
-  return programs
+export function calculateRecommendations(studentData, programs, options = {}) {
+  const {
+    academicWeight = 0.45,
+    suastWeight = 0.30,
+    personalWeight = 0.25,
+    hollandMatchWeight = 0.50,
+    interestMatchWeight = 0.30,
+    skillsMatchWeight = 0.20,
+    resultsCount = 10,
+    activePrograms = null,
+  } = options
+
+  let filtered = programs
+  if (activePrograms) {
+    filtered = programs.filter(p => activePrograms[p.code] !== false)
+  }
+
+  return filtered
     .map(program => {
       const academic = calculateAcademic(studentData, program)
       const suast = calculateSUAST(studentData, program)
-      const personal = calculatePersonalFit(studentData, program)
-      const total = Math.round(academic * 0.45 + suast * 0.30 + personal * 0.25)
+      const personal = calculatePersonalFit(studentData, program, { hollandMatchWeight, interestMatchWeight, skillsMatchWeight })
+      const total = Math.round(academic * academicWeight + suast * suastWeight + personal * personalWeight)
 
       const admission = estimateAdmissionChance(studentData, program)
 
@@ -23,7 +39,7 @@ export function calculateRecommendations(studentData, programs) {
     })
     .filter(r => r.totalScore > 0)
     .sort((a, b) => b.totalScore - a.totalScore)
-    .slice(0, 10)
+    .slice(0, resultsCount)
     .map((r, i) => ({ ...r, rank: i + 1 }))
 }
 
@@ -95,7 +111,13 @@ function calculateSUAST(student, program) {
   return relevantScore * 0.60 + overallScore * 0.40
 }
 
-function calculatePersonalFit(student, program) {
+function calculatePersonalFit(student, program, weights = {}) {
+  const {
+    hollandMatchWeight = 0.50,
+    interestMatchWeight = 0.30,
+    skillsMatchWeight = 0.20,
+  } = weights
+
   const holland = student.hollandCode
   let hollandScore = 50
   if (holland && holland.scores) {
@@ -129,7 +151,7 @@ function calculatePersonalFit(student, program) {
   }
   const skillsScore = skillCount > 0 ? 100 * (1 - skillDist / skillCount) : 50
 
-  return Math.round(hollandScore * 0.50 + interestScore * 0.30 + skillsScore * 0.20)
+  return Math.round(hollandScore * hollandMatchWeight + interestScore * interestMatchWeight + skillsScore * skillsMatchWeight)
 }
 
 function estimateAdmissionChance(student, program) {

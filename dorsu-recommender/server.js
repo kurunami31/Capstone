@@ -121,6 +121,7 @@ app.post('/api/register', rateLimit, async (req, res) => {
     }
     const token = generateToken(user)
     setTokenCookie(res, token)
+    logActivity(row.id, 'register', `User registered: ${row.email}`, req.ip || '')
     res.json({ user })
   } catch (err) {
     console.error('Register error:', err)
@@ -167,6 +168,7 @@ app.post('/api/login', rateLimit, async (req, res) => {
     const user = mapUser(row)
     const token = generateToken(user)
     setTokenCookie(res, token)
+    logActivity(row.id, 'login', `User logged in: ${row.email}`, req.ip || '')
     res.json({ user })
   } catch (err) {
     console.error('Login error:', err)
@@ -174,7 +176,7 @@ app.post('/api/login', rateLimit, async (req, res) => {
   }
 })
 
-app.post('/api/logout', (_, res) => {
+app.post('/api/logout', (req, res) => {
   res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' })
   res.json({ success: true })
 })
@@ -251,6 +253,7 @@ app.put('/api/profile', authenticate, async (req, res) => {
       values
     )
 
+    logActivity(req.user.id, 'profile_update', 'Profile updated', req.ip || '')
     res.json({ user: mapUser(result.rows[0]) })
   } catch (err) {
     console.error('Profile update error:', err)
@@ -278,6 +281,7 @@ app.put('/api/profile/password', authenticate, async (req, res) => {
       [bcrypt.hashSync(newPassword, SALT_ROUNDS), req.user.id]
     )
 
+    logActivity(req.user.id, 'password_change', 'Password changed', req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Password change error:', err)
@@ -393,6 +397,18 @@ function requireAdmin(req, res, next) {
   next()
 }
 
+async function logActivity(userId, actionType, details = '', ip = '') {
+  try {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+    await pool.query(
+      'INSERT INTO activity_log (id, user_id, action_type, details, ip_address, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
+      [id, userId, actionType, details, ip]
+    )
+  } catch (err) {
+    console.error('Activity log error:', err)
+  }
+}
+
 app.get('/api/admin/stats', authenticate, requireAdmin, async (_, res) => {
   try {
     const totalUsers = await pool.query("SELECT COUNT(*) FROM users WHERE email != 'admin@dorsu.edu.ph'")
@@ -486,6 +502,7 @@ app.post('/api/assessment/save', authenticate, async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
       [id, req.user.id, strand || '', gwa || 0, hollandCode || '[]', JSON.stringify(topPrograms || [])]
     )
+    logActivity(req.user.id, 'assessment_save', 'Assessment completed', req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Assessment save error:', err)
@@ -593,6 +610,113 @@ app.get('/{*path}', (_, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'))
 })
 
+// ---- Activity Log ----
+app.get('/api/admin/activity', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 100, 1), 500)
+    const result = await pool.query(
+      `SELECT a.id, a.user_id, a.action_type, a.details, a.ip_address, a.created_at,
+              u.email, u.first_name, u.last_name
+       FROM activity_log a
+       LEFT JOIN users u ON u.id = a.user_id
+       ORDER BY a.created_at DESC
+       LIMIT $1`,
+      [limit]
+    )
+    res.json(result.rows)
+  } catch (err) {
+    console.error('Activity log fetch error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Toggle program active status ----
+app.put('/api/admin/programs/:code/toggle', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { code } = req.params
+    const existing = await pool.query('SELECT * FROM program_settings WHERE program_code = $1', [code])
+    if (existing.rows.length === 0) {
+      await pool.query(
+        'INSERT INTO program_settings (program_code, active) VALUES ($1, false)',
+        [code]
+      )
+      logActivity(req.user.id, 'program_toggle', `Disabled program: ${code}`, req.ip || '')
+      return res.json({ code, active: false })
+    }
+    const newActive = !existing.rows[0].active
+    await pool.query(
+      'UPDATE program_settings SET active = $1, updated_at = NOW() WHERE program_code = $2',
+      [newActive, code]
+    )
+    logActivity(req.user.id, 'program_toggle', `${newActive ? 'Enabled' : 'Disabled'} program: ${code}`, req.ip || '')
+    res.json({ code, active: newActive })
+  } catch (err) {
+    console.error('Program toggle error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Get program active statuses ----
+app.get('/api/programs/status', authenticate, async (_, res) => {
+  try {
+    const result = await pool.query('SELECT program_code, active FROM program_settings')
+    const map = {}
+    for (const row of result.rows) {
+      map[row.program_code] = row.active
+    }
+    res.json(map)
+  } catch (err) {
+    console.error('Program status error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Get system settings ----
+app.get('/api/settings', authenticate, async (req, res) => {
+  try {
+    if (req.user.role === 'admin') {
+      const result = await pool.query('SELECT key, value FROM system_settings')
+      const map = {}
+      for (const row of result.rows) {
+        map[row.key] = row.value
+      }
+      return res.json(map)
+    }
+    // Students can only read non-admin settings
+    const result = await pool.query('SELECT key, value FROM system_settings WHERE key NOT LIKE $1', ['admin_%'])
+    const map = {}
+    for (const row of result.rows) {
+      map[row.key] = row.value
+    }
+    res.json(map)
+  } catch (err) {
+    console.error('Settings fetch error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Update system settings (admin only) ----
+app.put('/api/admin/settings', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { settings } = req.body
+    if (!settings || typeof settings !== 'object') {
+      return res.status(400).json({ error: 'Settings object required.' })
+    }
+    for (const [key, value] of Object.entries(settings)) {
+      await pool.query(
+        `INSERT INTO system_settings (key, value) VALUES ($1, $2)
+         ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()`,
+        [key, String(value)]
+      )
+    }
+    logActivity(req.user.id, 'settings_update', `Updated settings: ${Object.keys(settings).join(', ')}`, req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Settings update error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
 initDB().then(async () => {
   const ADMIN_EMAIL = 'admin@dorsu.edu.ph'
   const existing = await pool.query('SELECT id FROM users WHERE email = $1', [ADMIN_EMAIL])
@@ -611,6 +735,19 @@ initDB().then(async () => {
     console.log(`   Password: ${adminPwd}`)
     console.log('=============================')
     console.log('')
+  }
+
+  // Auto-populate program_settings with all programs enabled by default
+  const progCount = await pool.query('SELECT COUNT(*)::int AS cnt FROM program_settings')
+  if (progCount.rows[0].cnt === 0) {
+    const programs = await pool.query('SELECT code FROM programs')
+    for (const prog of programs.rows) {
+      await pool.query(
+        'INSERT INTO program_settings (program_code, active) VALUES ($1, true) ON CONFLICT DO NOTHING',
+        [prog.code]
+      )
+    }
+    console.log(`Auto-populated ${programs.rows.length} program settings.`)
   }
 
   app.listen(PORT, () => {
