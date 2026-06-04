@@ -65,7 +65,10 @@ function AppContent() {
     setStudentData(prev => ({ ...prev, ...updates }))
   }
 
-  const handleStart = (name, school) => { updateData({ name, school }); setStep(1) }
+  const handleStart = (school) => {
+    const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ')
+    updateData({ name: fullName, school }); setStep(1)
+  }
   const handleGetStarted = () => { setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0) }
   const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false) }
   const handleBackFromProfile = () => setShowProfile(false)
