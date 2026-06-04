@@ -11,7 +11,7 @@ export default function LandingPage({ onGetStarted, user, onLogout, onShowProfil
         display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12,
         padding: '16px 24px',
       }}>
-        <span style={{ fontSize: 13, color: '#64748b' }}>{user?.name}</span>
+        <span style={{ fontSize: 13, color: '#64748b' }}>{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.name}</span>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button onClick={onShowProfile} style={{
             background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',

@@ -43,7 +43,13 @@ app.use((req, res, next) => {
 })
 
 function generateToken(user) {
-  return jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY })
+  return jwt.sign({
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName || user.first_name || '',
+    lastName: user.lastName || user.last_name || '',
+    name: [user.firstName || user.first_name || '', user.lastName || user.last_name || ''].filter(Boolean).join(' '),
+  }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY })
 }
 
 function setTokenCookie(res, token) {
@@ -68,10 +74,10 @@ function authenticate(req, res, next) {
 
 app.post('/api/register', rateLimit, async (req, res) => {
   try {
-    const { email, password, name } = req.body
+    const { email, password, firstName, lastName, middleInitial, extensionName } = req.body
 
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Name, email, and password are required.' })
+    if (!email || !password || !firstName || !lastName) {
+      return res.status(400).json({ error: 'First name, last name, email, and password are required.' })
     }
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters.' })
@@ -79,8 +85,8 @@ app.post('/api/register', rateLimit, async (req, res) => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: 'Invalid email format.' })
     }
-    if (name.trim().length < 2) {
-      return res.status(400).json({ error: 'Name must be at least 2 characters.' })
+    if (firstName.trim().length < 1 || lastName.trim().length < 1) {
+      return res.status(400).json({ error: 'First name and last name are required.' })
     }
 
     const lowerEmail = email.toLowerCase()
@@ -93,13 +99,20 @@ app.post('/api/register', rateLimit, async (req, res) => {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 
     const result = await pool.query(
-      `INSERT INTO users (id, email, name, password, avatar, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, '', NOW(), NOW())
-       RETURNING id, email, name, avatar, created_at, updated_at`,
-      [id, lowerEmail, name.trim(), hashed]
+      `INSERT INTO users (id, email, first_name, last_name, middle_initial, extension_name, password, avatar, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, '', NOW(), NOW())
+       RETURNING id, email, first_name, last_name, middle_initial, extension_name, avatar, created_at, updated_at`,
+      [id, lowerEmail, firstName.trim(), lastName.trim(), middleInitial?.trim() || '', extensionName?.trim() || '', hashed]
     )
 
-    const user = result.rows[0]
+    const row = result.rows[0]
+    const user = {
+      id: row.id, email: row.email, avatar: row.avatar,
+      firstName: row.first_name, lastName: row.last_name,
+      middleInitial: row.middle_initial, extensionName: row.extension_name,
+      name: [row.first_name, row.last_name].filter(Boolean).join(' '),
+      createdAt: row.created_at, updatedAt: row.updated_at,
+    }
     const token = generateToken(user)
     setTokenCookie(res, token)
     res.json({ user })
@@ -108,6 +121,16 @@ app.post('/api/register', rateLimit, async (req, res) => {
     res.status(500).json({ error: 'Server error during registration.' })
   }
 })
+
+function mapUser(row) {
+  return {
+    id: row.id, email: row.email, avatar: row.avatar,
+    firstName: row.first_name, lastName: row.last_name,
+    middleInitial: row.middle_initial, extensionName: row.extension_name,
+    name: [row.first_name, row.last_name].filter(Boolean).join(' '),
+    createdAt: row.created_at, updatedAt: row.updated_at,
+  }
+}
 
 app.post('/api/login', rateLimit, async (req, res) => {
   try {
@@ -118,19 +141,20 @@ app.post('/api/login', rateLimit, async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT id, email, name, password, avatar, created_at, updated_at FROM users WHERE email = $1',
+      'SELECT id, email, first_name, last_name, middle_initial, extension_name, password, avatar, created_at, updated_at FROM users WHERE email = $1',
       [email.toLowerCase()]
     )
 
-    const user = result.rows[0]
-    if (!user || !bcrypt.compareSync(password, user.password)) {
+    const row = result.rows[0]
+    if (!row || !bcrypt.compareSync(password, row.password)) {
       return res.status(401).json({ error: 'Invalid email or password.' })
     }
 
+    const { password: _, ...safe } = row
+    const user = mapUser(row)
     const token = generateToken(user)
     setTokenCookie(res, token)
-    const { password: _, ...safe } = user
-    res.json({ user: safe })
+    res.json({ user })
   } catch (err) {
     console.error('Login error:', err)
     res.status(500).json({ error: 'Server error during login.' })
@@ -145,11 +169,11 @@ app.post('/api/logout', (_, res) => {
 app.get('/api/me', authenticate, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, email, name, avatar, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, created_at, updated_at FROM users WHERE id = $1',
       [req.user.id]
     )
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
-    res.json({ user: result.rows[0] })
+    res.json({ user: mapUser(result.rows[0]) })
   } catch (err) {
     console.error('/api/me error:', err)
     res.status(500).json({ error: 'Server error.' })
@@ -158,7 +182,7 @@ app.get('/api/me', authenticate, async (req, res) => {
 
 app.put('/api/profile', authenticate, async (req, res) => {
   try {
-    const { name, email } = req.body
+    const { firstName, lastName, middleInitial, extensionName, email } = req.body
 
     const check = await pool.query('SELECT id, email FROM users WHERE id = $1', [req.user.id])
     if (check.rows.length === 0) return res.status(404).json({ error: 'User not found' })
@@ -167,10 +191,23 @@ app.put('/api/profile', authenticate, async (req, res) => {
     const values = []
     let idx = 1
 
-    if (name !== undefined) {
-      if (name.trim().length < 2) return res.status(400).json({ error: 'Name must be at least 2 characters.' })
-      updates.push(`name = $${idx++}`)
-      values.push(name.trim())
+    if (firstName !== undefined) {
+      if (firstName.trim().length < 1) return res.status(400).json({ error: 'First name is required.' })
+      updates.push(`first_name = $${idx++}`)
+      values.push(firstName.trim())
+    }
+    if (lastName !== undefined) {
+      if (lastName.trim().length < 1) return res.status(400).json({ error: 'Last name is required.' })
+      updates.push(`last_name = $${idx++}`)
+      values.push(lastName.trim())
+    }
+    if (middleInitial !== undefined) {
+      updates.push(`middle_initial = $${idx++}`)
+      values.push(middleInitial.trim())
+    }
+    if (extensionName !== undefined) {
+      updates.push(`extension_name = $${idx++}`)
+      values.push(extensionName.trim())
     }
 
     if (email !== undefined) {
@@ -185,8 +222,11 @@ app.put('/api/profile', authenticate, async (req, res) => {
     }
 
     if (updates.length === 0) {
-      const current = await pool.query('SELECT id, email, name, avatar, created_at, updated_at FROM users WHERE id = $1', [req.user.id])
-      return res.json({ user: current.rows[0] })
+      const current = await pool.query(
+        'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, created_at, updated_at FROM users WHERE id = $1',
+        [req.user.id]
+      )
+      return res.json({ user: mapUser(current.rows[0]) })
     }
 
     updates.push(`updated_at = NOW()`)
@@ -194,11 +234,11 @@ app.put('/api/profile', authenticate, async (req, res) => {
 
     const result = await pool.query(
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}
-       RETURNING id, email, name, avatar, created_at, updated_at`,
+       RETURNING id, email, first_name, last_name, middle_initial, extension_name, avatar, created_at, updated_at`,
       values
     )
 
-    res.json({ user: result.rows[0] })
+    res.json({ user: mapUser(result.rows[0]) })
   } catch (err) {
     console.error('Profile update error:', err)
     res.status(500).json({ error: 'Server error updating profile.' })

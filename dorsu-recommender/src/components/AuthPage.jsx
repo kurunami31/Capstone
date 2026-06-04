@@ -4,7 +4,10 @@ import { useAuth } from '../context/AuthContext.jsx'
 export default function AuthPage() {
   const { login, register } = useAuth()
   const [mode, setMode] = useState('login')
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [middleInitial, setMiddleInitial] = useState('')
+  const [extensionName, setExtensionName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -18,7 +21,7 @@ export default function AuthPage() {
       if (mode === 'login') {
         await login(email, password)
       } else {
-        await register(name, email, password)
+        await register({ firstName, lastName, middleInitial, extensionName, email, password })
       }
     } catch (err) {
       setError(err.message)
@@ -66,17 +69,39 @@ export default function AuthPage() {
 
           <form onSubmit={handleSubmit}>
             {mode === 'register' && (
-              <div style={{ marginBottom: 18, animation: 'fadeInUp 0.3s ease-out both' }}>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
-                  Full Name
-                </label>
-                <input
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder="Enter your full name"
-                  style={inputStyle}
-                  autoFocus
-                />
+              <div style={{ animation: 'fadeInUp 0.3s ease-out both' }}>
+                <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                      First Name
+                    </label>
+                    <input value={firstName} onChange={e => setFirstName(e.target.value)}
+                      placeholder="First name" style={inputStyle} autoFocus />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                      Last Name
+                    </label>
+                    <input value={lastName} onChange={e => setLastName(e.target.value)}
+                      placeholder="Last name" style={inputStyle} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                      Middle Initial <span style={{ color: '#64748b', fontWeight: 400 }}>(optional)</span>
+                    </label>
+                    <input value={middleInitial} onChange={e => setMiddleInitial(e.target.value)}
+                      placeholder="e.g. M" style={inputStyle} maxLength={2} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                      Extension <span style={{ color: '#64748b', fontWeight: 400 }}>(optional)</span>
+                    </label>
+                    <input value={extensionName} onChange={e => setExtensionName(e.target.value)}
+                      placeholder="e.g. Jr., III" style={inputStyle} />
+                  </div>
+                </div>
               </div>
             )}
 

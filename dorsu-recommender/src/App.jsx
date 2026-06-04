@@ -126,7 +126,7 @@ function AppContent() {
           <div style={{ padding: '20px 0 12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 13, color: '#64748b' }}>{user.name}</span>
+                <span style={{ fontSize: 13, color: '#64748b' }}>{user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name}</span>
                 <button onClick={handleShowProfile} style={{
                   background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
                   fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',

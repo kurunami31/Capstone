@@ -3,7 +3,10 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 export default function ProfilePage({ onBack }) {
   const { user, refreshUser } = useAuth()
-  const [name, setName] = useState(user?.name || '')
+  const [firstName, setFirstName] = useState(user?.firstName || user?.first_name || '')
+  const [lastName, setLastName] = useState(user?.lastName || user?.last_name || '')
+  const [middleInitial, setMiddleInitial] = useState(user?.middleInitial || user?.middle_initial || '')
+  const [extensionName, setExtensionName] = useState(user?.extensionName || user?.extension_name || '')
   const [email, setEmail] = useState(user?.email || '')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -44,6 +47,11 @@ export default function ProfilePage({ onBack }) {
     }
   }
 
+  const buildFullName = (fn, ln, mi, ext) => {
+    const parts = [fn, mi, ln, ext].filter(Boolean)
+    return parts.join(' ') || ''
+  }
+
   const handleProfileSave = async () => {
     setSaving(true)
     setProfileMsg('')
@@ -53,7 +61,7 @@ export default function ProfilePage({ onBack }) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ name: name.trim(), email }),
+        body: JSON.stringify({ firstName, lastName, middleInitial, extensionName, email }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Update failed')
@@ -153,15 +161,34 @@ export default function ProfilePage({ onBack }) {
               <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
             </div>
             <div>
-              <div style={{ fontWeight: 600, fontSize: 17, color: '#f1f5f9' }}>{user?.name}</div>
+              <div style={{ fontWeight: 600, fontSize: 17, color: '#f1f5f9' }}>{buildFullName(user?.firstName, user?.lastName, user?.middleInitial, user?.extensionName) || user?.name}</div>
               <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{user?.email}</div>
             </div>
           </div>
 
-          <div style={{ marginBottom: 18 }}>
-            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>Full Name</label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="Your name"
-              style={{ width: '100%', padding: '11px 14px', fontSize: 14, backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#f1f5f9', outline: 'none', boxSizing: 'border-box' }} />
+          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>First Name</label>
+              <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name"
+                style={inputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>Last Name</label>
+              <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name"
+                style={inputStyle} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>Middle Initial <span style={{ color: '#64748b', fontWeight: 400 }}>(optional)</span></label>
+              <input value={middleInitial} onChange={e => setMiddleInitial(e.target.value)} placeholder="e.g. M"
+                style={inputStyle} maxLength={2} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>Extension <span style={{ color: '#64748b', fontWeight: 400 }}>(optional)</span></label>
+              <input value={extensionName} onChange={e => setExtensionName(e.target.value)} placeholder="e.g. Jr., III"
+                style={inputStyle} />
+            </div>
           </div>
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>Email Address</label>
@@ -217,4 +244,12 @@ export default function ProfilePage({ onBack }) {
       </div>
     </div>
   )
+}
+
+const inputStyle = {
+  width: '100%', padding: '11px 14px', fontSize: 14,
+  backgroundColor: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 8, color: '#f1f5f9',
+  outline: 'none', boxSizing: 'border-box',
 }
