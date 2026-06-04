@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const iconSvg = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: '#555', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }
+const iconSvg = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: '#94a3b8', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }
 
 function ClusterIcon({ name }) {
   switch (name) {
@@ -54,8 +54,8 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8 }}>Career Interests</h2>
-      <p style={{ color: '#666', marginBottom: 20 }}>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: '#f1f5f9' }}>Career Interests</h2>
+      <p style={{ color: '#94a3b8', marginBottom: 20, fontSize: 14 }}>
         Rate your interest in each career field from 1 (Not Interested) to 5 (Extremely Interested).
       </p>
 
@@ -63,10 +63,11 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
         {CLUSTERS.map(c => (
           <div key={c.key} style={{
             display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
-            backgroundColor: '#f8f9fa', borderRadius: 8
+            backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.06)',
           }}>
             <ClusterIcon name={c.key} />
-            <div style={{ flex: 1, fontWeight: 500 }}>{c.label}</div>
+            <div style={{ flex: 1, fontWeight: 500, color: '#f1f5f9' }}>{c.label}</div>
             <div style={{ display: 'flex', gap: 4 }}>
               {[1, 2, 3, 4, 5].map(val => (
                 <button
@@ -74,9 +75,10 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
                   onClick={() => setRating(c.key, val)}
                   style={{
                     width: 36, height: 36, fontSize: 13, fontWeight: 600,
-                    border: `2px solid ${ratings[c.key] === val ? '#1a56db' : '#ddd'}`,
-                    backgroundColor: ratings[c.key] === val ? '#eef4ff' : '#fff',
-                    borderRadius: 6, cursor: 'pointer'
+                    border: `2px solid ${ratings[c.key] === val ? '#3b82f6' : 'rgba(255,255,255,0.15)'}`,
+                    backgroundColor: ratings[c.key] === val ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.04)',
+                    color: ratings[c.key] === val ? '#60a5fa' : '#94a3b8',
+                    borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s',
                   }}
                 >
                   {val}
@@ -97,11 +99,14 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
 
 const primaryBtn = {
   padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: '#1a56db', color: '#fff',
-  border: 'none', borderRadius: 8, cursor: 'pointer'
+  backgroundColor: '#2563eb', color: '#fff',
+  border: 'none', borderRadius: 10, cursor: 'pointer',
+  transition: 'all 0.2s',
 }
 
 const secondaryBtn = {
   padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: 8, cursor: 'pointer'
+  backgroundColor: 'rgba(255,255,255,0.04)', color: '#94a3b8',
+  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer',
+  transition: 'all 0.2s',
 }

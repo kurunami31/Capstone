@@ -1,12 +1,24 @@
 import './LandingPage.css'
 
-export default function LandingPage({ onGetStarted }) {
+export default function LandingPage({ onGetStarted, user, onLogout }) {
   return (
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
     }}>
+      <div style={{
+        display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12,
+        padding: '16px 24px',
+      }}>
+        <span style={{ fontSize: 13, color: '#64748b' }}>{user?.name}</span>
+        <button onClick={onLogout} style={{
+          background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8',
+          fontSize: 12, padding: '4px 14px', borderRadius: 6, cursor: 'pointer',
+        }}>
+          Sign Out
+        </button>
+      </div>
       <div className="hero-fade" style={{
         textAlign: 'center', color: '#fff',
         padding: '100px 24px 80px',

@@ -11,27 +11,29 @@ const STRANDS = [
 export default function StrandStep({ data, onUpdate, onNext }) {
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8 }}>SHS Strand</h2>
-      <p style={{ color: '#666', marginBottom: 24 }}>Select the SHS strand you are currently enrolled in or completed.</p>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: '#f1f5f9' }}>SHS Strand</h2>
+      <p style={{ color: '#94a3b8', marginBottom: 24 }}>Select the SHS strand you are currently enrolled in or completed.</p>
       <div style={{ display: 'grid', gap: 10 }}>
         {STRANDS.map(s => (
           <label
             key={s.value}
             style={{
-              display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
-              border: `2px solid ${data.strand === s.value ? '#1a56db' : '#ddd'}`,
-              borderRadius: 8, cursor: 'pointer', backgroundColor: data.strand === s.value ? '#eef4ff' : '#fff'
+              display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px',
+              border: `2px solid ${data.strand === s.value ? '#3b82f6' : 'rgba(255,255,255,0.1)'}`,
+              borderRadius: 10, cursor: 'pointer',
+              backgroundColor: data.strand === s.value ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.04)',
+              transition: 'all 0.2s',
             }}
           >
             <input
               type="radio" name="strand" value={s.value}
               checked={data.strand === s.value}
               onChange={() => onUpdate({ strand: s.value })}
-              style={{ accentColor: '#1a56db' }}
+              style={{ accentColor: '#3b82f6' }}
             />
             <div>
-              <div style={{ fontWeight: 600 }}>{s.label}</div>
-              <div style={{ fontSize: 13, color: '#666' }}>{s.desc}</div>
+              <div style={{ fontWeight: 600, color: '#f1f5f9' }}>{s.label}</div>
+              <div style={{ fontSize: 13, color: '#64748b' }}>{s.desc}</div>
             </div>
           </label>
         ))}
@@ -50,7 +52,8 @@ export default function StrandStep({ data, onUpdate, onNext }) {
 function btnStyle(ready) {
   return {
     marginTop: 24, padding: '12px 40px', fontSize: 15, fontWeight: 600,
-    backgroundColor: ready ? '#1a56db' : '#aaa', color: '#fff',
-    border: 'none', borderRadius: 8, cursor: ready ? 'pointer' : 'not-allowed'
+    backgroundColor: ready ? '#2563eb' : 'rgba(255,255,255,0.1)', color: '#fff',
+    border: 'none', borderRadius: 10, cursor: ready ? 'pointer' : 'not-allowed',
+    transition: 'all 0.2s',
   }
 }

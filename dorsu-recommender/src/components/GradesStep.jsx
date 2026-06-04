@@ -37,18 +37,24 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
     }
   }, [grades, strandGrades])
 
-  const inpStyle = { width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #ccc', fontSize: 14 }
+  const inpStyle = {
+    width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 14,
+    backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+    color: '#f1f5f9', outline: 'none', boxSizing: 'border-box',
+  }
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8 }}>SHS Grades</h2>
-      <p style={{ color: '#666', marginBottom: 24 }}>Enter your final grades for Grade 11 and Grade 12 (or current).</p>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: '#f1f5f9' }}>SHS Grades</h2>
+      <p style={{ color: '#94a3b8', marginBottom: 24, fontSize: 14 }}>
+        Enter your final grades for Grade 11 and Grade 12 (or current).
+      </p>
 
-      <h3 style={{ fontSize: 16, marginBottom: 12 }}>Core Subjects</h3>
+      <h3 style={{ fontSize: 16, marginBottom: 12, color: '#cbd5e1' }}>Core Subjects</h3>
       <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
         {CORE.map(s => (
           <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ width: 140, fontWeight: 500, textTransform: 'capitalize' }}>{s}</label>
+            <label style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: '#94a3b8' }}>{s}</label>
             <input
               type="number" min="0" max="100" value={grades[s] ?? ''}
               onChange={e => updateGrade(s, e.target.value)}
@@ -60,16 +66,20 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
       </div>
 
       {allFilled && (
-        <div style={{ padding: '12px 16px', backgroundColor: '#e8f5e9', borderRadius: 8, marginBottom: 24 }}>
+        <div style={{
+          padding: '12px 16px', backgroundColor: 'rgba(5,150,105,0.1)',
+          border: '1px solid rgba(5,150,105,0.2)', borderRadius: 8,
+          marginBottom: 24, color: '#6ee7b7', fontSize: 14,
+        }}>
           <strong>GWA: {gwa}</strong> / 100
         </div>
       )}
 
-      <h3 style={{ fontSize: 16, marginBottom: 12 }}>Strand-Specific Subjects ({strand})</h3>
+      <h3 style={{ fontSize: 16, marginBottom: 12, color: '#cbd5e1' }}>Strand-Specific Subjects ({strand})</h3>
       <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
         {strandSubs.map(s => (
           <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ width: 140, fontWeight: 500, textTransform: 'capitalize' }}>{s.replace(/_/g, ' ')}</label>
+            <label style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: '#94a3b8' }}>{s.replace(/_/g, ' ')}</label>
             <input
               type="number" min="0" max="100" value={strandGrades[s] ?? ''}
               onChange={e => updateStrandGrade(s, e.target.value)}
@@ -91,12 +101,15 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
 function btnStyle(ready) {
   return {
     padding: '12px 40px', fontSize: 15, fontWeight: 600,
-    backgroundColor: ready ? '#1a56db' : '#aaa', color: '#fff',
-    border: 'none', borderRadius: 8, cursor: ready ? 'pointer' : 'not-allowed'
+    backgroundColor: ready ? '#2563eb' : 'rgba(255,255,255,0.1)', color: '#fff',
+    border: 'none', borderRadius: 10, cursor: ready ? 'pointer' : 'not-allowed',
+    transition: 'all 0.2s',
   }
 }
 
 const secondaryBtn = {
   padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: '#fff', color: '#333', border: '1px solid #ccc', borderRadius: 8, cursor: 'pointer'
+  backgroundColor: 'rgba(255,255,255,0.04)', color: '#94a3b8',
+  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer',
+  transition: 'all 0.2s',
 }
