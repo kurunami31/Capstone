@@ -46,7 +46,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
     gap: 10,
   }
 
-  const sidebarWidth = isMobile ? 240 : (open ? 220 : 56)
+  const sidebarWidth = isMobile ? 240 : (open ? 220 : 76)
 
   return (
     <>
@@ -60,7 +60,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
           }}
         />
       )}
-      {!open && (
+      {isMobile && !open && (
         <button onClick={onToggle} style={{
           position: 'fixed', left: 8, top: 8, zIndex: 100,
           width: 40, height: 40,
@@ -83,32 +83,28 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
         zIndex: 100,
         transition: 'left 0.3s ease, width 0.3s ease',
       }}>
-          <div style={{ padding: isMobile ? '16px 12px 12px' : '16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/>
-                </svg>
-              </div>
-              <div style={{ opacity: isMobile || open ? 1 : 0, transition: 'opacity 0.15s', overflow: 'hidden', whiteSpace: 'nowrap', width: isMobile || open ? 'auto' : 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2, whiteSpace: 'nowrap' }}>DOrSU</div>
-                <div style={{ fontSize: 10, color: '#475569', lineHeight: 1.2, whiteSpace: 'nowrap' }}>Recommender</div>
-              </div>
+          <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '16px 12px' : '10px 6px'), borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{
+              width: open ? 32 : 28, height: open ? 32 : 28, borderRadius: 8, flexShrink: 0,
+              background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width={open ? 16 : 14} height={open ? 16 : 14} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/>
+              </svg>
             </div>
-            {open && (
-              <button onClick={onToggle} style={{
-                width: 28, height: 28, flexShrink: 0,
-                background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 6,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#94a3b8', padding: 0,
-              }}>
-                <HamburgerIcon open={true} />
-              </button>
-            )}
+            <div style={{ opacity: isMobile || open ? 1 : 0, transition: 'opacity 0.15s', overflow: 'hidden', whiteSpace: 'nowrap', width: isMobile || open ? 'auto' : 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2, whiteSpace: 'nowrap' }}>DOrSU</div>
+              <div style={{ fontSize: 10, color: '#475569', lineHeight: 1.2, whiteSpace: 'nowrap' }}>Recommender</div>
+            </div>
+            <button onClick={onToggle} style={{
+              width: 28, height: 28, flexShrink: 0, marginLeft: 'auto',
+              background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 6,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#94a3b8', padding: 0,
+            }}>
+              <HamburgerIcon open={isMobile || open} />
+            </button>
           </div>
 
         <div style={{ padding: '8px 0', flex: 1, display: 'flex', flexDirection: 'column', alignItems: isMobile || open ? 'stretch' : 'center' }}>
