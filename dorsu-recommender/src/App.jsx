@@ -64,6 +64,8 @@ function AppContent() {
     )
   }
 
+  if (!user) return <AuthPage />
+
   const updateData = (updates) => {
     setStudentData(prev => ({ ...prev, ...updates }))
   }
