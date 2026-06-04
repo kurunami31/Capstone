@@ -83,6 +83,7 @@ export default function Welcome({ onStart }) {
   return (
     <div>
       <div style={styles.hero}>
+        <img src="./logo.png" alt="DOrSU Logo" style={{ height: 64, marginBottom: 16 }} />
         <h1 style={styles.heroTitle}>DOrSU College Program Recommender</h1>
         <p style={styles.heroSub}>
           Find the best college programs at Davao Oriental State University
