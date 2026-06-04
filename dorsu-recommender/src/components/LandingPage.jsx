@@ -1,90 +1,116 @@
+import './LandingPage.css'
+
 export default function LandingPage({ onGetStarted }) {
   return (
-    <div>
-      <div style={{
-        background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
-        color: '#fff', textAlign: 'center',
-        padding: '100px 24px 70px',
+    <div style={{
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
+    }}>
+      <div className="hero-fade" style={{
+        textAlign: 'center', color: '#fff',
+        padding: '100px 24px 80px',
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(37,99,235,0.15) 0%, transparent 60%)',
       }}>
-        <img src="./logo.png" alt="DOrSU Logo" style={{ height: 140, marginBottom: 20 }} />
+        <img src="./logo.png" alt="DOrSU Logo" className="hero-logo" style={{ height: 140, marginBottom: 20 }} />
         <h1 style={{
-          fontSize: 40, fontWeight: 800, marginBottom: 14,
-          letterSpacing: '-0.02em', lineHeight: 1.2,
+          fontSize: 44, fontWeight: 800, marginBottom: 14,
+          letterSpacing: '-0.02em', lineHeight: 1.15,
+          background: 'linear-gradient(135deg, #fff 60%, #60a5fa)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
         }}>
           DOrSU College Program Recommender
         </h1>
-        <p style={{
+        <p className="hero-sub" style={{
           fontSize: 20, fontWeight: 400, opacity: 0.9,
-          marginBottom: 8, lineHeight: 1.5, maxWidth: 600, marginLeft: 'auto', marginRight: 'auto',
+          margin: '0 auto 8px', lineHeight: 1.6, maxWidth: 600,
         }}>
           Find the best college programs at Davao Oriental State University
           that match your unique strengths and interests.
         </p>
-        <p style={{ fontSize: 14, opacity: 0.75, marginBottom: 36 }}>
+        <p className="hero-tagline" style={{ fontSize: 14, opacity: 0.65, marginBottom: 40, letterSpacing: '0.02em' }}>
           SHS Strand &bull; Grades &bull; Aptitude &bull; Personality &bull; Interests &bull; Skills
         </p>
         <button
           onClick={onGetStarted}
+          className="hero-cta"
           style={{
-            padding: '16px 56px', fontSize: 18, fontWeight: 700,
-            backgroundColor: '#fff', color: '#1a56db',
-            border: 'none', borderRadius: 10, cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+            padding: '16px 60px', fontSize: 18, fontWeight: 700,
+            backgroundColor: '#2563eb', color: '#fff',
+            border: 'none', borderRadius: 12, cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(37,99,235,0.3)',
+            letterSpacing: '0.01em',
           }}
         >
           Get Started
         </button>
       </div>
 
-      <div style={{
-        maxWidth: 800, margin: '0 auto', padding: '60px 24px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      <div className="section-fade" style={{
+        maxWidth: 900, margin: '0 auto', padding: '70px 24px 80px',
       }}>
-        <h2 style={{
-          fontSize: 24, fontWeight: 700, color: '#1e293b',
-          textAlign: 'center', marginBottom: 8,
-        }}>
-          How It Works
-        </h2>
-        <p style={{
-          fontSize: 15, color: '#64748b', marginBottom: 36,
-          textAlign: 'center', maxWidth: 500, marginLeft: 'auto', marginRight: 'auto',
-        }}>
-          A comprehensive 6-step assessment to match you with the right college program.
-        </p>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <span style={{
+            display: 'inline-block', padding: '4px 14px', borderRadius: 20,
+            backgroundColor: 'rgba(37,99,235,0.15)', color: '#60a5fa',
+            fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase',
+            marginBottom: 12,
+          }}>
+            How It Works
+          </span>
+          <h2 style={{
+            fontSize: 30, fontWeight: 700, color: '#f1f5f9', margin: 0,
+            letterSpacing: '-0.01em',
+          }}>
+            Three steps to your future
+          </h2>
+          <p style={{
+            fontSize: 15, color: '#94a3b8', marginTop: 8,
+            maxWidth: 480, marginLeft: 'auto', marginRight: 'auto',
+          }}>
+            A comprehensive assessment that evaluates six dimensions to find your perfect program.
+          </p>
+        </div>
+
         <div style={{
-          display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap',
+          display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap',
         }}>
           {[
-            { num: '1', title: 'Your Profile', desc: 'Enter your SHS strand and grades to establish your academic foundation.' },
-            { num: '2', title: 'Aptitude & Personality', desc: 'Assess your SUAST performance, Holland personality code, and interests.' },
-            { num: '3', title: 'Your Matches', desc: 'Get a ranked list of programs with match scores and admission chances.' },
-          ].map(s => (
-            <div key={s.num} style={{
-              flex: '1 1 200px', maxWidth: 240,
-              padding: 28, backgroundColor: '#f8fafc', borderRadius: 12, textAlign: 'center',
+            { num: '01', title: 'Your Profile', desc: 'Tell us about your SHS strand, grades, and academic background to establish your foundation.', color: '#3b82f6' },
+            { num: '02', title: 'Aptitude & Personality', desc: 'Assess your SUAST performance, Holland personality code, career interests, and skills.', color: '#8b5cf6' },
+            { num: '03', title: 'Get Matched', desc: 'Receive a ranked list of compatible programs with match scores and admission chances.', color: '#06b6d4' },
+          ].map((s, i) => (
+            <div key={s.num} className="step-card" style={{
+              flex: '1 1 220px', maxWidth: 260,
+              padding: 32, borderRadius: 16,
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              backdropFilter: 'blur(8px)',
+              textAlign: 'center', cursor: 'default',
             }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%',
-                backgroundColor: '#1a56db', color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 700, fontSize: 18, margin: '0 auto 14px',
+              <div className="step-num" style={{
+                width: 48, height: 48, borderRadius: 16,
+                background: `linear-gradient(135deg, ${s.color}, ${s.color}88)`,
+                color: '#fff', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontWeight: 700, fontSize: 16,
+                margin: '0 auto 18px',
               }}>
                 {s.num}
               </div>
-              <div style={{ fontWeight: 600, fontSize: 16, color: '#1e293b', marginBottom: 6 }}>{s.title}</div>
-              <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>{s.desc}</div>
+              <div style={{ fontWeight: 700, fontSize: 17, color: '#f1f5f9', marginBottom: 10 }}>{s.title}</div>
+              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.6 }}>{s.desc}</div>
             </div>
           ))}
         </div>
       </div>
 
       <div style={{
-        borderTop: '1px solid #e2e8f0', padding: '24px',
-        textAlign: 'center', fontSize: 13, color: '#94a3b8',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '28px 24px', textAlign: 'center',
+        fontSize: 13, color: '#475569',
       }}>
-        Davao Oriental State University &mdash; College Program Recommender System
+        Davao Oriental State University &bull; College Program Recommender System
       </div>
     </div>
   )

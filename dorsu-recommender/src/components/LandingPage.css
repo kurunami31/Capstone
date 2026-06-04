@@ -1,0 +1,44 @@
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+  50% { box-shadow: 0 6px 24px rgba(26,86,219,0.35); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.hero-fade { animation: fadeInUp 0.8s ease-out both; }
+.hero-logo { animation: fadeInUp 0.6s ease-out both, float 4s ease-in-out 0.6s infinite; }
+.hero-sub { animation: fadeInUp 0.8s ease-out 0.2s both; }
+.hero-tagline { animation: fadeInUp 0.8s ease-out 0.35s both; }
+.hero-cta { animation: fadeInUp 0.6s ease-out 0.5s both, pulse 2.5s ease-in-out 1.5s infinite; }
+.hero-cta:hover { animation: fadeInUp 0.6s ease-out 0.5s both, none; transform: scale(1.04); transition: transform 0.2s; }
+
+.step-card { opacity: 0; animation: fadeInUp 0.6s ease-out forwards; }
+.step-card:nth-child(1) { animation-delay: 0.2s; }
+.step-card:nth-child(2) { animation-delay: 0.4s; }
+.step-card:nth-child(3) { animation-delay: 0.6s; }
+.step-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); transition: all 0.25s ease; }
+
+.step-num { transition: transform 0.3s ease; }
+.step-card:hover .step-num { transform: scale(1.15); }
+
+.section-fade { animation: fadeInUp 0.7s ease-out both; }
+.section-fade:nth-child(1) { animation-delay: 0.1s; }
+.section-fade:nth-child(2) { animation-delay: 0.3s; }
