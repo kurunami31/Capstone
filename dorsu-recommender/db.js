@@ -70,10 +70,10 @@ async function initDB() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS program_settings (
       code TEXT PRIMARY KEY,
-      active BOOLEAN NOT NULL DEFAULT true,
-      updated_at TIMESTAMPTZ DEFAULT NOW()
+      active BOOLEAN NOT NULL DEFAULT true
     )
   `)
+  await pool.query(`ALTER TABLE program_settings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`)
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS system_settings (
