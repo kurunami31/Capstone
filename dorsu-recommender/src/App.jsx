@@ -68,6 +68,7 @@ function AppContent() {
   const [savedProgress, setSavedProgress] = useState(null)
   const [showResumePrompt, setShowResumePrompt] = useState(false)
   const [emailVerified, setEmailVerified] = useState(true)
+  const [smtpConfigured, setSmtpConfigured] = useState(false)
   const autoSaveRef = useRef(null)
 
   // Check email verification status
@@ -75,7 +76,10 @@ function AppContent() {
     if (!user) return
     fetch('/api/email-verified', { credentials: 'include' })
       .then(r => r.json())
-      .then(data => setEmailVerified(data.verified))
+      .then(data => {
+        setEmailVerified(data.verified)
+        setSmtpConfigured(data.smtpConfigured)
+      })
       .catch(() => {})
   }, [user])
 
@@ -199,8 +203,8 @@ function AppContent() {
 
   if (!consented) return <ConsentPage onConsent={() => setConsented(true)} />
 
-  // Email verification banner
-  const verificationBanner = !emailVerified ? (
+  // Email verification banner — only shown when email is unverified AND SMTP is configured
+  const verificationBanner = smtpConfigured && !emailVerified ? (
     <div style={{
       background: 'rgba(234,179,8,0.1)', borderBottom: '1px solid rgba(234,179,8,0.2)',
       padding: '10px 20px', textAlign: 'center', fontSize: 13, color: '#fbbf24',

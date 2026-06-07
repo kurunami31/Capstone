@@ -1189,7 +1189,8 @@ app.get('/api/email-verified', authenticate, async (req, res) => {
   try {
     const result = await pool.query('SELECT email_verified FROM users WHERE id = $1', [req.user.id])
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found.' })
-    res.json({ verified: result.rows[0].email_verified })
+    const smtpConfigured = !!(process.env.SMTP_HOST)
+    res.json({ verified: result.rows[0].email_verified, smtpConfigured })
   } catch (err) {
     console.error('Email verified status error:', err)
     res.status(500).json({ error: 'Server error.' })
