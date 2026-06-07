@@ -34,10 +34,15 @@ const STEPS = [
 export default function OnboardingWalkthrough() {
   const [step, setStep] = useState(0)
   const [visible, setVisible] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 480)
 
   useEffect(() => {
     const done = localStorage.getItem(STORAGE_KEY)
     if (!done) setVisible(true)
+    const mq = window.matchMedia('(max-width: 480px)')
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
   const dismiss = () => {
@@ -54,18 +59,18 @@ export default function OnboardingWalkthrough() {
       position: 'fixed', inset: 0, zIndex: 9998,
       backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 24,
+      padding: isMobile ? 16 : 24,
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     }}>
       <div style={{
-        backgroundColor: '#1e293b', borderRadius: 20, padding: 32, maxWidth: 380, width: '100%',
+        backgroundColor: '#1e293b', borderRadius: 20, padding: isMobile ? 20 : 32, maxWidth: 380, width: '100%',
         border: '1px solid rgba(255,255,255,0.08)',
         textAlign: 'center',
       }}>
-        <div style={{ marginBottom: 16 }}>{s.icon}</div>
-        <h3 style={{ color: '#f1f5f9', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>{s.title}</h3>
-        <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>{s.body}</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 20 }}>
+        <div style={{ marginBottom: 12 }}>{s.icon}</div>
+        <h3 style={{ color: '#f1f5f9', fontSize: isMobile ? 16 : 18, fontWeight: 700, margin: '0 0 8px' }}>{s.title}</h3>
+        <p style={{ color: '#94a3b8', fontSize: isMobile ? 13 : 14, margin: '0 0 20px', lineHeight: 1.6 }}>{s.body}</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 }}>
           {STEPS.map((_, i) => (
             <div key={i} style={{
               width: 8, height: 8, borderRadius: '50%',
@@ -74,24 +79,34 @@ export default function OnboardingWalkthrough() {
             }} />
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <div style={{
+          display: 'flex', gap: 8,
+          flexDirection: isMobile ? 'column-reverse' : 'row',
+          justifyContent: isMobile ? 'stretch' : 'flex-end',
+        }}>
           <button onClick={dismiss} style={{
-            padding: '8px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
-            backgroundColor: 'transparent', color: '#94a3b8', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            padding: isMobile ? '10px 16px' : '8px 16px',
+            borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
+            backgroundColor: 'transparent', color: '#94a3b8',
+            fontSize: 13, fontWeight: 600, cursor: 'pointer',
           }}>
             Skip Tour
           </button>
           {step < STEPS.length - 1 ? (
             <button onClick={() => setStep(step + 1)} style={{
-              padding: '8px 20px', borderRadius: 10, border: 'none',
-              backgroundColor: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              padding: isMobile ? '10px 16px' : '8px 20px',
+              borderRadius: 10, border: 'none',
+              backgroundColor: '#2563eb', color: '#fff',
+              fontSize: 13, fontWeight: 600, cursor: 'pointer',
             }}>
               Next
             </button>
           ) : (
             <button onClick={dismiss} style={{
-              padding: '8px 20px', borderRadius: 10, border: 'none',
-              backgroundColor: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              padding: isMobile ? '10px 16px' : '8px 20px',
+              borderRadius: 10, border: 'none',
+              backgroundColor: '#2563eb', color: '#fff',
+              fontSize: 13, fontWeight: 600, cursor: 'pointer',
             }}>
               Got it!
             </button>
