@@ -2,7 +2,8 @@ import 'dotenv/config'
 import express from 'express'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
+import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
@@ -29,6 +30,10 @@ if (process.env.SENTRY_DSN) {
 const app = express()
 const PORT = process.env.PORT || 3000
 const JWT_SECRET = process.env.JWT_SECRET || 'dorsu-recommender-secret-change-in-production'
+const USE_INSECURE_JWT = !process.env.JWT_SECRET
+if (USE_INSECURE_JWT) {
+  console.warn('WARNING: JWT_SECRET not set. Using insecure fallback. Set JWT_SECRET in production.')
+}
 const SALT_ROUNDS = 12
 const TOKEN_EXPIRY = '1h'
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
@@ -120,7 +125,7 @@ app.post('/api/register', async (req, res) => {
       return res.status(409).json({ error: 'An account with this email already exists.' })
     }
 
-    const hashed = bcrypt.hashSync(password, SALT_ROUNDS)
+    const hashed = await bcrypt.hash(password, SALT_ROUNDS)
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 
     const role = ADMIN_EMAILS.includes(lowerEmail) ? 'admin' : 'user'
@@ -177,7 +182,7 @@ app.post('/api/login', async (req, res) => {
     )
 
     const row = result.rows[0]
-    if (!row || !bcrypt.compareSync(password, row.password)) {
+    if (!row || !(await bcrypt.compare(password, row.password))) {
       return res.status(401).json({ error: 'Invalid email or password.' })
     }
 
@@ -290,7 +295,7 @@ app.put('/api/profile/password', authenticate, async (req, res) => {
     const result = await pool.query('SELECT password FROM users WHERE id = $1', [req.user.id])
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
 
-    if (!bcrypt.compareSync(currentPassword, result.rows[0].password)) {
+    if (!(await bcrypt.compare(currentPassword, result.rows[0].password))) {
       return res.status(401).json({ error: 'Current password is incorrect.' })
     }
 
@@ -300,7 +305,7 @@ app.put('/api/profile/password', authenticate, async (req, res) => {
 
     await pool.query(
       'UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2',
-      [bcrypt.hashSync(newPassword, SALT_ROUNDS), req.user.id]
+      [await bcrypt.hash(newPassword, SALT_ROUNDS), req.user.id]
     )
 
     logActivity(req.user.id, 'password_change', 'Password changed', req.ip || '')
@@ -388,7 +393,7 @@ app.post('/api/chat', async (req, res) => {
     contents.push({ role: 'user', parts: [{ text: message }] })
 
     const result = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents,
       config: {
         systemInstruction: SYSTEM_PROMPT,
@@ -524,6 +529,60 @@ app.delete('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) 
   }
 })
 
+// ---- Admin edit user details and role ----
+app.put('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { firstName, lastName, email, role } = req.body
+    if (req.params.id === req.user.id && role && role !== 'admin') {
+      return res.status(400).json({ error: 'You cannot demote yourself.' })
+    }
+
+    const updates = []
+    const values = []
+    let idx = 1
+
+    if (firstName !== undefined) {
+      if (firstName.trim().length < 1) return res.status(400).json({ error: 'First name is required.' })
+      updates.push(`first_name = $${idx++}`)
+      values.push(firstName.trim())
+    }
+    if (lastName !== undefined) {
+      updates.push(`last_name = $${idx++}`)
+      values.push(lastName.trim())
+    }
+    if (email !== undefined) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email format.' })
+      const lower = email.toLowerCase()
+      const dup = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [lower, req.params.id])
+      if (dup.rows.length > 0) return res.status(409).json({ error: 'Email already in use.' })
+      updates.push(`email = $${idx++}`)
+      values.push(lower)
+    }
+    if (role !== undefined) {
+      if (!['user', 'admin', 'counselor'].includes(role)) return res.status(400).json({ error: 'Invalid role.' })
+      updates.push(`role = $${idx++}`)
+      values.push(role)
+    }
+
+    if (updates.length === 0) return res.status(400).json({ error: 'No fields to update.' })
+    updates.push('updated_at = NOW()')
+    values.push(req.params.id)
+
+    const result = await pool.query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}
+       RETURNING id, email, first_name, last_name, role, created_at, updated_at`,
+      values
+    )
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found.' })
+
+    logActivity(req.user.id, 'user_edit', `Edited user ${req.params.id}`, req.ip || '')
+    res.json({ user: result.rows[0] })
+  } catch (err) {
+    console.error('Admin edit user error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
 // ---- Admin: reset student retake cooldown ----
 app.post('/api/admin/users/:id/reset-cooldown', authenticate, requireAdmin, async (req, res) => {
   try {
@@ -547,8 +606,15 @@ function requireCounselor(req, res, next) {
   return requireRole('admin', 'counselor')(req, res, next)
 }
 
-app.get('/api/counselor/assessments', authenticate, requireCounselor, async (_, res) => {
+app.get('/api/counselor/assessments', authenticate, requireCounselor, async (req, res) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20))
+    const offset = (page - 1) * limit
+
+    const countResult = await pool.query('SELECT COUNT(*)::int AS cnt FROM assessments')
+    const total = countResult.rows[0].cnt
+
     const result = await pool.query(`
       SELECT
         a.id, a.user_id, a.strand, a.gwa, a.holland_code, a.top_programs, a.created_at,
@@ -558,8 +624,8 @@ app.get('/api/counselor/assessments', authenticate, requireCounselor, async (_, 
       JOIN users u ON u.id = a.user_id
       LEFT JOIN counselor_notes cn ON cn.assessment_id = a.id
       ORDER BY a.created_at DESC
-      LIMIT 100
-    `)
+      LIMIT $1 OFFSET $2
+    `, [limit, offset])
     const programsList = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
     const programMap = {}
     for (const p of programsList) programMap[p.code] = p.name
@@ -579,7 +645,7 @@ app.get('/api/counselor/assessments', authenticate, requireCounselor, async (_, 
       reviewStatus: r.review_status || 'pending',
       noteUpdatedAt: r.note_updated_at,
     }))
-    res.json({ assessments })
+    res.json({ assessments, total, page, limit })
   } catch (err) {
     console.error('Counselor assessments error:', err)
     res.status(500).json({ error: 'Server error.' })
@@ -736,12 +802,23 @@ app.post('/api/assessment/save', authenticate, async (req, res) => {
 // ---- Student assessment history ----
 app.get('/api/assessments/history', authenticate, async (req, res) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20))
+    const offset = (page - 1) * limit
+
+    const countResult = await pool.query(
+      'SELECT COUNT(*)::int AS cnt FROM assessments WHERE user_id = $1',
+      [req.user.id]
+    )
+    const total = countResult.rows[0].cnt
+
     const result = await pool.query(
       `SELECT id, strand, gwa, holland_code, top_programs, created_at
        FROM assessments WHERE user_id = $1
-       ORDER BY created_at DESC LIMIT 20`,
-      [req.user.id]
+       ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+      [req.user.id, limit, offset]
     )
+
     const programsList = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
     const programMap = {}
     for (const p of programsList) programMap[p.code] = p.name
@@ -757,7 +834,7 @@ app.get('/api/assessments/history', authenticate, async (req, res) => {
       })),
       createdAt: r.created_at,
     }))
-    res.json({ history })
+    res.json({ history, total, page, limit })
   } catch (err) {
     console.error('Assessment history error:', err)
     res.status(500).json({ error: 'Server error.' })
@@ -915,6 +992,116 @@ app.get('/api/admin/users/export', authenticate, requireAdmin, async (_, res) =>
   }
 })
 
+// ---- Export assessments CSV (admin only) ----
+app.get('/api/admin/assessments/export', authenticate, requireAdmin, async (_, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT a.id, a.user_id, u.email, u.first_name, u.last_name, a.strand, a.gwa, a.holland_code, a.top_programs, a.created_at
+      FROM assessments a
+      JOIN users u ON u.id = a.user_id
+      ORDER BY a.created_at DESC
+    `)
+    const headers = 'ID,User ID,Email,First Name,Last Name,Strand,GWA,Holland Code,Top Programs,Created At'
+    const rows = result.rows.map(r =>
+      `"${r.id}","${r.user_id}","${r.email}","${r.first_name || ''}","${r.last_name || ''}","${r.strand}","${r.gwa}","${r.holland_code}","${r.top_programs}","${r.created_at?.toISOString?.() || r.created_at || ''}"`
+    )
+    res.setHeader('Content-Type', 'text/csv')
+    res.setHeader('Content-Disposition', 'attachment; filename=assessments.csv')
+    res.send([headers, ...rows].join('\n'))
+  } catch (err) {
+    console.error('Export assessments error:', err)
+    res.status(500).json({ error: 'Server error exporting assessments.' })
+  }
+})
+
+// ---- Forgot password ----
+app.post('/api/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) return res.status(400).json({ error: 'Email is required.' })
+
+    const result = await pool.query('SELECT id, email FROM users WHERE email = $1', [email.toLowerCase()])
+    if (result.rows.length === 0) {
+      return res.json({ success: true })
+    }
+
+    const user = result.rows[0]
+    const token = crypto.randomBytes(32).toString('hex')
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
+
+    await pool.query(
+      'INSERT INTO password_resets (id, user_id, token, expires_at) VALUES ($1, $2, $3, $4)',
+      [Date.now().toString(36) + Math.random().toString(36).slice(2, 8), user.id, token, expiresAt]
+    )
+
+    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${token}`
+    await sendEmail({
+      to: user.email,
+      subject: 'Reset Your Password — DOrSU Recommender',
+      html: `<div style="font-family:sans-serif;max-width:500px">
+        <h2 style="color:#1e3a5f">Password Reset</h2>
+        <p>Click the link below to reset your password. This link expires in 1 hour.</p>
+        <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0">Reset Password</a>
+        <p style="color:#64748b;font-size:13px">If you did not request this, please ignore this email.</p>
+        <hr style="border:none;border-top:1px solid #e2e8f0"/>
+        <p style="font-size:12px;color:#94a3b8">DOrSU Program Recommender System</p>
+      </div>`,
+    })
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Forgot password error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Verify reset token ----
+app.get('/api/reset-password/verify', async (req, res) => {
+  try {
+    const { token } = req.query
+    if (!token) return res.status(400).json({ error: 'Token is required.' })
+
+    const result = await pool.query(
+      'SELECT id, user_id FROM password_resets WHERE token = $1 AND used = false AND expires_at > NOW()',
+      [token]
+    )
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired reset token.' })
+    }
+    res.json({ valid: true })
+  } catch (err) {
+    console.error('Verify token error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Reset password ----
+app.post('/api/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body
+    if (!token || !password) return res.status(400).json({ error: 'Token and password are required.' })
+    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' })
+
+    const result = await pool.query(
+      'SELECT id, user_id FROM password_resets WHERE token = $1 AND used = false AND expires_at > NOW()',
+      [token]
+    )
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired reset token.' })
+    }
+
+    const reset = result.rows[0]
+    const hashed = await bcrypt.hash(password, SALT_ROUNDS)
+    await pool.query('UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2', [hashed, reset.user_id])
+    await pool.query('UPDATE password_resets SET used = true WHERE id = $1', [reset.id])
+
+    logActivity(reset.user_id, 'password_reset', 'Password reset via email', req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Reset password error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
 // ---- Health check ----
 app.get('/api/health', async (_, res) => {
   try {
@@ -934,17 +1121,23 @@ app.get('/{*path}', (_, res) => {
 // ---- Activity Log ----
 app.get('/api/admin/activity', authenticate, requireAdmin, async (req, res) => {
   try {
-    const limit = Math.min(Math.max(parseInt(req.query.limit) || 100, 1), 500)
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 100))
+    const offset = (page - 1) * limit
+
+    const countResult = await pool.query('SELECT COUNT(*)::int AS cnt FROM activity_log')
+    const total = countResult.rows[0].cnt
+
     const result = await pool.query(
       `SELECT a.id, a.user_id, a.action_type, a.details, a.ip_address, a.created_at,
               u.email, u.first_name, u.last_name
        FROM activity_log a
        LEFT JOIN users u ON u.id = a.user_id
        ORDER BY a.created_at DESC
-       LIMIT $1`,
-      [limit]
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
     )
-    res.json(result.rows)
+    res.json({ entries: result.rows, total, page, limit })
   } catch (err) {
     console.error('Activity log fetch error:', err)
     res.status(500).json({ error: 'Server error.' })
@@ -973,6 +1166,74 @@ app.put('/api/admin/programs/:code/toggle', authenticate, requireAdmin, async (r
     res.json({ code, active: newActive })
   } catch (err) {
     console.error('Program toggle error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Create program (admin only) ----
+app.post('/api/admin/programs', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { code, name, college, description, strand, subjects, hollandCodes, careers, admissionChance } = req.body
+    if (!code || !name) return res.status(400).json({ error: 'Code and name are required.' })
+
+    const programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
+    if (programs.some(p => p.code === code)) {
+      return res.status(409).json({ error: 'Program with this code already exists.' })
+    }
+
+    programs.push({
+      code, name, college: college || '', description: description || '',
+      strand: strand || [], subjects: subjects || [],
+      hollandCodes: hollandCodes || [], careers: careers || [],
+      admissionChance: admissionChance || 'Moderate',
+    })
+    writeFileSync(join(__dirname, 'src/data/programs.json'), JSON.stringify(programs, null, 2))
+    await pool.query('INSERT INTO program_settings (code, active) VALUES ($1, true) ON CONFLICT DO NOTHING', [code])
+
+    logActivity(req.user.id, 'program_create', `Created program: ${code}`, req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Create program error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Update program (admin only) ----
+app.put('/api/admin/programs/:code', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
+    const idx = programs.findIndex(p => p.code === req.params.code)
+    if (idx === -1) return res.status(404).json({ error: 'Program not found.' })
+
+    const updates = req.body
+    for (const key of Object.keys(updates)) {
+      if (key !== 'code') programs[idx][key] = updates[key]
+    }
+    writeFileSync(join(__dirname, 'src/data/programs.json'), JSON.stringify(programs, null, 2))
+
+    logActivity(req.user.id, 'program_update', `Updated program: ${req.params.code}`, req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Update program error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Delete program (admin only) ----
+app.delete('/api/admin/programs/:code', authenticate, requireAdmin, async (req, res) => {
+  try {
+    let programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
+    const idx = programs.findIndex(p => p.code === req.params.code)
+    if (idx === -1) return res.status(404).json({ error: 'Program not found.' })
+
+    programs.splice(idx, 1)
+    writeFileSync(join(__dirname, 'src/data/programs.json'), JSON.stringify(programs, null, 2))
+    await pool.query('DELETE FROM program_settings WHERE code = $1', [req.params.code])
+
+    logActivity(req.user.id, 'program_delete', `Deleted program: ${req.params.code}`, req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Delete program error:', err)
     res.status(500).json({ error: 'Server error.' })
   }
 })
@@ -1051,7 +1312,7 @@ initDB().then(async () => {
   const existing = await pool.query('SELECT id FROM users WHERE email = $1', [ADMIN_EMAIL])
   if (existing.rows.length === 0) {
     const adminPwd = 'Admin' + Math.random().toString(36).slice(2, 6).toUpperCase()
-    const hashed = bcrypt.hashSync(adminPwd, SALT_ROUNDS)
+    const hashed = await bcrypt.hash(adminPwd, SALT_ROUNDS)
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
     await pool.query(
       `INSERT INTO users (id, email, first_name, last_name, password, avatar, role, created_at, updated_at)
