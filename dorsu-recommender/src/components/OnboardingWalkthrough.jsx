@@ -55,6 +55,7 @@ export default function OnboardingWalkthrough() {
       backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 24,
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     }}>
       <div style={{
         backgroundColor: '#1e293b', borderRadius: 20, padding: 32, maxWidth: 380, width: '100%',
