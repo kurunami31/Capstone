@@ -1035,7 +1035,7 @@ app.put('/api/admin/settings', authenticate, requireAdmin, async (req, res) => {
 const programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
 
 // ---- Sentry error handler ----
-app.use(Sentry.Handlers.errorHandler())
+app.use(Sentry.expressErrorHandler())
 
 initDB().then(async () => {
   const ADMIN_EMAIL = 'admin@dorsu.edu.ph'
