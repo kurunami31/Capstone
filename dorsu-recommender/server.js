@@ -131,8 +131,8 @@ app.post('/api/register', async (req, res) => {
     const role = ADMIN_EMAILS.includes(lowerEmail) ? 'admin' : 'user'
 
     const result = await pool.query(
-      `INSERT INTO users (id, email, first_name, last_name, middle_initial, extension_name, password, avatar, role, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, '', $8, NOW(), NOW())
+      `INSERT INTO users (id, email, first_name, last_name, middle_initial, extension_name, password, avatar, role, email_verified, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, '', $8, false, NOW(), NOW())
        RETURNING id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at`,
       [id, lowerEmail, firstName.trim(), lastName.trim(), middleInitial?.trim() || '', extensionName?.trim() || '', hashed, role]
     )
@@ -149,6 +149,27 @@ app.post('/api/register', async (req, res) => {
     setTokenCookie(res, token)
     logActivity(row.id, 'register', `User registered: ${row.email}`, req.ip || '')
     notifyAccountCreated(user)
+    // Send verification email
+    const verifToken = crypto.randomBytes(32).toString('hex')
+    const verifExpires = new Date(Date.now() + 48 * 60 * 60 * 1000)
+    await pool.query(
+      'INSERT INTO email_verifications (id, user_id, token, expires_at) VALUES ($1, $2, $3, $4)',
+      [Date.now().toString(36) + Math.random().toString(36).slice(2, 8), row.id, verifToken, verifExpires]
+    )
+    const verifUrl = `${req.protocol}://${req.get('host')}/verify-email?token=${verifToken}`
+    sendEmail({
+      to: row.email,
+      subject: 'Verify Your Email — DOrSU Recommender',
+      html: `<div style="font-family:sans-serif;max-width:500px">
+        <h2 style="color:#1e3a5f">Verify Your Email</h2>
+        <p>Hi ${row.first_name || 'Student'},</p>
+        <p>Thanks for registering! Click the link below to verify your email address. This link expires in 48 hours.</p>
+        <a href="${verifUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0">Verify Email</a>
+        <p style="color:#64748b;font-size:13px">If you did not create an account, please ignore this email.</p>
+        <hr style="border:none;border-top:1px solid #e2e8f0"/>
+        <p style="font-size:12px;color:#94a3b8">DOrSU Program Recommender System</p>
+      </div>`,
+    })
     res.json({ user })
   } catch (err) {
     console.error('Register error:', err)
@@ -1098,6 +1119,79 @@ app.post('/api/reset-password', async (req, res) => {
     res.json({ success: true })
   } catch (err) {
     console.error('Reset password error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Verify email ----
+app.get('/api/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query
+    if (!token) return res.status(400).json({ error: 'Token is required.' })
+
+    const result = await pool.query(
+      'SELECT id, user_id FROM email_verifications WHERE token = $1 AND expires_at > NOW()',
+      [token]
+    )
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired verification link.' })
+    }
+
+    const verif = result.rows[0]
+    await pool.query('UPDATE users SET email_verified = true WHERE id = $1', [verif.user_id])
+    await pool.query('DELETE FROM email_verifications WHERE id = $1', [verif.id])
+    logActivity(verif.user_id, 'email_verified', 'Email verified', req.ip || '')
+
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Verify email error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Resend verification email ----
+app.post('/api/resend-verification', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email, first_name, email_verified FROM users WHERE id = $1', [req.user.id])
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found.' })
+    const user = result.rows[0]
+    if (user.email_verified) return res.json({ success: true, alreadyVerified: true })
+
+    await pool.query('DELETE FROM email_verifications WHERE user_id = $1', [user.id])
+    const verifToken = crypto.randomBytes(32).toString('hex')
+    const verifExpires = new Date(Date.now() + 48 * 60 * 60 * 1000)
+    await pool.query(
+      'INSERT INTO email_verifications (id, user_id, token, expires_at) VALUES ($1, $2, $3, $4)',
+      [Date.now().toString(36) + Math.random().toString(36).slice(2, 8), user.id, verifToken, verifExpires]
+    )
+    const verifUrl = `${req.protocol}://${req.get('host')}/verify-email?token=${verifToken}`
+    sendEmail({
+      to: user.email,
+      subject: 'Verify Your Email — DOrSU Recommender',
+      html: `<div style="font-family:sans-serif;max-width:500px">
+        <h2 style="color:#1e3a5f">Verify Your Email</h2>
+        <p>Hi ${user.first_name || 'Student'},</p>
+        <p>Click the link below to verify your email address.</p>
+        <a href="${verifUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0">Verify Email</a>
+        <hr style="border:none;border-top:1px solid #e2e8f0"/>
+        <p style="font-size:12px;color:#94a3b8">DOrSU Program Recommender System</p>
+      </div>`,
+    })
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Resend verification error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Get email verification status ----
+app.get('/api/email-verified', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT email_verified FROM users WHERE id = $1', [req.user.id])
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found.' })
+    res.json({ verified: result.rows[0].email_verified })
+  } catch (err) {
+    console.error('Email verified status error:', err)
     res.status(500).json({ error: 'Server error.' })
   }
 })

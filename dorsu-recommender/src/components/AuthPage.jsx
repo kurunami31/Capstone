@@ -20,7 +20,20 @@ export default function AuthPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const token = params.get('token')
-    if (token) {
+    const verifyToken = params.get('verify')
+
+    if (verifyToken) {
+      fetch(`/api/verify-email?token=${verifyToken}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            window.history.replaceState({}, document.title, '/')
+          } else {
+            setError(data.error || 'Verification failed.')
+          }
+        })
+        .catch(() => setError('Failed to verify email.'))
+    } else if (token) {
       setResetToken(token)
       setMode('reset')
       // Verify token
@@ -104,13 +117,14 @@ export default function AuthPage() {
                 fontSize: 24, fontWeight: 700, color: '#f1f5f9', margin: 0,
                 letterSpacing: '-0.01em',
               }}>
-                {mode === 'login' ? 'Welcome Back' : mode === 'register' ? 'Create Account' : mode === 'forgot' ? 'Reset Password' : 'Set New Password'}
+                {mode === 'login' ? 'Welcome Back' : mode === 'register' ? 'Create Account' : mode === 'forgot' ? 'Reset Password' : mode === 'verify' ? 'Email Verified' : 'Set New Password'}
               </h1>
               <p style={{ fontSize: 14, color: '#94a3b8', marginTop: 6 }}>
                 {mode === 'login' ? 'Sign in to continue to the program recommender.' :
                  mode === 'register' ? 'Register to start your college program assessment.' :
                  mode === 'forgot' && !forgotSent ? 'Enter your email to receive a reset link.' :
                  mode === 'forgot' && forgotSent ? 'Check your email for the reset link.' :
+                 mode === 'verify' ? error || 'Your email has been verified! You can now sign in.' :
                  mode === 'reset' && !resetDone ? 'Enter your new password.' :
                  'Your password has been reset successfully.'}
               </p>

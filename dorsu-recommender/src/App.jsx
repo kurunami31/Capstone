@@ -66,7 +66,17 @@ function AppContent() {
   })
   const [savedProgress, setSavedProgress] = useState(null)
   const [showResumePrompt, setShowResumePrompt] = useState(false)
+  const [emailVerified, setEmailVerified] = useState(true)
   const autoSaveRef = useRef(null)
+
+  // Check email verification status
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/email-verified', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => setEmailVerified(data.verified))
+      .catch(() => {})
+  }, [user])
 
   // Check for saved progress on mount
   useEffect(() => {
@@ -182,6 +192,35 @@ function AppContent() {
   if (!user) return <AuthPage />
 
   if (!consented) return <ConsentPage onConsent={() => setConsented(true)} />
+
+  // Email verification banner
+  const verificationBanner = !emailVerified ? (
+    <div style={{
+      background: 'rgba(234,179,8,0.1)', borderBottom: '1px solid rgba(234,179,8,0.2)',
+      padding: '10px 20px', textAlign: 'center', fontSize: 13, color: '#fbbf24',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    }}>
+      Please verify your email address.{' '}
+      <button
+        onClick={async () => {
+          try {
+            const res = await fetch('/api/resend-verification', { method: 'POST', credentials: 'include' })
+            const data = await res.json()
+            if (data.alreadyVerified) setEmailVerified(true)
+            else alert('Verification email sent! Check your inbox.')
+          } catch {
+            alert('Failed to send verification email.')
+          }
+        }}
+        style={{
+          background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer',
+          fontSize: 13, fontWeight: 600, textDecoration: 'underline',
+        }}
+      >
+        Resend verification email
+      </button>
+    </div>
+  ) : null
 
   let activePage = 'home'
   if (showProfile) activePage = 'profile'
@@ -316,6 +355,7 @@ function AppContent() {
           </div>
         </div>
       )}
+      {verificationBanner}
       <Sidebar
         user={user}
         activePage={activePage}
