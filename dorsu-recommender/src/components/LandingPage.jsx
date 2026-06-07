@@ -47,7 +47,7 @@ export default function LandingPage({ onGetStarted }) {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
         }}>
-          DOrSU College Program Recommender
+          DOrSU Program Recommender
         </h1>
         <p className="hero-sub" style={{
           fontSize: 20, fontWeight: 400, opacity: 0.9,
