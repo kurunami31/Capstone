@@ -291,6 +291,7 @@ function AppContent() {
           <div style={{
             backgroundColor: '#1e293b', borderRadius: 20, padding: 32, maxWidth: 400, width: '100%',
             border: '1px solid rgba(255,255,255,0.08)',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           }}>
             <h3 style={{ color: '#f1f5f9', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>
               Resume where you left off?
