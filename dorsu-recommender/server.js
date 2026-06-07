@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
 import { pool, initDB } from './db.js'
+import { sendEmail, notifyAssessmentCompleted, notifyAccountCreated, notifySettingsChanged } from './email.js'
 import { GoogleGenAI } from '@google/genai'
 import * as Sentry from '@sentry/node'
 
@@ -135,6 +136,7 @@ app.post('/api/register', async (req, res) => {
     const token = generateToken(user)
     setTokenCookie(res, token)
     logActivity(row.id, 'register', `User registered: ${row.email}`, req.ip || '')
+    notifyAccountCreated(user)
     res.json({ user })
   } catch (err) {
     console.error('Register error:', err)
@@ -410,6 +412,15 @@ function requireAdmin(req, res, next) {
   next()
 }
 
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ error: `Access denied. Required role: ${roles.join(' or ')}` })
+    }
+    next()
+  }
+}
+
 async function logActivity(userId, actionType, details = '', ip = '') {
   try {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
@@ -506,10 +517,196 @@ app.delete('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) 
   }
 })
 
+// ---- Admin: reset student retake cooldown ----
+app.post('/api/admin/users/:id/reset-cooldown', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM assessments WHERE user_id = $1 AND created_at = (SELECT MAX(created_at) FROM assessments WHERE user_id = $1) RETURNING id',
+      [req.params.id]
+    )
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No assessments found for this user.' })
+    }
+    logActivity(req.user.id, 'cooldown_reset', `Reset cooldown for user ${req.params.id}`, req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Reset cooldown error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Counselor: list assessments for review ----
+function requireCounselor(req, res, next) {
+  return requireRole('admin', 'counselor')(req, res, next)
+}
+
+app.get('/api/counselor/assessments', authenticate, requireCounselor, async (_, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        a.id, a.user_id, a.strand, a.gwa, a.holland_code, a.top_programs, a.created_at,
+        u.email, u.first_name, u.last_name,
+        cn.id AS note_id, cn.notes, cn.status AS review_status, cn.updated_at AS note_updated_at
+      FROM assessments a
+      JOIN users u ON u.id = a.user_id
+      LEFT JOIN counselor_notes cn ON cn.assessment_id = a.id
+      ORDER BY a.created_at DESC
+      LIMIT 100
+    `)
+    const programsList = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
+    const programMap = {}
+    for (const p of programsList) programMap[p.code] = p.name
+
+    const assessments = result.rows.map(r => ({
+      id: r.id,
+      userId: r.user_id,
+      studentName: `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.email,
+      email: r.email,
+      strand: r.strand,
+      gwa: r.gwa,
+      hollandCode: r.holland_code,
+      topPrograms: JSON.parse(r.top_programs || '[]').map(code => ({ code, name: programMap[code] || code })),
+      createdAt: r.created_at,
+      noteId: r.note_id,
+      notes: r.notes || '',
+      reviewStatus: r.review_status || 'pending',
+      noteUpdatedAt: r.note_updated_at,
+    }))
+    res.json({ assessments })
+  } catch (err) {
+    console.error('Counselor assessments error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.post('/api/counselor/notes', authenticate, requireCounselor, async (req, res) => {
+  try {
+    const { assessmentId, notes, status } = req.body
+    if (!assessmentId) return res.status(400).json({ error: 'Assessment ID required.' })
+
+    const existing = await pool.query('SELECT id FROM counselor_notes WHERE assessment_id = $1', [assessmentId])
+    if (existing.rows.length > 0) {
+      await pool.query(
+        'UPDATE counselor_notes SET notes = $1, status = $2, updated_at = NOW() WHERE assessment_id = $3',
+        [notes || '', status || 'pending', assessmentId]
+      )
+    } else {
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+      await pool.query(
+        'INSERT INTO counselor_notes (id, assessment_id, counselor_id, notes, status) VALUES ($1, $2, $3, $4, $5)',
+        [id, assessmentId, req.user.id, notes || '', status || 'pending']
+      )
+    }
+    logActivity(req.user.id, 'counselor_note', `Updated notes for assessment ${assessmentId}`, req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Counselor notes error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Assessment questions CRUD (admin only) ----
+app.get('/api/admin/questions', authenticate, requireAdmin, async (_, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM assessment_questions ORDER BY sort_order ASC, created_at ASC')
+    res.json(result.rows)
+  } catch (err) {
+    console.error('Get questions error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.post('/api/admin/questions', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { step, questionKey, questionText, questionType, options, sortOrder } = req.body
+    if (!step || !questionKey || !questionText) {
+      return res.status(400).json({ error: 'Step, question key, and question text are required.' })
+    }
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+    await pool.query(
+      `INSERT INTO assessment_questions (id, step, question_key, question_text, question_type, options, sort_order)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [id, step, questionKey, questionText, questionType || 'text', JSON.stringify(options || []), sortOrder || 0]
+    )
+    logActivity(req.user.id, 'question_create', `Created question: ${questionKey} (${step})`, req.ip || '')
+    res.json({ success: true, id })
+  } catch (err) {
+    console.error('Create question error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.put('/api/admin/questions/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { questionText, questionType, options, sortOrder, active } = req.body
+    const sets = []
+    const vals = []
+    let idx = 1
+    if (questionText !== undefined) { sets.push(`question_text = $${idx++}`); vals.push(questionText) }
+    if (questionType !== undefined) { sets.push(`question_type = $${idx++}`); vals.push(questionType) }
+    if (options !== undefined) { sets.push(`options = $${idx++}`); vals.push(JSON.stringify(options)) }
+    if (sortOrder !== undefined) { sets.push(`sort_order = $${idx++}`); vals.push(sortOrder) }
+    if (active !== undefined) { sets.push(`active = $${idx++}`); vals.push(active) }
+    if (sets.length === 0) return res.status(400).json({ error: 'No fields to update.' })
+    vals.push(req.params.id)
+    await pool.query(`UPDATE assessment_questions SET ${sets.join(', ')} WHERE id = $${idx}`, vals)
+    logActivity(req.user.id, 'question_update', `Updated question ${req.params.id}`, req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Update question error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.delete('/api/admin/questions/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM assessment_questions WHERE id = $1', [req.params.id])
+    logActivity(req.user.id, 'question_delete', `Deleted question ${req.params.id}`, req.ip || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Delete question error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Get active questions for a step (student-facing) ----
+app.get('/api/questions/:step', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, question_key, question_text, question_type, options, sort_order FROM assessment_questions WHERE step = $1 AND active = true ORDER BY sort_order ASC',
+      [req.params.step]
+    )
+    if (result.rows.length === 0) {
+      return res.json({ questions: [] })
+    }
+    res.json({ questions: result.rows.map(r => ({
+      ...r,
+      options: typeof r.options === 'string' ? JSON.parse(r.options) : r.options,
+    })) })
+  } catch (err) {
+    console.error('Get step questions error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
 app.post('/api/assessment/save', authenticate, async (req, res) => {
   try {
     const { strand, gwa, hollandCode, topPrograms } = req.body
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+    // Check cooldown unless admin/counselor
+    if (req.user.role === 'user') {
+      const last = await pool.query(
+        'SELECT created_at FROM assessments WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+        [req.user.id]
+      )
+      if (last.rows.length > 0) {
+        const daysSince = (Date.now() - new Date(last.rows[0].created_at).getTime()) / (1000 * 60 * 60 * 24)
+        if (daysSince < 120) {
+          const daysLeft = Math.ceil(120 - daysSince)
+          return res.status(429).json({ error: `Please wait ${daysLeft} more day${daysLeft === 1 ? '' : 's'} before retaking.` })
+        }
+      }
+    }
     await pool.query(
       `INSERT INTO assessments (id, user_id, strand, gwa, holland_code, top_programs, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
@@ -518,10 +715,45 @@ app.post('/api/assessment/save', authenticate, async (req, res) => {
     // Clear saved progress on completion
     await pool.query('DELETE FROM assessment_progress WHERE user_id = $1', [req.user.id])
     logActivity(req.user.id, 'assessment_save', 'Assessment completed', req.ip || '')
+    const userResult = await pool.query('SELECT email, first_name, last_name FROM users WHERE id = $1', [req.user.id])
+    if (userResult.rows.length > 0) {
+      notifyAssessmentCompleted(userResult.rows[0], topPrograms || [])
+    }
     res.json({ success: true })
   } catch (err) {
     console.error('Assessment save error:', err)
     res.status(500).json({ error: 'Server error saving assessment.' })
+  }
+})
+
+// ---- Student assessment history ----
+app.get('/api/assessments/history', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, strand, gwa, holland_code, top_programs, created_at
+       FROM assessments WHERE user_id = $1
+       ORDER BY created_at DESC LIMIT 20`,
+      [req.user.id]
+    )
+    const programsList = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
+    const programMap = {}
+    for (const p of programsList) programMap[p.code] = p.name
+
+    const history = result.rows.map(r => ({
+      id: r.id,
+      strand: r.strand,
+      gwa: r.gwa,
+      hollandCode: r.holland_code,
+      topPrograms: JSON.parse(r.top_programs || '[]').map(code => ({
+        code,
+        name: programMap[code] || code,
+      })),
+      createdAt: r.created_at,
+    }))
+    res.json({ history })
+  } catch (err) {
+    console.error('Assessment history error:', err)
+    res.status(500).json({ error: 'Server error.' })
   }
 })
 
@@ -792,6 +1024,7 @@ app.put('/api/admin/settings', authenticate, requireAdmin, async (req, res) => {
       )
     }
     logActivity(req.user.id, 'settings_update', `Updated settings: ${Object.keys(settings).join(', ')}`, req.ip || '')
+    notifySettingsChanged(req.user.email, Object.keys(settings))
     res.json({ success: true })
   } catch (err) {
     console.error('Settings update error:', err)

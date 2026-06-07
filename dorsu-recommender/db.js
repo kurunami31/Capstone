@@ -100,6 +100,32 @@ async function initDB() {
     )
   `)
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS counselor_notes (
+      id TEXT PRIMARY KEY,
+      assessment_id TEXT NOT NULL REFERENCES assessments(id),
+      counselor_id TEXT NOT NULL REFERENCES users(id),
+      notes TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS assessment_questions (
+      id TEXT PRIMARY KEY,
+      step TEXT NOT NULL,
+      question_key TEXT NOT NULL,
+      question_text TEXT NOT NULL,
+      question_type TEXT NOT NULL DEFAULT 'text',
+      options JSONB DEFAULT '[]',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT true,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+
   console.log('Database initialized.')
 }
 

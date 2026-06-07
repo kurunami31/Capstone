@@ -15,6 +15,7 @@ import Results from './components/Results.jsx'
 import ProfilePage from './components/ProfilePage.jsx'
 import FAQPage from './components/FAQPage.jsx'
 import AdminPage from './components/AdminPage.jsx'
+import HistoryPage from './components/HistoryPage.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
 import OnboardingWalkthrough from './components/OnboardingWalkthrough.jsx'
 import { calculateRecommendations } from './engine/scoring.js'
@@ -53,6 +54,7 @@ function AppContent() {
   const [consented, setConsented] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showProfile, setShowProfile] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
   const [showFAQ, setShowFAQ] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
   const [step, setStep] = useState(0)
@@ -139,7 +141,7 @@ function AppContent() {
     if (savedProgress && savedProgress.step > 0) {
       setShowResumePrompt(true)
     } else {
-      setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0)
+      setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setStep(0)
     }
   }
   const handleResume = () => {
@@ -154,13 +156,15 @@ function AppContent() {
     setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0)
     fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(() => {})
   }
-  const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false) }
+  const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false) }
   const handleBackFromProfile = () => setShowProfile(false)
-  const handleShowFAQ = () => { setShowFAQ(true); setShowLanding(false); setShowProfile(false); setShowAdmin(false) }
+  const handleShowHistory = () => { setShowHistory(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false) }
+  const handleBackFromHistory = () => setShowHistory(false)
+  const handleShowFAQ = () => { setShowFAQ(true); setShowLanding(false); setShowProfile(false); setShowAdmin(false); setShowHistory(false) }
   const handleBackFromFAQ = () => setShowFAQ(false)
-  const handleShowAdmin = () => { setShowAdmin(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false) }
+  const handleShowAdmin = () => { setShowAdmin(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowHistory(false) }
   const handleBackFromAdmin = () => setShowAdmin(false)
-  const handleGoHome = () => { setShowLanding(true); setShowProfile(false); setShowFAQ(false); setShowAdmin(false) }
+  const handleGoHome = () => { setShowLanding(true); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false) }
 
   if (loading) {
     return (
@@ -181,6 +185,7 @@ function AppContent() {
 
   let activePage = 'home'
   if (showProfile) activePage = 'profile'
+  else if (showHistory) activePage = 'history'
   else if (showFAQ) activePage = 'faq'
   else if (showAdmin) activePage = 'admin'
   else if (!showLanding) activePage = 'assessment'
@@ -238,10 +243,12 @@ function AppContent() {
 
   if (showProfile) {
     mainContent = <ProfilePage />
+  } else if (showHistory) {
+    mainContent = <HistoryPage />
   } else if (showFAQ) {
     mainContent = <FAQPage />
   } else if (showAdmin) {
-    mainContent = <AdminPage settings={systemSettings} activePrograms={activePrograms} />
+    mainContent = <AdminPage settings={systemSettings} activePrograms={activePrograms} userRole={user?.role} />
   } else if (showLanding) {
     mainContent = <LandingPage onGetStarted={handleGetStarted} />
   } else {
@@ -314,6 +321,7 @@ function AppContent() {
         onHome={handleGoHome}
         onAssessment={handleGetStarted}
         onProfile={handleShowProfile}
+        onHistory={handleShowHistory}
         onFAQ={handleShowFAQ}
         onAdmin={handleShowAdmin}
         onLogout={logout}

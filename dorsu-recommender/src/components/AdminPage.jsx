@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import programs from '../data/programs.json'
+import CounselorDashboard from './CounselorDashboard.jsx'
+import QuestionsManager from './QuestionsManager.jsx'
 
 const CARD = {
   backgroundColor: 'rgba(255,255,255,0.04)',
@@ -124,8 +126,8 @@ function PieChart({ data, labelKey, valueKey, colors }) {
   )
 }
 
-export default function AdminPage({ settings = {}, activePrograms = null }) {
-  const [activeTab, setActiveTab] = useState('dashboard')
+export default function AdminPage({ settings = {}, activePrograms = null, userRole = 'admin' }) {
+  const [activeTab, setActiveTab] = useState(userRole === 'admin' ? 'dashboard' : 'review')
   const [stats, setStats] = useState(null)
   const [analytics, setAnalytics] = useState({ userGrowth: [], programPopularity: [], hollandDistribution: [], strandDistribution: [] })
   const [users, setUsers] = useState([])
@@ -255,7 +257,10 @@ export default function AdminPage({ settings = {}, activePrograms = null }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Admin Panel</h1>
           <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3, flexWrap: 'wrap' }}>
-            {['dashboard', 'users', 'activity', 'programs', 'settings'].map(tab => (
+            {(userRole === 'admin'
+              ? ['dashboard', 'users', 'activity', 'programs', 'settings', 'questions', 'review']
+              : ['review']
+            ).map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
                 padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
                 fontSize: 13, fontWeight: 600, textTransform: 'capitalize',
@@ -466,6 +471,19 @@ export default function AdminPage({ settings = {}, activePrograms = null }) {
                                   <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>Updated</span>
                                   <span style={{ color: '#e2e8f0' }}>{u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '-'}</span>
                                 </div>
+                              </div>
+                              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                                <button onClick={async () => {
+                                  try {
+                                    const res = await fetch(`/api/admin/users/${u.id}/reset-cooldown`, { method: 'POST', credentials: 'include' })
+                                    if (res.ok) fetchActivityLog()
+                                  } catch {}
+                                }} style={{
+                                  padding: '5px 12px', borderRadius: 8, border: '1px solid rgba(234,179,8,0.3)',
+                                  background: 'rgba(234,179,8,0.1)', color: '#fbbf24', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                                }}>
+                                  Reset Cooldown
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -689,6 +707,14 @@ export default function AdminPage({ settings = {}, activePrograms = null }) {
               )
             })()}
           </div>
+        )}
+
+        {activeTab === 'questions' && (
+          <QuestionsManager />
+        )}
+
+        {activeTab === 'review' && (
+          <CounselorDashboard />
         )}
       </div>
     </div>
