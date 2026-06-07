@@ -263,6 +263,7 @@ function AppContent() {
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
           {STEP_LABELS.slice(0, -1).map((l, i) => (
             <span key={l} style={{
+              flex: 1, textAlign: 'center',
               color: i === step ? '#60a5fa' : i < step ? '#3b82f6' : '#64748b',
               fontWeight: i === step ? 700 : i < step ? 600 : 400,
             }}>
