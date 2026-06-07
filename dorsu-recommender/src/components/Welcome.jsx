@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Welcome({ onStart }) {
+export default function Welcome({ onStart, onBack }) {
   const [school, setSchool] = useState('')
 
   return (
@@ -38,6 +38,20 @@ export default function Welcome({ onStart }) {
         >
           Start Assessment
         </button>
+
+        {onBack && (
+          <button
+            onClick={onBack}
+            style={{
+              width: '100%', padding: '12px 0', fontSize: 14, fontWeight: 600,
+              backgroundColor: 'transparent', color: '#94a3b8',
+              border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer',
+              marginTop: 8,
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   )

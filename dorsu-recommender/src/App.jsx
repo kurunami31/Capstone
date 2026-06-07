@@ -227,8 +227,8 @@ function AppContent() {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 'welcome': return <Welcome onStart={handleStart} />
-      case 'strand': return <StrandStep data={studentData} onUpdate={updateData} onNext={() => setStep(2)} />
+      case 'welcome': return <Welcome onStart={handleStart} onBack={() => { setStep(null); handleGoHome() }} />
+      case 'strand': return <StrandStep data={studentData} onUpdate={updateData} onNext={() => setStep(2)} onBack={() => setStep(0)} />
       case 'grades': return <GradesStep data={studentData} onUpdate={updateData} onNext={() => setStep(3)} onBack={() => setStep(1)} />
       case 'suast': return <SUASTStep data={studentData} onUpdate={updateData} onNext={() => setStep(4)} onBack={() => setStep(2)} />
       case 'holland': return <HollandQuiz data={studentData} onUpdate={updateData} onNext={() => setStep(5)} onBack={() => setStep(3)} />

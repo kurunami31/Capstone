@@ -8,7 +8,7 @@ const STRANDS = [
   { value: 'ARTS', label: 'Arts & Design', desc: 'Arts and Design Track' },
 ]
 
-export default function StrandStep({ data, onUpdate, onNext }) {
+export default function StrandStep({ data, onUpdate, onNext, onBack }) {
   return (
     <div>
       <h2 style={{ fontSize: 22, marginBottom: 8, color: '#f1f5f9' }}>SHS Strand</h2>
@@ -38,13 +38,27 @@ export default function StrandStep({ data, onUpdate, onNext }) {
           </label>
         ))}
       </div>
-      <button
-        onClick={onNext}
-        disabled={!data.strand}
-        style={btnStyle(data.strand)}
-      >
-        Next
-      </button>
+      <div style={{ display: 'flex', gap: 10 }}>
+        {onBack && (
+          <button
+            onClick={onBack}
+            style={{
+              marginTop: 24, padding: '12px 30px', fontSize: 15, fontWeight: 600,
+              backgroundColor: 'transparent', color: '#94a3b8',
+              border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, cursor: 'pointer',
+            }}
+          >
+            Back
+          </button>
+        )}
+        <button
+          onClick={onNext}
+          disabled={!data.strand}
+          style={btnStyle(data.strand)}
+        >
+          Next
+        </button>
+      </div>
     </div>
   )
 }
