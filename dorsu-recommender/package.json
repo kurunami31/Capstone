@@ -7,10 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "node server.js",
+    "backup": "node scripts/backup.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.8.0",
+    "@sentry/node": "^10.56.0",
+    "@sentry/react": "^10.56.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",

@@ -8,8 +8,16 @@ import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
 import { pool, initDB } from './db.js'
 import { GoogleGenAI } from '@google/genai'
+import * as Sentry from '@sentry/node'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN || '',
+  environment: process.env.NODE_ENV || 'development',
+  tracesSampleRate: 0.1,
+})
+
 const app = express()
 const PORT = process.env.PORT || 3000
 const JWT_SECRET = process.env.JWT_SECRET || 'dorsu-recommender-secret-change-in-production'
@@ -19,23 +27,27 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim
 
 const rateLimitStore = {}
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000
-const RATE_LIMIT_MAX = 10
-
-function rateLimit(req, res, next) {
-  const ip = req.ip || req.connection.remoteAddress
-  const now = Date.now()
-  if (!rateLimitStore[ip] || rateLimitStore[ip].window < now - RATE_LIMIT_WINDOW) {
-    rateLimitStore[ip] = { window: now, count: 0 }
-  }
-  rateLimitStore[ip].count++
-  if (rateLimitStore[ip].count > RATE_LIMIT_MAX) {
-    return res.status(429).json({ error: 'Too many requests. Try again later.' })
-  }
-  next()
-}
+const AUTH_RATE_LIMIT_MAX = 100
+const UNAUTH_RATE_LIMIT_MAX = 20
 
 app.use(express.json({ limit: '1mb' }))
 app.use(cookieParser())
+
+// Rate limit all /api/ routes — authenticated users get higher limits
+app.use('/api', (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress
+  const now = Date.now()
+  const key = ip
+  if (!rateLimitStore[key] || rateLimitStore[key].window < now - RATE_LIMIT_WINDOW) {
+    rateLimitStore[key] = { window: now, count: 0 }
+  }
+  rateLimitStore[key].count++
+  const max = req.headers.cookie?.includes('token=') ? AUTH_RATE_LIMIT_MAX : UNAUTH_RATE_LIMIT_MAX
+  if (rateLimitStore[key].count > max) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.' })
+  }
+  next()
+})
 
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff')
@@ -77,7 +89,7 @@ function authenticate(req, res, next) {
   }
 }
 
-app.post('/api/register', rateLimit, async (req, res) => {
+app.post('/api/register', async (req, res) => {
   try {
     const { email, password, firstName, lastName, middleInitial, extensionName } = req.body
 
@@ -140,7 +152,7 @@ function mapUser(row) {
   }
 }
 
-app.post('/api/login', rateLimit, async (req, res) => {
+app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body
 
@@ -503,11 +515,70 @@ app.post('/api/assessment/save', authenticate, async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
       [id, req.user.id, strand || '', gwa || 0, hollandCode || '[]', JSON.stringify(topPrograms || [])]
     )
+    // Clear saved progress on completion
+    await pool.query('DELETE FROM assessment_progress WHERE user_id = $1', [req.user.id])
     logActivity(req.user.id, 'assessment_save', 'Assessment completed', req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Assessment save error:', err)
     res.status(500).json({ error: 'Server error saving assessment.' })
+  }
+})
+
+// ---- Save/resume assessment progress ----
+app.get('/api/assessment/progress', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT step, data, updated_at FROM assessment_progress WHERE user_id = $1',
+      [req.user.id]
+    )
+    if (result.rows.length === 0) return res.json({ progress: null })
+    res.json({ progress: { step: result.rows[0].step, data: result.rows[0].data, updatedAt: result.rows[0].updated_at } })
+  } catch (err) {
+    console.error('Get progress error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.put('/api/assessment/progress', authenticate, async (req, res) => {
+  try {
+    const { step, data } = req.body
+    if (step === undefined || !data) return res.status(400).json({ error: 'Step and data are required.' })
+    await pool.query(
+      `INSERT INTO assessment_progress (user_id, step, data, updated_at)
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (user_id) DO UPDATE SET step = $2, data = $3, updated_at = NOW()`,
+      [req.user.id, step, JSON.stringify(data)]
+    )
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Save progress error:', err)
+    res.status(500).json({ error: 'Server error saving progress.' })
+  }
+})
+
+app.delete('/api/assessment/progress', authenticate, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM assessment_progress WHERE user_id = $1', [req.user.id])
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Delete progress error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Check last assessment (for retake cooldown) ----
+app.get('/api/assessments/last', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT created_at FROM assessments WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [req.user.id]
+    )
+    if (result.rows.length === 0) return res.json({ lastAssessment: null })
+    res.json({ lastAssessment: result.rows[0].created_at })
+  } catch (err) {
+    console.error('Last assessment error:', err)
+    res.status(500).json({ error: 'Server error.' })
   }
 })
 
@@ -602,6 +673,16 @@ app.get('/api/admin/users/export', authenticate, requireAdmin, async (_, res) =>
   } catch (err) {
     console.error('Export users error:', err)
     res.status(500).json({ error: 'Server error exporting users.' })
+  }
+})
+
+// ---- Health check ----
+app.get('/api/health', async (_, res) => {
+  try {
+    await pool.query('SELECT 1')
+    res.json({ status: 'ok', timestamp: new Date().toISOString() })
+  } catch {
+    res.status(503).json({ status: 'error', message: 'Database unavailable' })
   }
 })
 
@@ -719,6 +800,9 @@ app.put('/api/admin/settings', authenticate, requireAdmin, async (req, res) => {
 })
 
 const programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
+
+// ---- Sentry error handler ----
+app.use(Sentry.Handlers.errorHandler())
 
 initDB().then(async () => {
   const ADMIN_EMAIL = 'admin@dorsu.edu.ph'

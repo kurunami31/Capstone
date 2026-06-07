@@ -1,6 +1,33 @@
+import { useState, useEffect } from 'react'
 import './LandingPage.css'
 
+const COOLDOWN_DAYS = 120
+
+function daysUntil(date) {
+  const diff = new Date(date) - new Date()
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+}
+
 export default function LandingPage({ onGetStarted }) {
+  const [lastAssessment, setLastAssessment] = useState(null)
+  const [loadingStatus, setLoadingStatus] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/assessments/last', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        setLastAssessment(data.lastAssessment ? new Date(data.lastAssessment) : null)
+        setLoadingStatus(false)
+      })
+      .catch(() => setLoadingStatus(false))
+  }, [])
+
+  const cooldownUntil = lastAssessment
+    ? new Date(lastAssessment.getTime() + COOLDOWN_DAYS * 24 * 60 * 60 * 1000)
+    : null
+  const cooldownDays = cooldownUntil ? daysUntil(cooldownUntil) : 0
+  const onCooldown = cooldownDays > 0
+
   return (
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -32,19 +59,41 @@ export default function LandingPage({ onGetStarted }) {
         <p className="hero-tagline" style={{ fontSize: 14, opacity: 0.65, marginBottom: 24, letterSpacing: '0.02em' }}>
           SHS Strand &bull; Grades &bull; Aptitude &bull; Personality &bull; Interests &bull; Skills
         </p>
-        <button
-          onClick={onGetStarted}
-          className="hero-cta"
-          style={{
-            padding: '16px 60px', fontSize: 18, fontWeight: 700,
-            backgroundColor: '#2563eb', color: '#fff',
-            border: 'none', borderRadius: 12, cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(37,99,235,0.3)',
-            letterSpacing: '0.01em',
-          }}
-        >
-          Get Started
-        </button>
+        {onCooldown ? (
+          <div>
+            <div style={{
+              padding: '14px 24px', borderRadius: 12,
+              backgroundColor: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)',
+              display: 'inline-block', marginBottom: 8,
+            }}>
+              <p style={{ color: '#fbbf24', fontSize: 15, fontWeight: 600, margin: '0 0 4px' }}>
+                Assessment on cooldown
+              </p>
+              <p style={{ color: '#a3a3a3', fontSize: 13, margin: 0 }}>
+                You last took the assessment on {lastAssessment.toLocaleDateString()}.
+                You can retake in {cooldownDays} day{cooldownDays === 1 ? '' : 's'}.
+              </p>
+            </div>
+            <p style={{ color: '#64748b', fontSize: 12, margin: 0 }}>
+              Contact the guidance office if you need to retake sooner.
+            </p>
+          </div>
+        ) : (
+          <button
+            onClick={onGetStarted}
+            disabled={loadingStatus}
+            className="hero-cta"
+            style={{
+              padding: '16px 60px', fontSize: 18, fontWeight: 700,
+              backgroundColor: '#2563eb', color: '#fff',
+              border: 'none', borderRadius: 12, cursor: loadingStatus ? 'default' : 'pointer',
+              boxShadow: '0 4px 14px rgba(37,99,235,0.3)',
+              letterSpacing: '0.01em', opacity: loadingStatus ? 0.5 : 1,
+            }}
+          >
+            {loadingStatus ? 'Checking...' : 'Get Started'}
+          </button>
+        )}
         <div style={{ height: 120 }} />
       </div>
 

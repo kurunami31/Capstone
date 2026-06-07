@@ -91,6 +91,15 @@ async function initDB() {
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['skills_match_weight', '0.20'])
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['results_count', '10'])
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS assessment_progress (
+      user_id TEXT PRIMARY KEY REFERENCES users(id),
+      step INTEGER NOT NULL DEFAULT 0,
+      data JSONB NOT NULL DEFAULT '{}',
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+
   console.log('Database initialized.')
 }
 

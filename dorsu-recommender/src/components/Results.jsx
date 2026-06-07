@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import generatePDF from './Report.jsx'
+import ComparisonView from './ComparisonView.jsx'
 
 function codeColor(score) {
   if (score >= 80) return '#34d399'
@@ -13,6 +15,15 @@ function admissionColor(level) {
 }
 
 export default function Results({ studentData, results, onRestart }) {
+  const [selected, setSelected] = useState([])
+  const [showCompare, setShowCompare] = useState(false)
+
+  const toggleSelect = (code) => {
+    setSelected(prev =>
+      prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
+    )
+  }
+
   if (!results || results.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: 40 }}>
@@ -32,6 +43,15 @@ export default function Results({ studentData, results, onRestart }) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          {selected.length >= 2 && (
+            <button onClick={() => setShowCompare(true)} style={{
+              padding: '10px 20px', fontSize: 14, fontWeight: 600,
+              backgroundColor: 'rgba(99,102,241,0.15)', color: '#818cf8',
+              border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, cursor: 'pointer',
+            }}>
+              Compare ({selected.length})
+            </button>
+          )}
           <button onClick={() => generatePDF(studentData, results)} style={pdfBtn}>Download PDF</button>
           <button onClick={onRestart} style={restartBtn}>Start Over</button>
         </div>
@@ -58,11 +78,26 @@ export default function Results({ studentData, results, onRestart }) {
                   <div style={{ fontSize: 13, color: '#64748b' }}>{r.program.faculty}</div>
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 28, fontWeight: 700, color: codeColor(r.totalScore) }}>
-                  {r.totalScore}%
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <label style={{
+                  display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
+                  fontSize: 11, color: selected.includes(r.program.code) ? '#818cf8' : '#64748b',
+                  userSelect: 'none',
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(r.program.code)}
+                    onChange={() => toggleSelect(r.program.code)}
+                    style={{ accentColor: '#6366f1', width: 14, height: 14, cursor: 'pointer' }}
+                  />
+                  Compare
+                </label>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: codeColor(r.totalScore) }}>
+                    {r.totalScore}%
+                  </div>
+                  <div style={{ fontSize: 12, color: '#64748b' }}>Overall Match</div>
                 </div>
-                <div style={{ fontSize: 12, color: '#64748b' }}>Overall Match</div>
               </div>
             </div>
 
@@ -103,9 +138,33 @@ export default function Results({ studentData, results, onRestart }) {
                 CHED Priority Course
               </div>
             )}
+
+            {r.program.career_paths && r.program.career_paths.length > 0 && (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6, fontWeight: 600 }}>Career Paths</div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {r.program.career_paths.map((career, ci) => (
+                    <span key={ci} style={{
+                      fontSize: 11, padding: '3px 10px', borderRadius: 20,
+                      backgroundColor: 'rgba(20,184,166,0.1)', color: '#5eead4',
+                      border: '1px solid rgba(20,184,166,0.2)',
+                    }}>
+                      {career}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
+
+      {showCompare && (
+        <ComparisonView
+          results={results.filter(r => selected.includes(r.program.code))}
+          onClose={() => setShowCompare(false)}
+        />
+      )}
     </div>
   )
 }

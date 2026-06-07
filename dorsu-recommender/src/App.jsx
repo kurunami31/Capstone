@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import AuthPage from './components/AuthPage.jsx'
 import Sidebar from './components/Sidebar.jsx'
@@ -16,6 +16,7 @@ import ProfilePage from './components/ProfilePage.jsx'
 import FAQPage from './components/FAQPage.jsx'
 import AdminPage from './components/AdminPage.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
+import OnboardingWalkthrough from './components/OnboardingWalkthrough.jsx'
 import { calculateRecommendations } from './engine/scoring.js'
 import { calculateHollandCode } from './engine/holland.js'
 import programs from './data/programs.json'
@@ -61,6 +62,34 @@ function AppContent() {
     suastTiers: {}, hollandAnswers: {}, hollandScores: [],
     interests: {}, skills: {},
   })
+  const [savedProgress, setSavedProgress] = useState(null)
+  const [showResumePrompt, setShowResumePrompt] = useState(false)
+  const autoSaveRef = useRef(null)
+
+  // Check for saved progress on mount
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/assessment/progress', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.progress) setSavedProgress(data.progress)
+      })
+      .catch(() => {})
+  }, [user])
+
+  // Auto-save progress when step changes (skip step 0 = fresh start)
+  useEffect(() => {
+    if (!user || step === 0 || showLanding) return
+    if (currentStep === 'results') return
+    autoSaveRef.current = setTimeout(() => {
+      fetch('/api/assessment/progress', {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ step, data: studentData }),
+      }).catch(() => {})
+    }, 500)
+    return () => clearTimeout(autoSaveRef.current)
+  }, [step, studentData, user, showLanding])
 
   const currentStep = STEPS[step]
 
@@ -106,7 +135,25 @@ function AppContent() {
     const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ')
     updateData({ name: fullName, school }); setStep(1)
   }
-  const handleGetStarted = () => { setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0) }
+  const handleGetStarted = () => {
+    if (savedProgress && savedProgress.step > 0) {
+      setShowResumePrompt(true)
+    } else {
+      setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0)
+    }
+  }
+  const handleResume = () => {
+    setStudentData(savedProgress.data)
+    setStep(savedProgress.step)
+    setShowLanding(false)
+    setShowResumePrompt(false)
+  }
+  const handleNewAssessment = () => {
+    setSavedProgress(null)
+    setShowResumePrompt(false)
+    setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0)
+    fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(() => {})
+  }
   const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false) }
   const handleBackFromProfile = () => setShowProfile(false)
   const handleShowFAQ = () => { setShowFAQ(true); setShowLanding(false); setShowProfile(false); setShowAdmin(false) }
@@ -140,9 +187,17 @@ function AppContent() {
 
   const renderAssessmentProgress = () => {
     if (currentStep === 'results') return null
+    const totalSteps = STEPS.length - 1
+    const pct = Math.round((step / totalSteps) * 100)
     return (
       <div style={{ padding: '20px 0 12px' }}>
-        <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>
+            Step {step} of {totalSteps}
+          </span>
+          <span style={{ fontSize: 12, color: '#64748b' }}>{pct}% complete</span>
+        </div>
+        <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
           {STEPS.slice(0, -1).map((s, i) => (
             <div key={s} style={{
               flex: 1, height: 4, borderRadius: 2,
@@ -151,9 +206,14 @@ function AppContent() {
             }} />
           ))}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#64748b' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
           {STEP_LABELS.slice(0, -1).map((l, i) => (
-            <span key={l} style={{ fontWeight: i <= step ? 600 : 400 }}>{l}</span>
+            <span key={l} style={{
+              color: i === step ? '#60a5fa' : i < step ? '#3b82f6' : '#64748b',
+              fontWeight: i === step ? 700 : i < step ? 600 : 400,
+            }}>
+              {i === step ? `▸ ${l}` : l}
+            </span>
           ))}
         </div>
       </div>
@@ -200,7 +260,9 @@ function AppContent() {
                 onRestart={() => {
                   setStudentData({ name: '', school: '', strand: '', grades: {}, strandSpecificGrades: {}, gwa: 0, suastTiers: {}, hollandAnswers: {}, hollandScores: [], interests: {}, skills: {} })
                   setStep(0)
+                  setSavedProgress(null)
                   setShowLanding(true)
+                  fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(() => {})
                 }}
               />
             ) : renderStep()}
@@ -212,6 +274,40 @@ function AppContent() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
+      {showResumePrompt && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 24,
+        }}>
+          <div style={{
+            backgroundColor: '#1e293b', borderRadius: 20, padding: 32, maxWidth: 400, width: '100%',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}>
+            <h3 style={{ color: '#f1f5f9', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>
+              Resume where you left off?
+            </h3>
+            <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}>
+              You have an incomplete assessment from your last session. Would you like to continue where you stopped?
+            </p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={handleNewAssessment} style={{
+                padding: '10px 20px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
+                backgroundColor: 'transparent', color: '#94a3b8', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              }}>
+                Start Over
+              </button>
+              <button onClick={handleResume} style={{
+                padding: '10px 20px', borderRadius: 10, border: 'none',
+                backgroundColor: '#2563eb', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              }}>
+                Resume
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Sidebar
         user={user}
         activePage={activePage}
@@ -229,6 +325,7 @@ function AppContent() {
         {mainContent}
       </div>
       <ChatWidget />
+      {user?.role !== 'admin' && showLanding && <OnboardingWalkthrough />}
     </div>
   )
 }
