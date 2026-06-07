@@ -13,11 +13,18 @@ import * as Sentry from '@sentry/node'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-Sentry.init({
-  dsn: process.env.SENTRY_DSN || '',
-  environment: process.env.NODE_ENV || 'development',
-  tracesSampleRate: 0.1,
-})
+if (process.env.SENTRY_DSN) {
+  try {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: process.env.NODE_ENV || 'development',
+      tracesSampleRate: 0.1,
+    })
+    console.log('Sentry initialized')
+  } catch (e) {
+    console.error('Sentry init failed:', e.message)
+  }
+}
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -1035,7 +1042,9 @@ app.put('/api/admin/settings', authenticate, requireAdmin, async (req, res) => {
 const programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
 
 // ---- Sentry error handler ----
-app.use(Sentry.expressErrorHandler())
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.expressErrorHandler())
+}
 
 initDB().then(async () => {
   const ADMIN_EMAIL = 'admin@dorsu.edu.ph'
