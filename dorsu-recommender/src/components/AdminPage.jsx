@@ -140,6 +140,15 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
   const [activityLog, setActivityLog] = useState([])
   const [localActivePrograms, setLocalActivePrograms] = useState({})
   const [localSettings, setLocalSettings] = useState({})
+  const [editUserModal, setEditUserModal] = useState(null)
+  const [editUserData, setEditUserData] = useState({})
+  const [editUserError, setEditUserError] = useState('')
+  const [programModal, setProgramModal] = useState(null)
+  const [programForm, setProgramForm] = useState({ code: '', name: '', college: '', description: '' })
+  const [programError, setProgramError] = useState('')
+  const [activityPage, setActivityPage] = useState(1)
+  const [activityTotal, setActivityTotal] = useState(0)
+  const [editingProgram, setEditingProgram] = useState(null)
 
   useEffect(() => {
     setLocalActivePrograms(activePrograms || {})
@@ -195,10 +204,16 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
     setAnalytics(prev => ({ ...prev, ...results }))
   }
 
-  async function fetchActivityLog() {
+  async function fetchActivityLog(p) {
     try {
-      const res = await fetch('/api/admin/activity?limit=200', { credentials: 'include' })
-      if (res.ok) setActivityLog(await res.json())
+      const page = p !== undefined ? p : activityPage
+      const res = await fetch(`/api/admin/activity?page=${page}&limit=100`, { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setActivityLog(data.entries || [])
+        setActivityTotal(data.total || 0)
+        if (p !== undefined) setActivityPage(p)
+      }
     } catch {}
   }
 
@@ -484,6 +499,18 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
                                 }}>
                                   Reset Cooldown
                                 </button>
+                                <button onClick={() => {
+                                  setEditUserData({
+                                    id: u.id, firstName: u.firstName || '', lastName: u.lastName || '',
+                                    email: u.email, role: u.role,
+                                  })
+                                  setEditUserModal(true)
+                                }} style={{
+                                  padding: '5px 12px', borderRadius: 8, border: '1px solid rgba(59,130,246,0.3)',
+                                  background: 'rgba(59,130,246,0.1)', color: '#60a5fa', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                                }}>
+                                  Edit
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -519,11 +546,76 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
           </div>
         )}
 
+        {editUserModal && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+          }}>
+            <div style={{
+              background: '#1e293b', borderRadius: 16, padding: 28, maxWidth: 400, width: '100%',
+              border: '1px solid rgba(255,255,255,0.08)',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            }}>
+              <h3 style={{ color: '#f1f5f9', fontSize: 16, fontWeight: 700, margin: '0 0 16px' }}>Edit User</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <input value={editUserData.firstName} onChange={e => setEditUserData(p => ({ ...p, firstName: e.target.value }))}
+                  placeholder="First Name" style={INPUT} />
+                <input value={editUserData.lastName} onChange={e => setEditUserData(p => ({ ...p, lastName: e.target.value }))}
+                  placeholder="Last Name" style={INPUT} />
+                <input value={editUserData.email} onChange={e => setEditUserData(p => ({ ...p, email: e.target.value }))}
+                  placeholder="Email" style={INPUT} />
+                <select value={editUserData.role} onChange={e => setEditUserData(p => ({ ...p, role: e.target.value }))}
+                  style={{ ...INPUT, cursor: 'pointer' }}>
+                  <option value="user">User</option>
+                  <option value="counselor">Counselor</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              {editUserError && (
+                <div style={{ color: '#f87171', fontSize: 12, marginTop: 8 }}>{editUserError}</div>
+              )}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                <button onClick={() => { setEditUserModal(false); setEditUserError('') }} style={{
+                  ...BTN_SECONDARY, padding: '8px 16px', fontSize: 13,
+                }}>Cancel</button>
+                <button onClick={async () => {
+                  try {
+                    const res = await fetch(`/api/admin/users/${editUserData.id}`, {
+                      method: 'PUT', credentials: 'include',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        firstName: editUserData.firstName,
+                        lastName: editUserData.lastName,
+                        email: editUserData.email,
+                        role: editUserData.role,
+                      }),
+                    })
+                    if (!res.ok) {
+                      const data = await res.json()
+                      throw new Error(data.error || 'Save failed')
+                    }
+                    setEditUserModal(false)
+                    setEditUserError('')
+                    fetchUsers(page, '')
+                    fetchActivityLog()
+                  } catch (e) {
+                    setEditUserError(e.message)
+                  }
+                }} style={{
+                  background: '#2563eb', border: 'none', color: '#fff',
+                  padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                }}>Save</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'activity' && (
           <div style={{ ...CARD, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Activity Log</h2>
-              <button onClick={fetchActivityLog} style={{ ...BTN_SECONDARY, fontSize: 12, padding: '5px 12px' }}>
+              <button onClick={() => fetchActivityLog(1)} style={{ ...BTN_SECONDARY, fontSize: 12, padding: '5px 12px' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4, verticalAlign: 'middle' }}>
                   <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                 </svg>
@@ -533,53 +625,68 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
             {activityLog.length === 0 ? (
               <div style={{ color: '#475569', fontSize: 13, padding: 20, textAlign: 'center' }}>No activity recorded yet.</div>
             ) : (
-              <div style={{ overflowX: 'auto', maxHeight: 500, overflowY: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                  <thead style={{ position: 'sticky', top: 0 }}>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#1e3a5f' }}>
-                      <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>User</th>
-                      <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Action</th>
-                      <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Details</th>
-                      <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>IP</th>
-                      <th style={{ textAlign: 'right', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activityLog.map(entry => (
-                      <tr key={entry.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                        <td style={{ padding: '8px 12px', color: '#e2e8f0' }}>
-                          {entry.first_name ? `${entry.first_name} ${entry.last_name || ''}`.trim() : entry.email || 'System'}
-                        </td>
-                        <td style={{ padding: '8px 12px' }}>
-                          <span style={{
-                            display: 'inline-block', padding: '2px 7px', borderRadius: 8,
-                            fontSize: 10, fontWeight: 600,
-                            background: entry.action_type === 'login' ? 'rgba(34,197,94,0.15)' :
-                              entry.action_type === 'register' ? 'rgba(59,130,246,0.15)' :
-                              entry.action_type === 'assessment_save' ? 'rgba(168,85,247,0.15)' :
-                              entry.action_type === 'settings_update' || entry.action_type === 'program_toggle' ? 'rgba(6,182,212,0.15)' :
-                              'rgba(255,255,255,0.06)',
-                            color: entry.action_type === 'login' ? '#4ade80' :
-                              entry.action_type === 'register' ? '#60a5fa' :
-                              entry.action_type === 'assessment_save' ? '#c084fc' :
-                              entry.action_type === 'settings_update' || entry.action_type === 'program_toggle' ? '#22d3ee' :
-                              '#94a3b8',
-                          }}>
-                            {entry.action_type.replace(/_/g, ' ')}
-                          </span>
-                        </td>
-                        <td style={{ padding: '8px 12px', color: '#94a3b8', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {entry.details || '-'}
-                        </td>
-                        <td style={{ padding: '8px 12px', color: '#64748b', fontSize: 11 }}>{entry.ip_address || '-'}</td>
-                        <td style={{ padding: '8px 12px', color: '#64748b', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                          {entry.created_at ? new Date(entry.created_at).toLocaleString() : '-'}
-                        </td>
+              <>
+                <div style={{ overflowX: 'auto', maxHeight: 500, overflowY: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <thead style={{ position: 'sticky', top: 0 }}>
+                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#1e3a5f' }}>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>User</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Action</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Details</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>IP</th>
+                        <th style={{ textAlign: 'right', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Time</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {activityLog.map(entry => (
+                        <tr key={entry.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                          <td style={{ padding: '8px 12px', color: '#e2e8f0' }}>
+                            {entry.first_name ? `${entry.first_name} ${entry.last_name || ''}`.trim() : entry.email || 'System'}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>
+                            <span style={{
+                              display: 'inline-block', padding: '2px 7px', borderRadius: 8,
+                              fontSize: 10, fontWeight: 600,
+                              background: entry.action_type === 'login' ? 'rgba(34,197,94,0.15)' :
+                                entry.action_type === 'register' ? 'rgba(59,130,246,0.15)' :
+                                entry.action_type === 'assessment_save' ? 'rgba(168,85,247,0.15)' :
+                                entry.action_type === 'settings_update' || entry.action_type === 'program_toggle' ? 'rgba(6,182,212,0.15)' :
+                                'rgba(255,255,255,0.06)',
+                              color: entry.action_type === 'login' ? '#4ade80' :
+                                entry.action_type === 'register' ? '#60a5fa' :
+                                entry.action_type === 'assessment_save' ? '#c084fc' :
+                                entry.action_type === 'settings_update' || entry.action_type === 'program_toggle' ? '#22d3ee' :
+                                '#94a3b8',
+                            }}>
+                              {entry.action_type.replace(/_/g, ' ')}
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 12px', color: '#94a3b8', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {entry.details || '-'}
+                          </td>
+                          <td style={{ padding: '8px 12px', color: '#64748b', fontSize: 11 }}>{entry.ip_address || '-'}</td>
+                          <td style={{ padding: '8px 12px', color: '#64748b', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                            {entry.created_at ? new Date(entry.created_at).toLocaleString() : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {activityTotal > 100 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 12 }}>
+                    <button disabled={activityPage <= 1} onClick={() => fetchActivityLog(activityPage - 1)} style={{
+                      ...BTN_SECONDARY, padding: '5px 12px', fontSize: 11,
+                      opacity: activityPage <= 1 ? 0.4 : 1, cursor: activityPage <= 1 ? 'default' : 'pointer',
+                    }}>Previous</button>
+                    <span style={{ color: '#64748b', fontSize: 11, padding: '6px 0' }}>Page {activityPage} of {Math.ceil(activityTotal / 100)}</span>
+                    <button disabled={activityPage >= Math.ceil(activityTotal / 100)} onClick={() => fetchActivityLog(activityPage + 1)} style={{
+                      ...BTN_SECONDARY, padding: '5px 12px', fontSize: 11,
+                      opacity: activityPage >= Math.ceil(activityTotal / 100) ? 0.4 : 1, cursor: activityPage >= Math.ceil(activityTotal / 100) ? 'default' : 'pointer',
+                    }}>Next</button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -588,7 +695,26 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
           <div style={{ ...CARD, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Program Management</h2>
-              <span style={{ fontSize: 12, color: '#64748b' }}>Toggle programs on/off for recommendations</span>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span style={{ fontSize: 12, color: '#64748b' }}>Toggle programs on/off for recommendations</span>
+                <button onClick={() => {
+                  setProgramForm({ code: '', name: '', college: '', description: '' })
+                  setProgramModal('create')
+                }} style={{
+                  background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
+                  color: '#4ade80', padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                }}>
+                  + Add Program
+                </button>
+                <button onClick={() => window.open('/api/admin/assessments/export', '_blank')} style={{
+                  ...BTN_SECONDARY, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Export Assessments
+                </button>
+              </div>
             </div>
             <div style={{ display: 'grid', gap: 8 }}>
               {programs.map(prog => {
@@ -604,29 +730,128 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
                       <div style={{ color: '#e2e8f0', fontSize: 14, fontWeight: 600 }}>{prog.name}</div>
                       <div style={{ color: '#64748b', fontSize: 11 }}>{prog.code} — {prog.college}</div>
                     </div>
-                    <button
-                      onClick={async () => {
-                        try {
-                          const res = await fetch(`/api/admin/programs/${prog.code}/toggle`, { method: 'PUT', credentials: 'include' })
-                          if (res.ok) {
-                            const data = await res.json()
-                            setLocalActivePrograms(prev => ({ ...prev, [data.code]: data.active }))
-                            fetchActivityLog()
-                          }
-                        } catch {}
-                      }}
-                      style={{
-                        padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        fontSize: 12, fontWeight: 600,
-                        background: active ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
-                        color: active ? '#f87171' : '#4ade80',
-                      }}
-                    >
-                      {active ? 'Disable' : 'Enable'}
-                    </button>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(`/api/admin/programs/${prog.code}/toggle`, { method: 'PUT', credentials: 'include' })
+                            if (res.ok) {
+                              const data = await res.json()
+                              setLocalActivePrograms(prev => ({ ...prev, [data.code]: data.active }))
+                              fetchActivityLog(1)
+                            }
+                          } catch {}
+                        }}
+                        style={{
+                          padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                          fontSize: 12, fontWeight: 600,
+                          background: active ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
+                          color: active ? '#f87171' : '#4ade80',
+                        }}
+                      >
+                        {active ? 'Disable' : 'Enable'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setProgramForm({ code: prog.code, name: prog.name, college: prog.college, description: prog.description || '' })
+                          setEditingProgram(prog.code)
+                          setProgramModal('edit')
+                        }}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(59,130,246,0.3)',
+                          background: 'rgba(59,130,246,0.1)', color: '#60a5fa', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Delete program "${prog.name}"? This cannot be undone.`)) return
+                          try {
+                            const res = await fetch(`/api/admin/programs/${prog.code}`, { method: 'DELETE', credentials: 'include' })
+                            if (res.ok) {
+                              fetchProgramStatus()
+                              fetchActivityLog(1)
+                            }
+                          } catch {}
+                        }}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(248,113,113,0.3)',
+                          background: 'rgba(248,113,113,0.1)', color: '#f87171', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 )
               })}
+            </div>
+          </div>
+        )}
+
+        {programModal && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+          }}>
+            <div style={{
+              background: '#1e293b', borderRadius: 16, padding: 28, maxWidth: 450, width: '100%',
+              border: '1px solid rgba(255,255,255,0.08)',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            }}>
+              <h3 style={{ color: '#f1f5f9', fontSize: 16, fontWeight: 700, margin: '0 0 16px' }}>
+                {programModal === 'create' ? 'Add Program' : 'Edit Program'}
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <input value={programForm.code} onChange={e => setProgramForm(p => ({ ...p, code: e.target.value }))}
+                  placeholder="Program Code (e.g. BSIT)" style={INPUT} disabled={programModal === 'edit'} />
+                <input value={programForm.name} onChange={e => setProgramForm(p => ({ ...p, name: e.target.value }))}
+                  placeholder="Program Name" style={INPUT} />
+                <input value={programForm.college} onChange={e => setProgramForm(p => ({ ...p, college: e.target.value }))}
+                  placeholder="College" style={INPUT} />
+                <textarea value={programForm.description} onChange={e => setProgramForm(p => ({ ...p, description: e.target.value }))}
+                  placeholder="Description (optional)" rows={3} style={{ ...INPUT, resize: 'vertical' }} />
+              </div>
+              {programError && (
+                <div style={{ color: '#f87171', fontSize: 12, marginTop: 8 }}>{programError}</div>
+              )}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                <button onClick={() => { setProgramModal(null); setProgramError('') }} style={{
+                  ...BTN_SECONDARY, padding: '8px 16px', fontSize: 13,
+                }}>Cancel</button>
+                <button onClick={async () => {
+                  try {
+                    if (!programForm.code || !programForm.name) {
+                      setProgramError('Code and name are required.')
+                      return
+                    }
+                    const url = programModal === 'create' ? '/api/admin/programs' : `/api/admin/programs/${editingProgram}`
+                    const method = programModal === 'create' ? 'POST' : 'PUT'
+                    const res = await fetch(url, {
+                      method, credentials: 'include',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(programForm),
+                    })
+                    if (!res.ok) {
+                      const data = await res.json()
+                      throw new Error(data.error || 'Save failed')
+                    }
+                    setProgramModal(null)
+                    setProgramError('')
+                    fetchProgramStatus()
+                    fetchActivityLog(1)
+                  } catch (e) {
+                    setProgramError(e.message)
+                  }
+                }} style={{
+                  background: '#2563eb', border: 'none', color: '#fff',
+                  padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                }}>
+                  {programModal === 'create' ? 'Create' : 'Save'}
+                </button>
+              </div>
             </div>
           </div>
         )}

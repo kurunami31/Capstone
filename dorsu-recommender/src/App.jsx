@@ -46,9 +46,9 @@ function AppContent() {
   useEffect(() => {
     if (!user) return
     fetch('/api/settings', { credentials: 'include' })
-      .then(r => r.json()).then(setSystemSettings).catch(() => {})
+      .then(r => r.json()).then(setSystemSettings).catch(err => console.error('Failed to fetch system settings', err))
     fetch('/api/programs/status', { credentials: 'include' })
-      .then(r => r.json()).then(setActivePrograms).catch(() => {})
+      .then(r => r.json()).then(setActivePrograms).catch(err => console.error('Failed to fetch active programs', err))
   }, [user])
 
   const [consented, setConsented] = useState(false)
@@ -76,7 +76,7 @@ function AppContent() {
       .then(data => {
         if (data.progress) setSavedProgress(data.progress)
       })
-      .catch(() => {})
+      .catch(err => console.error('Failed to check saved progress', err))
   }, [user])
 
   // Auto-save progress when step changes (skip step 0 = fresh start)
@@ -88,7 +88,7 @@ function AppContent() {
         method: 'PUT', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ step, data: studentData }),
-      }).catch(() => {})
+      }).catch(err => console.error('Failed to auto-save progress', err))
     }, 500)
     return () => clearTimeout(autoSaveRef.current)
   }, [step, studentData, user, showLanding])
@@ -125,7 +125,7 @@ function AppContent() {
           hollandCode: hollandCode?.code || '',
           topPrograms: results.slice(0, 5).map(r => r.program.code),
         }),
-      }).catch(() => {})
+      }).catch(err => console.error('Failed to save assessment results', err))
     }
   }, [currentStep === 'results'])
 
@@ -154,7 +154,7 @@ function AppContent() {
     setSavedProgress(null)
     setShowResumePrompt(false)
     setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0)
-    fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(() => {})
+    fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(err => console.error('Failed to delete saved progress on new assessment', err))
   }
   const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false) }
   const handleBackFromProfile = () => setShowProfile(false)
@@ -269,7 +269,7 @@ function AppContent() {
                   setStep(0)
                   setSavedProgress(null)
                   setShowLanding(true)
-                  fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(() => {})
+                  fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(err => console.error('Failed to delete saved progress on restart', err))
                 }}
               />
             ) : renderStep()}
