@@ -199,7 +199,6 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {user?.role !== 'admin' && (
         <div className="card-padding-mobile" style={{
           backgroundColor: 'rgba(255,255,255,0.04)',
           border: '1px solid rgba(255,255,255,0.08)',
@@ -232,7 +231,6 @@ export default function ProfilePage() {
             {changingPwd ? 'Changing...' : 'Change Password'}
           </button>
         </div>
-        )}
       </div>
     </div>
   )

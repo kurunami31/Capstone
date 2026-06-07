@@ -17,8 +17,11 @@ function HamburgerIcon({ open }) {
 export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onFAQ, onAdmin, onLogout, open, onToggle, isMobile }) {
   const navItems = [
     { id: 'home', label: 'Home', icon: 'home', action: onHome },
-    { id: 'profile', label: 'Profile', icon: 'user', action: onProfile },
   ]
+
+  if (user?.role !== 'admin') {
+    navItems.push({ id: 'profile', label: 'Profile', icon: 'user', action: onProfile })
+  }
 
   if (user?.role === 'admin') {
     navItems.push({ id: 'admin', label: 'Admin', icon: 'shield', action: onAdmin })
