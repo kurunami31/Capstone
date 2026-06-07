@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import programs from '../data/programs.json'
 import CounselorDashboard from './CounselorDashboard.jsx'
 import QuestionsManager from './QuestionsManager.jsx'
+import SkeletonLoader from './SkeletonLoader.jsx'
 
 const CARD = {
   backgroundColor: 'rgba(255,255,255,0.04)',
@@ -381,7 +382,7 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
             </div>
 
             {loading ? (
-              <div style={{ color: '#64748b', fontSize: 13, padding: 20, textAlign: 'center' }}>Loading users...</div>
+              <div style={{ padding: 20 }}><SkeletonLoader height={14} width="40%" style={{ margin: '0 auto' }} /></div>
             ) : users.length === 0 ? (
               <div style={{ color: '#64748b', fontSize: 13, padding: 20, textAlign: 'center' }}>No users found.</div>
             ) : (

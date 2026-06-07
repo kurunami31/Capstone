@@ -38,7 +38,7 @@ export default function StrandStep({ data, onUpdate, onNext, onBack }) {
           </label>
         ))}
       </div>
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div className="stack-mobile" style={{ display: 'flex', gap: 10 }}>
         {onBack && (
           <button
             onClick={onBack}

@@ -18,6 +18,7 @@ import AdminPage from './components/AdminPage.jsx'
 import HistoryPage from './components/HistoryPage.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
 import OnboardingWalkthrough from './components/OnboardingWalkthrough.jsx'
+import SkeletonLoader, { SkeletonCard } from './components/SkeletonLoader.jsx'
 import { calculateRecommendations } from './engine/scoring.js'
 import { calculateHollandCode } from './engine/holland.js'
 import programs from './data/programs.json'
@@ -184,7 +185,12 @@ function AppContent() {
         color: '#94a3b8', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fontSize: 15,
       }}>
-        Loading...
+        <div style={{ width: 300, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <SkeletonLoader height={24} width="70%" style={{ margin: '0 auto' }} />
+          <SkeletonLoader height={14} width="90%" />
+          <SkeletonLoader height={14} width="80%" />
+          <SkeletonLoader height={14} width="60%" />
+        </div>
       </div>
     )
   }
@@ -295,7 +301,7 @@ function AppContent() {
       <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 16px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
           {renderAssessmentProgress()}
-          <div style={{
+          <div className="card-padding-mobile" style={{
             backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 32,
             border: '1px solid rgba(255,255,255,0.06)', marginTop: currentStep !== 'results' ? 4 : 0, marginBottom: 40,
             backdropFilter: 'blur(8px)',

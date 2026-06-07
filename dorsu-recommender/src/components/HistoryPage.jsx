@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import SkeletonLoader from './SkeletonLoader.jsx'
 
 export default function HistoryPage() {
   const [history, setHistory] = useState([])
@@ -29,7 +30,22 @@ export default function HistoryPage() {
         </h1>
 
         {loading ? (
-          <div style={{ color: '#64748b', textAlign: 'center', padding: 40, fontSize: 14 }}>Loading...</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{
+                backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: 20,
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}>
+                <SkeletonLoader height={16} width="50%" style={{ marginBottom: 8 }} />
+                <SkeletonLoader height={12} width="30%" style={{ marginBottom: 12 }} />
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <SkeletonLoader height={22} width={80} borderRadius={20} />
+                  <SkeletonLoader height={22} width={100} borderRadius={20} />
+                  <SkeletonLoader height={22} width={60} borderRadius={20} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : history.length === 0 ? (
           <div style={{
             backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 40,
