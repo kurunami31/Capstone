@@ -21,13 +21,13 @@ export default function ComparisonView({ results, onClose }) {
       padding: 24, overflowY: 'auto',
     }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{
-        backgroundColor: '#1e293b', borderRadius: 20, padding: 32, maxWidth: 900, width: '100%',
-        border: '1px solid rgba(255,255,255,0.08)', maxHeight: '90vh', overflowY: 'auto',
+        backgroundColor: 'var(--modal-bg)', borderRadius: 20, padding: 32, maxWidth: 900, width: '100%',
+        border: '1px solid var(--card-border)', maxHeight: '90vh', overflowY: 'auto',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h3 style={{ color: '#f1f5f9', fontSize: 18, fontWeight: 700, margin: 0 }}>Compare Programs</h3>
+          <h3 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 700, margin: 0 }}>Compare Programs</h3>
           <button onClick={onClose} style={{
-            background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex',
+            background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex',
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -45,25 +45,25 @@ export default function ComparisonView({ results, onClose }) {
           {results.map((r, i) => (
             <div key={r.program.code} style={{
               textAlign: 'center', padding: '12px 8px',
-              backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              backgroundColor: i % 2 === 0 ? 'var(--row-bg)' : 'transparent',
+              borderBottom: '1px solid var(--track-bg)',
             }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: '#f1f5f9', marginBottom: 4 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', marginBottom: 4 }}>
                 {r.program.name}
               </div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>{r.program.faculty}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.program.faculty}</div>
             </div>
           ))}
 
           {/* Overall Match */}
-          <div style={{ padding: '12px 8px', color: '#94a3b8', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ padding: '12px 8px', color: 'var(--text-secondary)', fontWeight: 600, borderBottom: '1px solid var(--track-bg)' }}>
             Overall Match
           </div>
           {results.map((r, i) => (
             <div key={r.program.code} style={{
               textAlign: 'center', padding: '12px 8px',
-              backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              backgroundColor: i % 2 === 0 ? 'var(--row-bg)' : 'transparent',
+              borderBottom: '1px solid var(--track-bg)',
             }}>
               <span style={{ fontWeight: 700, fontSize: 20, color: codeColor(r.totalScore) }}>{r.totalScore}%</span>
             </div>
@@ -76,14 +76,14 @@ export default function ComparisonView({ results, onClose }) {
             { label: 'Personal Fit', key: 'personalFit' },
           ].map(row => (
             <React.Fragment key={row.key}>
-              <div style={{ padding: '12px 8px', color: '#94a3b8', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ padding: '12px 8px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--track-bg)' }}>
                 {row.label}
               </div>
               {results.map((r, i) => (
                 <div key={r.program.code} style={{
                   textAlign: 'center', padding: '12px 8px',
-                  backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
-                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  backgroundColor: i % 2 === 0 ? 'var(--row-bg)' : 'transparent',
+                  borderBottom: '1px solid var(--track-bg)',
                 }}>
                   <span style={{ fontWeight: 600, color: codeColor(r.breakdown[row.key]) }}>{r.breakdown[row.key]}%</span>
                 </div>
@@ -92,14 +92,14 @@ export default function ComparisonView({ results, onClose }) {
           ))}
 
           {/* Admission Chance */}
-          <div style={{ padding: '12px 8px', color: '#94a3b8', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ padding: '12px 8px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--track-bg)' }}>
             Admission Chance
           </div>
           {results.map((r, i) => (
             <div key={r.program.code} style={{
               textAlign: 'center', padding: '12px 8px',
-              backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              backgroundColor: i % 2 === 0 ? 'var(--row-bg)' : 'transparent',
+              borderBottom: '1px solid var(--track-bg)',
             }}>
               <span style={{
                 fontWeight: 600, color: admissionColor(r.admission.label),
@@ -112,57 +112,57 @@ export default function ComparisonView({ results, onClose }) {
           ))}
 
           {/* CHED Priority */}
-          <div style={{ padding: '12px 8px', color: '#94a3b8', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ padding: '12px 8px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--track-bg)' }}>
             CHED Priority
           </div>
           {results.map((r, i) => (
             <div key={r.program.code} style={{
               textAlign: 'center', padding: '12px 8px',
-              backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              backgroundColor: i % 2 === 0 ? 'var(--row-bg)' : 'transparent',
+              borderBottom: '1px solid var(--track-bg)',
             }}>
               {r.program.ched_priority ? (
-                <span style={{ color: '#60a5fa' }}>Yes</span>
+                <span style={{ color: 'var(--accent-text)' }}>Yes</span>
               ) : (
-                <span style={{ color: '#64748b' }}>No</span>
+                <span style={{ color: 'var(--text-muted)' }}>No</span>
               )}
             </div>
           ))}
 
           {/* Strand Compatibility */}
-          <div style={{ padding: '12px 8px', color: '#94a3b8', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ padding: '12px 8px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--track-bg)' }}>
             Compatible Strands
           </div>
           {results.map((r, i) => (
             <div key={r.program.code} style={{
               textAlign: 'center', padding: '12px 8px',
-              backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              backgroundColor: i % 2 === 0 ? 'var(--row-bg)' : 'transparent',
+              borderBottom: '1px solid var(--track-bg)',
             }}>
               {r.program.compatible_strands?.length > 0 ? (
                 <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
                   {r.program.compatible_strands.map(s => (
                     <span key={s} style={{
                       fontSize: 10, padding: '2px 6px', borderRadius: 4,
-                      backgroundColor: 'rgba(59,130,246,0.1)', color: '#60a5fa',
+                      backgroundColor: 'var(--accent-bg)', color: 'var(--accent-text)',
                     }}>{s}</span>
                   ))}
                 </div>
               ) : (
-                <span style={{ color: '#64748b' }}>—</span>
+                <span style={{ color: 'var(--text-muted)' }}>—</span>
               )}
             </div>
           ))}
 
           {/* Career Paths */}
-          <div style={{ padding: '12px 8px', color: '#94a3b8', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ padding: '12px 8px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--track-bg)' }}>
             Career Paths
           </div>
           {results.map((r, i) => (
             <div key={r.program.code} style={{
               textAlign: 'center', padding: '12px 8px',
-              backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              backgroundColor: i % 2 === 0 ? 'var(--row-bg)' : 'transparent',
+              borderBottom: '1px solid var(--track-bg)',
             }}>
               {r.program.career_paths?.length > 0 ? (
                 <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -174,7 +174,7 @@ export default function ComparisonView({ results, onClose }) {
                   ))}
                 </div>
               ) : (
-                <span style={{ color: '#64748b' }}>—</span>
+                <span style={{ color: 'var(--text-muted)' }}>—</span>
               )}
             </div>
           ))}

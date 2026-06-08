@@ -5,14 +5,14 @@ export default function Welcome({ onStart, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 4, color: '#f1f5f9' }}>Welcome!</h2>
-      <p style={{ color: '#94a3b8', marginBottom: 24, fontSize: 14 }}>
+      <h2 style={{ fontSize: 22, marginBottom: 4, color: 'var(--text-primary)' }}>Welcome!</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontSize: 14 }}>
         Enter your school to begin the assessment.
       </p>
 
       <div style={{ maxWidth: 400, margin: '0 auto' }}>
         <div style={{ marginBottom: 24 }}>
-          <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: 13, color: '#cbd5e1' }}>
+          <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: 13, color: 'var(--label-color)' }}>
             School (optional)
           </label>
           <input
@@ -21,8 +21,8 @@ export default function Welcome({ onStart, onBack }) {
             placeholder="Your SHS school name"
             style={{
               width: '100%', padding: '11px 14px', borderRadius: 8, fontSize: 14,
-              backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-              color: '#f1f5f9', outline: 'none', boxSizing: 'border-box',
+              backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)',
+              color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
             }}
           />
         </div>
@@ -44,8 +44,8 @@ export default function Welcome({ onStart, onBack }) {
             onClick={onBack}
             style={{
               width: '100%', padding: '12px 0', fontSize: 14, fontWeight: 600,
-              backgroundColor: 'transparent', color: '#94a3b8',
-              border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer',
+              backgroundColor: 'transparent', color: 'var(--text-secondary)',
+              border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
               marginTop: 8,
             }}
           >

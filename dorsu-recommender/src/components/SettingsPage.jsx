@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 
 const CARD = {
-  backgroundColor: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.06)',
+  backgroundColor: 'var(--card-bg)',
+  border: '1px solid var(--track-bg)',
   borderRadius: 16,
   backdropFilter: 'blur(8px)',
 }
 
 const BTN_SECONDARY = {
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  color: '#94a3b8',
+  background: 'var(--track-bg)',
+  border: '1px solid var(--border-strong)',
+  color: 'var(--text-secondary)',
   padding: '8px 16px',
   borderRadius: 8,
   fontSize: 13,
@@ -28,14 +28,14 @@ export default function SettingsPage({ settings }) {
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
+      background: 'linear-gradient(135deg, #0f172a 0%, var(--table-header) 50%, #0f172a 100%)',
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px 60px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 16px' }}>Settings</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>Settings</h1>
         <div style={{ ...CARD, padding: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Scoring Weights</h2>
-            <span style={{ fontSize: 12, color: '#64748b' }}>Adjust how recommendation scores are calculated</span>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Scoring Weights</h2>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Adjust how recommendation scores are calculated</span>
           </div>
           {(() => {
             const weightFields = [
@@ -48,8 +48,8 @@ export default function SettingsPage({ settings }) {
                 {weightFields.map(field => (
                   <div key={field.key}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <label style={{ color: '#94a3b8', fontSize: 13 }}>{field.label}</label>
-                      <span style={{ color: '#60a5fa', fontSize: 13, fontWeight: 600 }}>
+                      <label style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{field.label}</label>
+                      <span style={{ color: 'var(--accent-text)', fontSize: 13, fontWeight: 600 }}>
                         {parseFloat(localSettings[field.key]) || field.defaultVal}
                       </span>
                     </div>

@@ -50,10 +50,10 @@ export default function ScoreSimulator({ studentData, programs, systemSettings, 
         border: '1px solid var(--card-border, rgba(255,255,255,0.08))', maxHeight: '90vh', overflow: 'auto',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Score Simulator</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Score Simulator</h2>
           <button onClick={onClose} style={{
             width: 32, height: 32, borderRadius: 8, border: 'none',
-            background: 'rgba(255,255,255,0.06)', color: '#94a3b8',
+            background: 'var(--track-bg)', color: 'var(--text-secondary)',
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: 0,
           }}>
@@ -65,8 +65,8 @@ export default function ScoreSimulator({ studentData, programs, systemSettings, 
 
         <div style={{ marginBottom: 20 }}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 13, color: '#94a3b8', display: 'block', marginBottom: 6 }}>
-              GWA: <strong style={{ color: '#f1f5f9' }}>{simGwa}%</strong>
+            <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+              GWA: <strong style={{ color: 'var(--text-primary)' }}>{simGwa}%</strong>
             </label>
             <input type="range" min={70} max={99} value={simGwa}
               onChange={e => setSimGwa(Number(e.target.value))}
@@ -77,8 +77,8 @@ export default function ScoreSimulator({ studentData, programs, systemSettings, 
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 13, color: '#94a3b8', display: 'block', marginBottom: 6 }}>
-              SUAST Score: <strong style={{ color: '#f1f5f9' }}>{simSuast}%</strong>
+            <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+              SUAST Score: <strong style={{ color: 'var(--text-primary)' }}>{simSuast}%</strong>
             </label>
             <input type="range" min={40} max={99} value={simSuast}
               onChange={e => setSimSuast(Number(e.target.value))}
@@ -91,7 +91,7 @@ export default function ScoreSimulator({ studentData, programs, systemSettings, 
         </div>
 
         <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>
             Simulated Top 5
           </div>
           {simResults.map((r, i) => {
@@ -101,27 +101,27 @@ export default function ScoreSimulator({ studentData, programs, systemSettings, 
               <div key={r.program.code} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '8px 10px', borderRadius: 8,
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                borderBottom: '1px solid var(--card-bg)',
               }}>
                 <span style={{
                   width: 22, height: 22, borderRadius: 6,
-                  background: 'rgba(59,130,246,0.15)', color: '#60a5fa',
+                  background: 'var(--accent-bg)', color: 'var(--accent-text)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 11, fontWeight: 700, flexShrink: 0,
                 }}>
                   {i + 1}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-input)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {r.program.name}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
                     {r.totalScore}%
                   </div>
                   {delta !== 0 && (
-                    <div style={{ fontSize: 11, fontWeight: 600, color: delta > 0 ? '#34d399' : '#f87171' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: delta > 0 ? '#34d399' : 'var(--danger)' }}>
                       {delta > 0 ? '+' : ''}{delta.toFixed(1)}%
                     </div>
                   )}

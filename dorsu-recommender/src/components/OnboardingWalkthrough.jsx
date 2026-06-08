@@ -6,7 +6,7 @@ const STEPS = [
     title: 'Welcome to the Recommender',
     body: 'This system helps you find the best college programs at DOrSU based on your unique strengths and interests.',
     icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-text)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
       </svg>
     ),
@@ -63,13 +63,13 @@ export default function OnboardingWalkthrough() {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     }}>
       <div style={{
-        backgroundColor: '#1e293b', borderRadius: 20, padding: isMobile ? 20 : 32, maxWidth: 380, width: '100%',
-        border: '1px solid rgba(255,255,255,0.08)',
+        backgroundColor: 'var(--modal-bg)', borderRadius: 20, padding: isMobile ? 20 : 32, maxWidth: 380, width: '100%',
+        border: '1px solid var(--card-border)',
         textAlign: 'center',
       }}>
         <div style={{ marginBottom: 12 }}>{s.icon}</div>
-        <h3 style={{ color: '#f1f5f9', fontSize: isMobile ? 16 : 18, fontWeight: 700, margin: '0 0 8px' }}>{s.title}</h3>
-        <p style={{ color: '#94a3b8', fontSize: isMobile ? 13 : 14, margin: '0 0 20px', lineHeight: 1.6 }}>{s.body}</p>
+        <h3 style={{ color: 'var(--text-primary)', fontSize: isMobile ? 16 : 18, fontWeight: 700, margin: '0 0 8px' }}>{s.title}</h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: isMobile ? 13 : 14, margin: '0 0 20px', lineHeight: 1.6 }}>{s.body}</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 }}>
           {STEPS.map((_, i) => (
             <div key={i} style={{
@@ -86,8 +86,8 @@ export default function OnboardingWalkthrough() {
         }}>
           <button onClick={dismiss} style={{
             padding: isMobile ? '10px 16px' : '8px 16px',
-            borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
-            backgroundColor: 'transparent', color: '#94a3b8',
+            borderRadius: 10, border: '1px solid var(--border-strong)',
+            backgroundColor: 'transparent', color: 'var(--text-secondary)',
             fontSize: 13, fontWeight: 600, cursor: 'pointer',
           }}>
             Skip Tour

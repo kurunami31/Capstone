@@ -22,19 +22,19 @@ export default function SkillsStep({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: '#f1f5f9' }}>Self-Skills Assessment</h2>
-      <p style={{ color: '#94a3b8', marginBottom: 20, fontSize: 14 }}>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>Self-Skills Assessment</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 20, fontSize: 14 }}>
         Rate your current skill level in each area from 1 (Beginner) to 5 (Expert).
       </p>
 
       <div style={{ display: 'grid', gap: 14 }}>
         {SKILLS.map(s => (
           <div key={s.key} style={{
-            padding: '16px 20px', backgroundColor: 'rgba(255,255,255,0.04)',
-            borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)',
+            padding: '16px 20px', backgroundColor: 'var(--card-bg)',
+            borderRadius: 10, border: '1px solid var(--track-bg)',
           }}>
-            <div style={{ fontWeight: 600, marginBottom: 2, color: '#f1f5f9' }}>{s.label}</div>
-            <div style={{ fontSize: 13, color: '#64748b', marginBottom: 10 }}>{s.desc}</div>
+            <div style={{ fontWeight: 600, marginBottom: 2, color: 'var(--text-primary)' }}>{s.label}</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 10 }}>{s.desc}</div>
             <div style={{ display: 'flex', gap: 8 }}>
               {[1, 2, 3, 4, 5].map(val => (
                 <button
@@ -43,8 +43,8 @@ export default function SkillsStep({ data, onUpdate, onNext, onBack }) {
                   style={{
                     flex: 1, padding: '8px 0', fontSize: 13, fontWeight: 600,
                     border: `2px solid ${ratings[s.key] === val ? '#3b82f6' : 'rgba(255,255,255,0.15)'}`,
-                    backgroundColor: ratings[s.key] === val ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.04)',
-                    color: ratings[s.key] === val ? '#60a5fa' : '#94a3b8',
+                    backgroundColor: ratings[s.key] === val ? 'var(--accent-bg)' : 'var(--card-bg)',
+                    color: ratings[s.key] === val ? 'var(--accent-text)' : 'var(--text-secondary)',
                     borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s',
                   }}
                 >
@@ -73,7 +73,7 @@ export default function SkillsStep({ data, onUpdate, onNext, onBack }) {
 function btnStyle(ready) {
   return {
     padding: '12px 40px', fontSize: 15, fontWeight: 600,
-    backgroundColor: ready ? '#059669' : 'rgba(255,255,255,0.1)', color: '#fff',
+    backgroundColor: ready ? '#059669' : 'var(--border-strong)', color: '#fff',
     border: 'none', borderRadius: 10, cursor: ready ? 'pointer' : 'not-allowed',
     transition: 'all 0.2s',
   }
@@ -81,7 +81,7 @@ function btnStyle(ready) {
 
 const secondaryBtn = {
   padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: 'rgba(255,255,255,0.04)', color: '#94a3b8',
-  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer',
+  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
+  border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
   transition: 'all 0.2s',
 }

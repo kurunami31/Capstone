@@ -39,22 +39,22 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
 
   const inpStyle = {
     width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 14,
-    backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-    color: '#f1f5f9', outline: 'none', boxSizing: 'border-box',
+    backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)',
+    color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
   }
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: '#f1f5f9' }}>SHS Grades</h2>
-      <p style={{ color: '#94a3b8', marginBottom: 24, fontSize: 14 }}>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>SHS Grades</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontSize: 14 }}>
         Enter your final grades for Grade 11 and Grade 12 (or current).
       </p>
 
-      <h3 style={{ fontSize: 16, marginBottom: 12, color: '#cbd5e1' }}>Core Subjects</h3>
+      <h3 style={{ fontSize: 16, marginBottom: 12, color: 'var(--label-color)' }}>Core Subjects</h3>
       <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
         {CORE.map(s => (
           <div key={s} className="stack-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="full-mobile" style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: '#94a3b8' }}>{s}</label>
+            <label className="full-mobile" style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: 'var(--text-secondary)' }}>{s}</label>
             <input
               type="number" min="0" max="100" value={grades[s] ?? ''}
               onChange={e => updateGrade(s, e.target.value)}
@@ -75,11 +75,11 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
         </div>
       )}
 
-      <h3 style={{ fontSize: 16, marginBottom: 12, color: '#cbd5e1' }}>Strand-Specific Subjects ({strand})</h3>
+      <h3 style={{ fontSize: 16, marginBottom: 12, color: 'var(--label-color)' }}>Strand-Specific Subjects ({strand})</h3>
       <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
         {strandSubs.map(s => (
           <div key={s} className="stack-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="full-mobile" style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: '#94a3b8' }}>{s.replace(/_/g, ' ')}</label>
+            <label className="full-mobile" style={{ width: 140, fontWeight: 500, textTransform: 'capitalize', color: 'var(--text-secondary)' }}>{s.replace(/_/g, ' ')}</label>
             <input
               type="number" min="0" max="100" value={strandGrades[s] ?? ''}
               onChange={e => updateStrandGrade(s, e.target.value)}
@@ -101,7 +101,7 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
 function btnStyle(ready) {
   return {
     padding: '12px 40px', fontSize: 15, fontWeight: 600,
-    backgroundColor: ready ? '#2563eb' : 'rgba(255,255,255,0.1)', color: '#fff',
+    backgroundColor: ready ? '#2563eb' : 'var(--border-strong)', color: '#fff',
     border: 'none', borderRadius: 10, cursor: ready ? 'pointer' : 'not-allowed',
     transition: 'all 0.2s',
   }
@@ -109,7 +109,7 @@ function btnStyle(ready) {
 
 const secondaryBtn = {
   padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: 'rgba(255,255,255,0.04)', color: '#94a3b8',
-  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer',
+  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
+  border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
   transition: 'all 0.2s',
 }

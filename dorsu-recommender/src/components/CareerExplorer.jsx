@@ -36,8 +36,8 @@ export default function CareerExplorer({ studentData }) {
 
         <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
           <select value={faculty} onChange={e => setFaculty(e.target.value)} style={{
-            padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(255,255,255,0.05)', color: '#e2e8f0',
+            padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)',
+            background: 'var(--input-bg)', color: 'var(--text-input)',
             fontSize: 13, outline: 'none', cursor: 'pointer', fontFamily: 'inherit', minWidth: 180,
           }}>
             <option value="">All Faculties</option>
@@ -46,7 +46,7 @@ export default function CareerExplorer({ studentData }) {
         </div>
 
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 60, color: '#64748b' }}>
+          <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
             <p style={{ fontSize: 15, margin: 0 }}>No careers found.</p>
           </div>
         ) : (
@@ -54,8 +54,8 @@ export default function CareerExplorer({ studentData }) {
             {filtered.map(([career, progs]) => (
               <div key={career} style={{
                 borderRadius: 16,
-                border: '1px solid rgba(255,255,255,0.06)',
-                background: expanded === career ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+                border: '1px solid var(--track-bg)',
+                background: expanded === career ? 'var(--track-bg)' : 'var(--row-bg)',
                 overflow: 'hidden', transition: 'all 0.15s',
               }}>
                 <button
@@ -68,8 +68,8 @@ export default function CareerExplorer({ studentData }) {
                   }}
                 >
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#e2e8f0' }}>{career}</div>
-                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-input)' }}>{career}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
                       {progs.length} program{progs.length !== 1 ? 's' : ''} • {progs.map(p => p.faculty).filter((v, i, a) => a.indexOf(v) === i).join(', ')}
                     </div>
                   </div>
@@ -87,16 +87,16 @@ export default function CareerExplorer({ studentData }) {
                         style={{
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           padding: '10px 14px', borderRadius: 10,
-                          border: '1px solid rgba(255,255,255,0.06)',
-                          background: 'rgba(255,255,255,0.03)', cursor: 'pointer',
+                          border: '1px solid var(--track-bg)',
+                          background: 'var(--row-bg)', cursor: 'pointer',
                           color: 'inherit', textAlign: 'left', fontFamily: 'inherit',
                           width: '100%',
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.borderColor = 'rgba(59,130,246,0.2)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-bg)'; e.currentTarget.style.borderColor = 'var(--accent-bg)' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--row-bg)'; e.currentTarget.style.borderColor = 'var(--track-bg)' }}
                       >
-                        <span style={{ fontSize: 13, fontWeight: 500, color: '#e2e8f0' }}>{p.name}</span>
-                        <span style={{ fontSize: 11, color: '#64748b' }}>{p.faculty}</span>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-input)' }}>{p.name}</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.faculty}</span>
                       </button>
                     ))}
                   </div>

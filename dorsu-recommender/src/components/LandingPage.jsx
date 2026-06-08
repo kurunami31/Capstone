@@ -32,7 +32,7 @@ export default function LandingPage({ onGetStarted, user }) {
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
+      background: 'linear-gradient(135deg, #0f172a 0%, var(--table-header) 50%, #0f172a 100%)',
     }}>
       <div className="hero-fade" style={{
         textAlign: 'center', color: '#fff',
@@ -43,7 +43,7 @@ export default function LandingPage({ onGetStarted, user }) {
         <h1 style={{
           fontSize: 44, fontWeight: 800, marginBottom: 14,
           letterSpacing: '-0.02em', lineHeight: 1.15,
-          background: 'linear-gradient(135deg, #fff 60%, #60a5fa)',
+          background: 'linear-gradient(135deg, #fff 60%, var(--accent-text))',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
         }}>
@@ -65,7 +65,7 @@ export default function LandingPage({ onGetStarted, user }) {
             backgroundColor: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.2)',
             display: 'inline-block',
           }}>
-            <p style={{ color: '#60a5fa', fontSize: 15, fontWeight: 600, margin: 0 }}>
+            <p style={{ color: 'var(--accent-text)', fontSize: 15, fontWeight: 600, margin: 0 }}>
               Welcome, {user?.firstName || 'Staff'}! Use the sidebar to access the admin panel.
             </p>
           </div>
@@ -84,7 +84,7 @@ export default function LandingPage({ onGetStarted, user }) {
                 You can retake in {cooldownDays} day{cooldownDays === 1 ? '' : 's'}.
               </p>
             </div>
-            <p style={{ color: '#64748b', fontSize: 12, margin: 0 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0 }}>
               Contact the guidance office if you need to retake sooner.
             </p>
           </div>
@@ -113,20 +113,20 @@ export default function LandingPage({ onGetStarted, user }) {
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
           <span style={{
             display: 'inline-block', padding: '4px 14px', borderRadius: 20,
-            backgroundColor: 'rgba(37,99,235,0.15)', color: '#60a5fa',
+            backgroundColor: 'rgba(37,99,235,0.15)', color: 'var(--accent-text)',
             fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase',
             marginBottom: 12,
           }}>
             How It Works
           </span>
           <h2 style={{
-            fontSize: 30, fontWeight: 700, color: '#f1f5f9', margin: 0,
+            fontSize: 30, fontWeight: 700, color: 'var(--text-primary)', margin: 0,
             letterSpacing: '-0.01em',
           }}>
             Three steps to your future
           </h2>
           <p style={{
-            fontSize: 15, color: '#94a3b8', marginTop: 8,
+            fontSize: 15, color: 'var(--text-secondary)', marginTop: 8,
             maxWidth: 480, marginLeft: 'auto', marginRight: 'auto',
           }}>
             A comprehensive assessment that evaluates six dimensions to find your perfect program.
@@ -144,8 +144,8 @@ export default function LandingPage({ onGetStarted, user }) {
             <div key={s.num} className="step-card" style={{
               flex: '1 1 220px', maxWidth: 260,
               padding: 32, borderRadius: 16,
-              backgroundColor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              backgroundColor: 'var(--card-bg)',
+              border: '1px solid var(--track-bg)',
               backdropFilter: 'blur(8px)',
               textAlign: 'center', cursor: 'default',
             }}>
@@ -158,15 +158,15 @@ export default function LandingPage({ onGetStarted, user }) {
               }}>
                 {s.num}
               </div>
-              <div style={{ fontWeight: 700, fontSize: 17, color: '#f1f5f9', marginBottom: 10 }}>{s.title}</div>
-              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.6 }}>{s.desc}</div>
+              <div style={{ fontWeight: 700, fontSize: 17, color: 'var(--text-primary)', marginBottom: 10 }}>{s.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{s.desc}</div>
             </div>
           ))}
         </div>
       </div>
 
       <div style={{
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderTop: '1px solid var(--track-bg)',
         padding: '28px 24px', textAlign: 'center',
         fontSize: 13, color: '#475569',
       }}>

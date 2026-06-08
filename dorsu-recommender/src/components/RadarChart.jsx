@@ -38,17 +38,17 @@ export default function RadarChart({ scores, size, labels, colors }) {
           const y = cy + r * level * Math.sin(a)
           return `${x},${y}`
         }).join(' ')
-        return <polygon key={li} points={points} fill={fillColors[li]} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        return <polygon key={li} points={points} fill={fillColors[li]} stroke="var(--track-bg)" strokeWidth="1" />
       })}
 
       {vertexPoints.map((_, i) => {
         const a = -Math.PI / 2 + i * angle
         const x2 = cx + r * Math.cos(a)
         const y2 = cy + r * Math.sin(a)
-        return <line key={i} x1={cx} y1={cy} x2={x2} y2={y2} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        return <line key={i} x1={cx} y1={cy} x2={x2} y2={y2} stroke="var(--track-bg)" strokeWidth="1" />
       })}
 
-      <polygon points={polyPoints} fill="rgba(59,130,246,0.2)" stroke="#3b82f6" strokeWidth="2" />
+      <polygon points={polyPoints} fill="var(--accent-bg)" stroke="#3b82f6" strokeWidth="2" />
 
       {data.map((d, i) => {
         const a = -Math.PI / 2 + i * angle
@@ -59,12 +59,12 @@ export default function RadarChart({ scores, size, labels, colors }) {
 
         return (
           <g key={i}>
-            <circle cx={x} cy={y} r={3} fill={d.color} stroke="#1e293b" strokeWidth="1.5" />
+            <circle cx={x} cy={y} r={3} fill={d.color} stroke="var(--modal-bg)" strokeWidth="1.5" />
             <text
               x={lx} y={ly}
               textAnchor="middle"
               dominantBaseline="middle"
-              fill="#94a3b8"
+              fill="var(--text-secondary)"
               fontSize={10}
               fontWeight={600}
               fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"

@@ -49,21 +49,21 @@ export default function FAQPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
+      background: 'linear-gradient(135deg, #0f172a 0%, var(--table-header) 50%, #0f172a 100%)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 28px' }}>Frequently Asked Questions</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 28px' }}>Frequently Asked Questions</h1>
 
         <div style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          backgroundColor: 'var(--card-bg)',
+          border: '1px solid var(--card-border)',
           borderRadius: 20, padding: 24,
           backdropFilter: 'blur(12px)',
         }}>
           {faqs.map((faq, i) => (
             <div key={i} style={{
-              borderBottom: i < faqs.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+              borderBottom: i < faqs.length - 1 ? '1px solid var(--track-bg)' : 'none',
             }}>
               <button
                 onClick={() => setOpenIdx(openIdx === i ? null : i)}
@@ -71,7 +71,7 @@ export default function FAQPage() {
                   width: '100%', background: 'none', border: 'none',
                   padding: '16px 8px', cursor: 'pointer',
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  textAlign: 'left', color: '#f1f5f9', fontSize: 15, fontWeight: 600,
+                  textAlign: 'left', color: 'var(--text-primary)', fontSize: 15, fontWeight: 600,
                   fontFamily: 'inherit', gap: 12,
                 }}
               >
@@ -84,7 +84,7 @@ export default function FAQPage() {
               </button>
               {openIdx === i && (
                 <div style={{
-                  padding: '0 8px 16px', fontSize: 14, color: '#94a3b8',
+                  padding: '0 8px 16px', fontSize: 14, color: 'var(--text-secondary)',
                   lineHeight: 1.7, animation: 'fadeIn 0.2s ease-out',
                 }}>
                   {faq.a}

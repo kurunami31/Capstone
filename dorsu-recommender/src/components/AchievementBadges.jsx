@@ -18,16 +18,16 @@ export default function AchievementBadges() {
 
   return (
     <div style={{
-      backgroundColor: 'rgba(255,255,255,0.04)',
-      border: '1px solid rgba(255,255,255,0.08)',
+      backgroundColor: 'var(--card-bg)',
+      border: '1px solid var(--card-border)',
       borderRadius: 20, padding: 28,
       backdropFilter: 'blur(12px)',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
           Achievements
         </h2>
-        <span style={{ fontSize: 12, color: '#64748b' }}>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           {earned}/{achievements.length}
         </span>
       </div>
@@ -39,8 +39,8 @@ export default function AchievementBadges() {
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '6px 12px', borderRadius: 20, fontSize: 13,
-              backgroundColor: a.earned ? 'rgba(52,211,153,0.1)' : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${a.earned ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.06)'}`,
+              backgroundColor: a.earned ? 'rgba(52,211,153,0.1)' : 'var(--row-bg)',
+              border: `1px solid ${a.earned ? 'rgba(52,211,153,0.2)' : 'var(--track-bg)'}`,
               color: a.earned ? '#34d399' : '#475569',
               opacity: a.earned ? 1 : 0.5,
               cursor: 'default',

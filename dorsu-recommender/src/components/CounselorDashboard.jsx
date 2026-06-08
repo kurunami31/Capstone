@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 
 const CARD = {
-  backgroundColor: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.06)',
+  backgroundColor: 'var(--card-bg)',
+  border: '1px solid var(--track-bg)',
   borderRadius: 16,
   backdropFilter: 'blur(8px)',
 }
@@ -46,10 +46,10 @@ export default function CounselorDashboard() {
   return (
     <div style={{ ...CARD, padding: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Student Assessments</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Student Assessments</h2>
         <button onClick={() => fetchAssessments(page)} style={{
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-          color: '#94a3b8', padding: '5px 12px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
+          background: 'var(--track-bg)', border: '1px solid var(--border-strong)',
+          color: 'var(--text-secondary)', padding: '5px 12px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
         }}>
           Refresh
         </button>
@@ -63,7 +63,7 @@ export default function CounselorDashboard() {
             {assessments.map(a => (
               <div key={a.id} style={{
                 borderRadius: 10, overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.06)',
+                border: '1px solid var(--track-bg)',
               }}>
                 <div
                   onClick={() => {
@@ -75,24 +75,24 @@ export default function CounselorDashboard() {
                   style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '12px 16px', cursor: 'pointer',
-                    backgroundColor: expandedId === a.id ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+                    backgroundColor: expandedId === a.id ? 'var(--track-bg)' : 'var(--row-bg)',
                   }}
                 >
                   <div>
-                    <div style={{ color: '#e2e8f0', fontSize: 14, fontWeight: 600 }}>{a.studentName}</div>
-                    <div style={{ color: '#64748b', fontSize: 12 }}>{a.email} — {a.strand || 'No strand'}</div>
+                    <div style={{ color: 'var(--text-input)', fontSize: 14, fontWeight: 600 }}>{a.studentName}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>{a.email} — {a.strand || 'No strand'}</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{
                       display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: 10, fontWeight: 600,
                       backgroundColor: a.reviewStatus === 'reviewed' ? 'rgba(34,197,94,0.15)' :
-                        a.reviewStatus === 'in_progress' ? 'rgba(234,179,8,0.15)' : 'rgba(255,255,255,0.06)',
+                        a.reviewStatus === 'in_progress' ? 'rgba(234,179,8,0.15)' : 'var(--track-bg)',
                       color: a.reviewStatus === 'reviewed' ? '#4ade80' :
-                        a.reviewStatus === 'in_progress' ? '#fbbf24' : '#64748b',
+                        a.reviewStatus === 'in_progress' ? '#fbbf24' : 'var(--text-muted)',
                     }}>
                       {a.reviewStatus.replace('_', ' ')}
                     </span>
-                    <span style={{ color: '#64748b', fontSize: 11 }}>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
                       {new Date(a.createdAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -102,30 +102,30 @@ export default function CounselorDashboard() {
                   <div style={{ padding: '0 16px 16px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
                       <div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>GWA</div>
-                        <div style={{ color: '#e2e8f0', fontSize: 13 }}>{a.gwa || 'N/A'}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>GWA</div>
+                        <div style={{ color: 'var(--text-input)', fontSize: 13 }}>{a.gwa || 'N/A'}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>Holland Code</div>
-                        <div style={{ color: '#e2e8f0', fontSize: 13 }}>{a.hollandCode || 'N/A'}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Holland Code</div>
+                        <div style={{ color: 'var(--text-input)', fontSize: 13 }}>{a.hollandCode || 'N/A'}</div>
                       </div>
                     </div>
 
                     <div style={{ marginBottom: 12 }}>
-                      <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Top Programs</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Top Programs</div>
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                         {a.topPrograms.map((p, i) => (
                           <span key={p.code} style={{
                             fontSize: 11, padding: '2px 8px', borderRadius: 6,
-                            backgroundColor: i === 0 ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.06)',
-                            color: i === 0 ? '#60a5fa' : '#94a3b8',
+                            backgroundColor: i === 0 ? 'var(--accent-bg)' : 'var(--track-bg)',
+                            color: i === 0 ? 'var(--accent-text)' : 'var(--text-secondary)',
                           }}>{p.name}</span>
                         ))}
                       </div>
                     </div>
 
                     <div style={{ marginBottom: 8 }}>
-                      <label style={{ display: 'block', color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>Notes</label>
+                      <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: 12, marginBottom: 4 }}>Notes</label>
                       <textarea
                         value={editNotes}
                         onChange={e => setEditNotes(e.target.value)}
@@ -133,8 +133,8 @@ export default function CounselorDashboard() {
                         rows={3}
                         style={{
                           width: '100%', padding: '8px 10px', fontSize: 13,
-                          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: 8, color: '#e2e8f0', outline: 'none', resize: 'vertical',
+                          background: 'var(--track-bg)', border: '1px solid var(--border-strong)',
+                          borderRadius: 8, color: 'var(--text-input)', outline: 'none', resize: 'vertical',
                           fontFamily: 'inherit', boxSizing: 'border-box',
                         }}
                       />
@@ -146,8 +146,8 @@ export default function CounselorDashboard() {
                         onChange={e => setEditStatus(e.target.value)}
                         style={{
                           padding: '6px 10px', fontSize: 12,
-                          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: 8, color: '#e2e8f0', outline: 'none',
+                          background: 'var(--track-bg)', border: '1px solid var(--border-strong)',
+                          borderRadius: 8, color: 'var(--text-input)', outline: 'none',
                         }}
                       >
                         <option value="pending">Pending</option>
@@ -162,7 +162,7 @@ export default function CounselorDashboard() {
                         {saving ? 'Saving...' : 'Save'}
                       </button>
                       {a.noteUpdatedAt && (
-                        <span style={{ color: '#64748b', fontSize: 10 }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>
                           Last updated: {new Date(a.noteUpdatedAt).toLocaleString()}
                         </span>
                       )}
@@ -180,18 +180,18 @@ export default function CounselorDashboard() {
                 onClick={() => setPage(p => { const np = p - 1; fetchAssessments(np); return np })}
                 style={{
                   padding: '6px 14px', borderRadius: 8, fontSize: 12, cursor: page <= 1 ? 'default' : 'pointer',
-                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#94a3b8', opacity: page <= 1 ? 0.4 : 1,
+                  background: 'var(--track-bg)', border: '1px solid var(--border-strong)',
+                  color: 'var(--text-secondary)', opacity: page <= 1 ? 0.4 : 1,
                 }}
               >Previous</button>
-              <span style={{ color: '#64748b', fontSize: 12, padding: '6px 0' }}>Page {page} of {totalPages}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12, padding: '6px 0' }}>Page {page} of {totalPages}</span>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => { const np = p + 1; fetchAssessments(np); return np })}
                 style={{
                   padding: '6px 14px', borderRadius: 8, fontSize: 12, cursor: page >= totalPages ? 'default' : 'pointer',
-                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#94a3b8', opacity: page >= totalPages ? 0.4 : 1,
+                  background: 'var(--track-bg)', border: '1px solid var(--border-strong)',
+                  color: 'var(--text-secondary)', opacity: page >= totalPages ? 0.4 : 1,
                 }}
               >Next</button>
             </div>

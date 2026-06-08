@@ -24,26 +24,26 @@ export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
 
   const selectStyle = {
     width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 14,
-    backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-    color: '#f1f5f9', outline: 'none',
+    backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)',
+    color: 'var(--text-primary)', outline: 'none',
   }
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: '#f1f5f9' }}>SUAST Exam Tiers</h2>
-      <p style={{ color: '#94a3b8', marginBottom: 4, fontSize: 14 }}>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>SUAST Exam Tiers</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 4, fontSize: 14 }}>
         Estimate your performance on the DOrSU State University Aptitude and Scholarship Test (SUAST).
       </p>
-      <p style={{ color: '#64748b', fontSize: 13, marginBottom: 20 }}>
+      <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 20 }}>
         If you haven't taken it yet, select "Not taken" — the system will use your grades instead.
       </p>
 
       <div style={{ display: 'grid', gap: 10, marginBottom: 20 }}>
         {SUBTESTS.map(s => (
           <div key={s.key} className="stack-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="full-mobile" style={{ width: 160, fontWeight: 500, color: '#cbd5e1' }}>{s.label}</label>
+            <label className="full-mobile" style={{ width: 160, fontWeight: 500, color: 'var(--label-color)' }}>{s.label}</label>
             <select value={tiers[s.key] || 'not_taken'} onChange={e => update(s.key, e.target.value)} style={selectStyle}>
-              {TIERS.map(t => <option key={t.value} value={t.value} style={{ background: '#1e293b', color: '#f1f5f9' }}>{t.label}</option>)}
+              {TIERS.map(t => <option key={t.value} value={t.value} style={{ background: 'var(--modal-bg)', color: 'var(--text-primary)' }}>{t.label}</option>)}
             </select>
           </div>
         ))}
@@ -55,7 +55,7 @@ export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
       }}>
         <label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#fbbf24', fontSize: 14 }}>Overall Composite Tier</label>
         <select value={tiers.overall || 'not_taken'} onChange={e => update('overall', e.target.value)} style={selectStyle}>
-          {TIERS.map(t => <option key={t.value} value={t.value} style={{ background: '#1e293b', color: '#f1f5f9' }}>{t.label}</option>)}
+          {TIERS.map(t => <option key={t.value} value={t.value} style={{ background: 'var(--modal-bg)', color: 'var(--text-primary)' }}>{t.label}</option>)}
         </select>
       </div>
 
@@ -76,7 +76,7 @@ const primaryBtn = {
 
 const secondaryBtn = {
   padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: 'rgba(255,255,255,0.04)', color: '#94a3b8',
-  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer',
+  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
+  border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
   transition: 'all 0.2s',
 }

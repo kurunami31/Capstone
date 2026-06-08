@@ -59,8 +59,8 @@ export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: '#f1f5f9' }}>Career Personality Assessment</h2>
-      <p style={{ color: '#94a3b8', marginBottom: 16, fontSize: 14 }}>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>Career Personality Assessment</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 16, fontSize: 14 }}>
         Rate how much each statement describes you. There are no right or wrong answers.
       </p>
 
@@ -72,15 +72,15 @@ export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
 
       <div style={{
         padding: 24, backgroundColor: 'rgba(59,130,246,0.05)',
-        borderRadius: 12, border: '1px solid rgba(59,130,246,0.1)', marginBottom: 20,
+        borderRadius: 12, border: '1px solid var(--accent-bg)', marginBottom: 20,
       }}>
-        <div style={{ fontSize: 14, color: '#60a5fa', marginBottom: 8, fontWeight: 600 }}>
+        <div style={{ fontSize: 14, color: 'var(--accent-text)', marginBottom: 8, fontWeight: 600 }}>
           {currentDim.dimension} — Set {step + 1} of {totalSteps}
         </div>
 
         {currentDim.questions.map((q, qi) => (
           <div key={qi} style={{ marginBottom: qi < currentDim.questions.length - 1 ? 16 : 0 }}>
-            <p style={{ fontWeight: 500, marginBottom: 8, fontSize: 15, color: '#f1f5f9' }}>{q}</p>
+            <p style={{ fontWeight: 500, marginBottom: 8, fontSize: 15, color: 'var(--text-primary)' }}>{q}</p>
             <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
               {[1, 2, 3, 4, 5].map(val => (
                 <button
@@ -89,8 +89,8 @@ export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
                   style={{
                     flex: 1, minWidth: 0, maxWidth: 60, height: 40, fontSize: 14, fontWeight: 600,
                     border: `2px solid ${answers[`${currentDim.dimension}_${qi}`] === val ? '#3b82f6' : 'rgba(255,255,255,0.15)'}`,
-                    backgroundColor: answers[`${currentDim.dimension}_${qi}`] === val ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.04)',
-                    color: answers[`${currentDim.dimension}_${qi}`] === val ? '#60a5fa' : '#94a3b8',
+                    backgroundColor: answers[`${currentDim.dimension}_${qi}`] === val ? 'var(--accent-bg)' : 'var(--card-bg)',
+                    color: answers[`${currentDim.dimension}_${qi}`] === val ? 'var(--accent-text)' : 'var(--text-secondary)',
                     borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s',
                   }}
                 >
@@ -128,7 +128,7 @@ export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
 function btnStyle(ready) {
   return {
     padding: '12px 40px', fontSize: 15, fontWeight: 600,
-    backgroundColor: ready ? '#2563eb' : 'rgba(255,255,255,0.1)', color: '#fff',
+    backgroundColor: ready ? '#2563eb' : 'var(--border-strong)', color: '#fff',
     border: 'none', borderRadius: 10, cursor: ready ? 'pointer' : 'not-allowed',
     transition: 'all 0.2s',
   }
@@ -136,7 +136,7 @@ function btnStyle(ready) {
 
 const secondaryBtn = {
   padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: 'rgba(255,255,255,0.04)', color: '#94a3b8',
-  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer',
+  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
+  border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
   transition: 'all 0.2s',
 }

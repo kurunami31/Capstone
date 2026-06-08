@@ -15,7 +15,7 @@ export default function HollandChart({ scores }) {
 
   return (
     <div style={{ marginTop: 12 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8', marginBottom: 10 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>
         Holland Personality Profile
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -32,12 +32,12 @@ export default function HollandChart({ scores }) {
               }}>
                 {code}
               </div>
-              <div style={{ width: 60, fontSize: 11, color: '#94a3b8', flexShrink: 0 }}>
+              <div style={{ width: 60, fontSize: 11, color: 'var(--text-secondary)', flexShrink: 0 }}>
                 {label}
               </div>
               <div style={{
                 flex: 1, height: 8, borderRadius: 4,
-                backgroundColor: 'rgba(255,255,255,0.06)', overflow: 'hidden',
+                backgroundColor: 'var(--track-bg)', overflow: 'hidden',
               }}>
                 <div style={{
                   width: `${pct}%`, height: '100%', borderRadius: 4,
@@ -45,7 +45,7 @@ export default function HollandChart({ scores }) {
                   transition: 'width 0.5s ease',
                 }} />
               </div>
-              <div style={{ width: 32, textAlign: 'right', fontSize: 11, fontWeight: 600, color: '#f1f5f9' }}>
+              <div style={{ width: 32, textAlign: 'right', fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>
                 {score}
               </div>
             </div>

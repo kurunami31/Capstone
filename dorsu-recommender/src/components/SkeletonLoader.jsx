@@ -2,7 +2,7 @@ export default function SkeletonLoader({ width = '100%', height = 16, borderRadi
   return (
     <div style={{
       width, height, borderRadius,
-      background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)',
+      background: 'linear-gradient(90deg, var(--card-bg) 25%, var(--card-border) 50%, var(--card-bg) 75%)',
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.5s ease-in-out infinite',
       ...style,
@@ -13,8 +13,8 @@ export default function SkeletonLoader({ width = '100%', height = 16, borderRadi
 export function SkeletonCard({ lines = 3 }) {
   return (
     <div style={{
-      backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 24,
-      border: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: 12,
+      backgroundColor: 'var(--card-bg)', borderRadius: 16, padding: 24,
+      border: '1px solid var(--track-bg)', display: 'flex', flexDirection: 'column', gap: 12,
     }}>
       <SkeletonLoader height={20} width="60%" />
       {Array.from({ length: lines }).map((_, i) => (

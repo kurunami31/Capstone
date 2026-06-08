@@ -21,7 +21,7 @@ function admissionColor(level) {
 
 function HeartIcon({ filled }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? '#ef4444' : 'none'} stroke={filled ? '#ef4444' : '#64748b'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? '#ef4444' : 'none'} stroke={filled ? '#ef4444' : 'var(--text-muted)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
     </svg>
   )
@@ -104,8 +104,8 @@ export default function Results({ studentData, results, systemSettings, activePr
   if (!results || results.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: 40 }}>
-        <h2 style={{ color: '#f1f5f9' }}>No recommendations available</h2>
-        <p style={{ color: '#64748b' }}>Please complete the assessment first.</p>
+        <h2 style={{ color: 'var(--text-primary)' }}>No recommendations available</h2>
+        <p style={{ color: 'var(--text-muted)' }}>Please complete the assessment first.</p>
       </div>
     )
   }
@@ -114,8 +114,8 @@ export default function Results({ studentData, results, systemSettings, activePr
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontSize: 24, margin: 0, color: '#f1f5f9' }}>Your Top Program Matches</h2>
-          <p style={{ color: '#94a3b8', margin: '4px 0 0 0', fontSize: 14 }}>
+          <h2 style={{ fontSize: 24, margin: 0, color: 'var(--text-primary)' }}>Your Top Program Matches</h2>
+          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: 14 }}>
             {studentData.name} | {studentData.school} | {studentData.strand} Strand | GWA: {studentData.gwa}
           </p>
         </div>
@@ -141,8 +141,8 @@ export default function Results({ studentData, results, systemSettings, activePr
       <div style={{ display: 'grid', gap: 16 }}>
         {results.map((r) => (
           <div key={r.program.code} style={{
-            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 20,
-            backgroundColor: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)',
+            border: '1px solid var(--card-border)', borderRadius: 14, padding: 20,
+            backgroundColor: 'var(--card-bg)', backdropFilter: 'blur(8px)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -157,15 +157,15 @@ export default function Results({ studentData, results, systemSettings, activePr
                 <div>
                   <button onClick={() => setDetailProgram(r)} style={{
                     background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                    fontWeight: 600, fontSize: 16, color: '#f1f5f9', textAlign: 'left',
+                    fontWeight: 600, fontSize: 16, color: 'var(--text-primary)', textAlign: 'left',
                     fontFamily: 'inherit',
                   }}
-                    onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
-                    onMouseLeave={e => e.currentTarget.style.color = '#f1f5f9'}
+                    onMouseEnter={e => e.currentTarget.style.color = 'var(--accent-text)'}
+                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-primary)'}
                   >
                     {r.program.name}
                   </button>
-                  <div style={{ fontSize: 13, color: '#64748b' }}>{r.program.faculty}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{r.program.faculty}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -186,7 +186,7 @@ export default function Results({ studentData, results, systemSettings, activePr
                 </button>
                 <label style={{
                   display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
-                  fontSize: 11, color: selected.includes(r.program.code) ? '#818cf8' : '#64748b',
+                  fontSize: 11, color: selected.includes(r.program.code) ? '#818cf8' : 'var(--text-muted)',
                   userSelect: 'none',
                 }}>
                   <input
@@ -201,7 +201,7 @@ export default function Results({ studentData, results, systemSettings, activePr
                   <div style={{ fontSize: 28, fontWeight: 700, color: codeColor(r.totalScore) }}>
                     {r.totalScore}%
                   </div>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>Overall Match</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Overall Match</div>
                 </div>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default function Results({ studentData, results, systemSettings, activePr
                   </span>
                   <div style={{
                     marginTop: 6, height: 4, borderRadius: 2,
-                    backgroundColor: 'rgba(255,255,255,0.06)', overflow: 'hidden',
+                    backgroundColor: 'var(--track-bg)', overflow: 'hidden',
                   }}>
                     <div style={{
                       width: r.admission.label === 'High' ? '85%' : r.admission.label === 'Moderate' ? '60%' : '35%',
@@ -245,7 +245,7 @@ export default function Results({ studentData, results, systemSettings, activePr
                       transition: 'width 0.5s ease',
                     }} />
                   </div>
-                  <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
                     {r.admission.value}
                   </div>
                 </div>
@@ -254,7 +254,7 @@ export default function Results({ studentData, results, systemSettings, activePr
 
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {r.program.ched_priority && (
-              <div style={{ fontSize: 12, color: '#60a5fa', backgroundColor: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.15)', padding: '4px 10px', borderRadius: 4, display: 'inline-block' }}>
+              <div style={{ fontSize: 12, color: 'var(--accent-text)', backgroundColor: 'var(--accent-bg)', border: '1px solid var(--accent-bg)', padding: '4px 10px', borderRadius: 4, display: 'inline-block' }}>
                 CHED Priority Course
               </div>
             )}
@@ -280,7 +280,7 @@ export default function Results({ studentData, results, systemSettings, activePr
 
             {r.program.career_paths && r.program.career_paths.length > 0 && (
               <div style={{ marginTop: 12 }}>
-                <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6, fontWeight: 600 }}>Career Paths</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 600 }}>Career Paths</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {r.program.career_paths.map((career, ci) => (
                     <span key={ci} style={{
@@ -325,10 +325,10 @@ export default function Results({ studentData, results, systemSettings, activePr
 }
 
 const statBox = {
-  padding: '10px 14px', backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 10,
-  border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center',
+  padding: '10px 14px', backgroundColor: 'var(--card-bg)', borderRadius: 10,
+  border: '1px solid var(--track-bg)', textAlign: 'center',
 }
-const statLabel = { display: 'block', fontSize: 12, color: '#64748b', marginBottom: 4 }
+const statLabel = { display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }
 const statValue = { display: 'block', fontWeight: 700, fontSize: 18 }
 
 const simBtn = {
@@ -348,6 +348,6 @@ const pdfBtn = {
 }
 const restartBtn = {
   padding: '10px 24px', fontSize: 14, fontWeight: 600,
-  backgroundColor: 'rgba(255,255,255,0.04)', color: '#94a3b8',
-  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, cursor: 'pointer',
+  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
+  border: '1px solid var(--border-strong)', borderRadius: 8, cursor: 'pointer',
 }

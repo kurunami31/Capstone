@@ -2,18 +2,18 @@ import { useState, useEffect, useRef } from 'react'
 import SkeletonLoader from './SkeletonLoader.jsx'
 
 const CARD = {
-  backgroundColor: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.06)',
+  backgroundColor: 'var(--card-bg)',
+  border: '1px solid var(--track-bg)',
   borderRadius: 16,
   backdropFilter: 'blur(8px)',
 }
 
 const INPUT = {
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'var(--track-bg)',
+  border: '1px solid var(--border-strong)',
   borderRadius: 8,
   padding: '8px 12px',
-  color: '#e2e8f0',
+  color: 'var(--text-input)',
   fontSize: 13,
   outline: 'none',
   width: '100%',
@@ -21,9 +21,9 @@ const INPUT = {
 }
 
 const BTN_SECONDARY = {
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  color: '#94a3b8',
+  background: 'var(--track-bg)',
+  border: '1px solid var(--border-strong)',
+  color: 'var(--text-secondary)',
   padding: '8px 16px',
   borderRadius: 8,
   fontSize: 13,
@@ -39,10 +39,10 @@ function BarChart({ data, labelKey, valueKey, color, maxLabel }) {
       {data.map((d, i) => (
         <div key={d[labelKey]}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 2 }}>
-            <span style={{ color: '#94a3b8' }}>{d[labelKey]}</span>
-            <span style={{ color: '#64748b' }}>{d[valueKey]}{maxLabel ? ` ${maxLabel}` : ''}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>{d[labelKey]}</span>
+            <span style={{ color: 'var(--text-muted)' }}>{d[valueKey]}{maxLabel ? ` ${maxLabel}` : ''}</span>
           </div>
-          <div style={{ height: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 4, overflow: 'hidden' }}>
+          <div style={{ height: 8, background: 'var(--track-bg)', borderRadius: 4, overflow: 'hidden' }}>
             <div style={{
               width: `${(d[valueKey] / max) * 100}%`, height: '100%',
               background: Array.isArray(color) ? color[i % color.length] : color,
@@ -69,10 +69,10 @@ function VerticalBarChart({ data, labelKey, valueKey, color }) {
             transition: 'height 0.6s ease',
             minHeight: 4,
           }} />
-          <div style={{ fontSize: 9, color: '#64748b', marginTop: 4, textAlign: 'center', writingMode: 'vertical-lr', transform: 'rotate(180deg)', height: 40, lineHeight: '10px' }}>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 4, textAlign: 'center', writingMode: 'vertical-lr', transform: 'rotate(180deg)', height: 40, lineHeight: '10px' }}>
             {d[labelKey]}
           </div>
-          <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>{d[valueKey]}</div>
+          <div style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600 }}>{d[valueKey]}</div>
         </div>
       ))}
     </div>
@@ -115,8 +115,8 @@ function PieChart({ data, labelKey, valueKey, colors }) {
         {segments.map((s, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
             <div style={{ width: 10, height: 10, borderRadius: 2, background: s.color, flexShrink: 0 }} />
-            <span style={{ color: '#94a3b8' }}>{s[labelKey]}</span>
-            <span style={{ color: '#64748b' }}>{s[valueKey]} ({s.pct}%)</span>
+            <span style={{ color: 'var(--text-secondary)' }}>{s[labelKey]}</span>
+            <span style={{ color: 'var(--text-muted)' }}>{s[valueKey]} ({s.pct}%)</span>
           </div>
         ))}
       </div>
@@ -250,18 +250,18 @@ export default function AdminPage({ userRole = 'admin' }) {
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
+      background: 'linear-gradient(135deg, #0f172a 0%, var(--table-header) 50%, #0f172a 100%)',
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px 60px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Admin Panel</h1>
-          <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3, flexWrap: 'wrap' }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Admin Panel</h1>
+          <div style={{ display: 'flex', gap: 4, background: 'var(--card-bg)', borderRadius: 10, padding: 3, flexWrap: 'wrap' }}>
             {tabs.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
                 padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
                 fontSize: 13, fontWeight: 600, textTransform: 'capitalize',
                 background: activeTab === tab ? 'rgba(59,130,246,0.25)' : 'transparent',
-                color: activeTab === tab ? '#60a5fa' : '#64748b',
+                color: activeTab === tab ? 'var(--accent-text)' : 'var(--text-muted)',
                 transition: 'all 0.2s',
               }}>
                 {tab}
@@ -271,9 +271,9 @@ export default function AdminPage({ userRole = 'admin' }) {
         </div>
 
         {error && (
-          <div style={{ ...CARD, padding: '12px 18px', marginBottom: 20, color: '#f87171', fontSize: 13 }}>
+          <div style={{ ...CARD, padding: '12px 18px', marginBottom: 20, color: 'var(--danger)', fontSize: 13 }}>
             {error}
-            <button onClick={() => setError('')} style={{ marginLeft: 12, background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: 13 }}>Dismiss</button>
+            <button onClick={() => setError('')} style={{ marginLeft: 12, background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: 13 }}>Dismiss</button>
           </div>
         )}
 
@@ -287,14 +287,14 @@ export default function AdminPage({ userRole = 'admin' }) {
               ].map(s => (
                 <div key={s.label} style={{ ...CARD, padding: '18px 20px', textAlign: 'center' }}>
                   <div style={{ fontSize: 28, fontWeight: 700, color: s.color }}>{s.value}</div>
-                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>{s.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{s.label}</div>
                 </div>
               ))}
             </div>
 
             <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <div style={{ ...CARD, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9', margin: '0 0 12px' }}>User Growth (Monthly)</h3>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>User Growth (Monthly)</h3>
                 {analytics.userGrowth.length > 0 ? (
                   <VerticalBarChart
                     data={analytics.userGrowth.map(d => ({ ...d, month: new Date(d.month).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) }))}
@@ -305,7 +305,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                 )}
               </div>
               <div style={{ ...CARD, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9', margin: '0 0 12px' }}>Program Popularity</h3>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>Program Popularity</h3>
                 {analytics.programPopularity.length > 0 ? (
                   <BarChart data={analytics.programPopularity} labelKey="program" valueKey="count" color={COLORS} />
                 ) : (
@@ -316,7 +316,7 @@ export default function AdminPage({ userRole = 'admin' }) {
 
             <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div style={{ ...CARD, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9', margin: '0 0 12px' }}>Holland Code Distribution</h3>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>Holland Code Distribution</h3>
                 {analytics.hollandDistribution.length > 0 && analytics.hollandDistribution.some(d => d.count > 0) ? (
                   <PieChart data={analytics.hollandDistribution} labelKey="code" valueKey="count" colors={['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#f97316', '#a855f7']} />
                 ) : (
@@ -324,7 +324,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                 )}
               </div>
               <div style={{ ...CARD, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9', margin: '0 0 12px' }}>Strand Distribution</h3>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>Strand Distribution</h3>
                 {analytics.strandDistribution.length > 0 ? (
                   <BarChart data={analytics.strandDistribution} labelKey="strand" valueKey="count" color={COLORS} />
                 ) : (
@@ -339,8 +339,8 @@ export default function AdminPage({ userRole = 'admin' }) {
           <div style={{ ...CARD, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Users</h2>
-                <span style={{ fontSize: 12, color: '#64748b' }}>{total} total</span>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Users</h2>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{total} total</span>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
@@ -364,14 +364,14 @@ export default function AdminPage({ userRole = 'admin' }) {
             {loading ? (
               <div style={{ padding: 20 }}><SkeletonLoader height={14} width="40%" style={{ margin: '0 auto' }} /></div>
             ) : visibleUsers.length === 0 ? (
-              <div style={{ color: '#64748b', fontSize: 13, padding: 20, textAlign: 'center' }}>No users found.</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: 13, padding: 20, textAlign: 'center' }}>No users found.</div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <tr style={{ borderBottom: '1px solid var(--track-bg)' }}>
                       {['', 'User', 'Email', 'Role', 'Joined', 'Actions'].map(h => (
-                        <th key={h} style={{ textAlign: 'left', padding: '10px 12px', color: '#64748b', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h === '' ? null : h}</th>
+                        <th key={h} style={{ textAlign: 'left', padding: '10px 12px', color: 'var(--text-muted)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h === '' ? null : h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -382,14 +382,14 @@ export default function AdminPage({ userRole = 'admin' }) {
                           key={u.id}
                           onClick={() => toggleRow(u.id)}
                           style={{
-                            borderBottom: expandedRow === u.id ? 'none' : '1px solid rgba(255,255,255,0.04)',
+                            borderBottom: expandedRow === u.id ? 'none' : '1px solid var(--card-bg)',
                             cursor: 'pointer', transition: 'background 0.15s',
                           }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--row-bg)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                           <td style={{ padding: '10px 12px', width: 20 }}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                               style={{ transform: expandedRow === u.id ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
                               <polyline points="9 18 15 12 9 6" />
                             </svg>
@@ -400,31 +400,31 @@ export default function AdminPage({ userRole = 'admin' }) {
                                 <img src={u.avatar} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }} />
                               ) : (
                                 <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                                   </svg>
                                 </div>
                               )}
-                              <span style={{ color: '#e2e8f0' }}>{u.firstName}{u.lastName ? ` ${u.lastName}` : ''}</span>
+                              <span style={{ color: 'var(--text-input)' }}>{u.firstName}{u.lastName ? ` ${u.lastName}` : ''}</span>
                             </div>
                           </td>
-                          <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{u.email}</td>
+                          <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{u.email}</td>
                           <td style={{ padding: '10px 12px' }}>
                             <span style={{
                               display: 'inline-block', padding: '2px 8px', borderRadius: 10,
                               fontSize: 11, fontWeight: 600,
-                              backgroundColor: u.role === 'admin' || u.role === 'super_admin' ? 'rgba(6,182,212,0.15)' : 'rgba(59,130,246,0.15)',
-                              color: u.role === 'admin' || u.role === 'super_admin' ? '#22d3ee' : '#60a5fa',
+                              backgroundColor: u.role === 'admin' || u.role === 'super_admin' ? 'rgba(6,182,212,0.15)' : 'var(--accent-bg)',
+                              color: u.role === 'admin' || u.role === 'super_admin' ? '#22d3ee' : 'var(--accent-text)',
                             }}>
                               {u.role}
                             </span>
                           </td>
-                          <td style={{ padding: '10px 12px', color: '#64748b', fontSize: 12 }}>
+                          <td style={{ padding: '10px 12px', color: 'var(--text-muted)', fontSize: 12 }}>
                             {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}
                           </td>
                           <td style={{ padding: '10px 12px' }} onClick={e => e.stopPropagation()}>
                             <button onClick={() => handleDelete(u.id)} style={{
-                              background: 'none', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171',
+                              background: 'none', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--danger)',
                               fontSize: 11, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
                             }}>
                               Delete
@@ -433,39 +433,39 @@ export default function AdminPage({ userRole = 'admin' }) {
                         </tr>
                         {expandedRow === u.id && (
                           <tr key={`${u.id}-expanded`}>
-                            <td colSpan={6} style={{ padding: 0, borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                            <td colSpan={6} style={{ padding: 0, borderBottom: '1px solid var(--card-bg)' }}>
                               <div className="r-grid-2" style={{
                                 padding: '16px 24px 16px 48px',
                                 background: 'rgba(255,255,255,0.02)',
                                 fontSize: 13, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8,
                               }}>
                                 <div>
-                                  <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>First Name</span>
-                                  <span style={{ color: '#e2e8f0' }}>{u.firstName || '-'}</span>
+                                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>First Name</span>
+                                  <span style={{ color: 'var(--text-input)' }}>{u.firstName || '-'}</span>
                                 </div>
                                 <div>
-                                  <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>Last Name</span>
-                                  <span style={{ color: '#e2e8f0' }}>{u.lastName || '-'}</span>
+                                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Last Name</span>
+                                  <span style={{ color: 'var(--text-input)' }}>{u.lastName || '-'}</span>
                                 </div>
                                 <div>
-                                  <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>Middle Initial</span>
-                                  <span style={{ color: '#e2e8f0' }}>{u.middleInitial || '-'}</span>
+                                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Middle Initial</span>
+                                  <span style={{ color: 'var(--text-input)' }}>{u.middleInitial || '-'}</span>
                                 </div>
                                 <div>
-                                  <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>Extension</span>
-                                  <span style={{ color: '#e2e8f0' }}>{u.extensionName || '-'}</span>
+                                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Extension</span>
+                                  <span style={{ color: 'var(--text-input)' }}>{u.extensionName || '-'}</span>
                                 </div>
                                 <div>
-                                  <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>Role</span>
-                                  <span style={{ color: '#e2e8f0' }}>{u.role}</span>
+                                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Role</span>
+                                  <span style={{ color: 'var(--text-input)' }}>{u.role}</span>
                                 </div>
                                 <div>
-                                  <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>Created</span>
-                                  <span style={{ color: '#e2e8f0' }}>{u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</span>
+                                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Created</span>
+                                  <span style={{ color: 'var(--text-input)' }}>{u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</span>
                                 </div>
                                 <div>
-                                  <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>Updated</span>
-                                  <span style={{ color: '#e2e8f0' }}>{u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '-'}</span>
+                                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Updated</span>
+                                  <span style={{ color: 'var(--text-input)' }}>{u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '-'}</span>
                                 </div>
                               </div>
                               <div style={{ marginTop: 12, display: 'flex', gap: 8, padding: '0 24px 16px 48px' }}>
@@ -489,7 +489,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                                   setEditUserModal(true)
                                 }} style={{
                                   padding: '5px 12px', borderRadius: 8, border: '1px solid rgba(59,130,246,0.3)',
-                                  background: 'rgba(59,130,246,0.1)', color: '#60a5fa', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                                  background: 'var(--accent-bg)', color: 'var(--accent-text)', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                                 }}>
                                   Edit
                                 </button>
@@ -514,7 +514,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                     opacity: page <= 1 ? 0.4 : 1, cursor: page <= 1 ? 'default' : 'pointer',
                   }}
                 >Previous</button>
-                <span style={{ color: '#64748b', fontSize: 12, padding: '6px 0' }}>Page {page} of {Math.ceil(total / 20)}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 12, padding: '6px 0' }}>Page {page} of {Math.ceil(total / 20)}</span>
                 <button
                   disabled={page >= Math.ceil(total / 20)}
                   onClick={() => fetchUsers(page + 1, '')}
@@ -535,11 +535,11 @@ export default function AdminPage({ userRole = 'admin' }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
           }}>
             <div style={{
-              background: '#1e293b', borderRadius: 16, padding: 28, maxWidth: 400, width: '100%',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'var(--modal-bg)', borderRadius: 16, padding: 28, maxWidth: 400, width: '100%',
+              border: '1px solid var(--card-border)',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}>
-              <h3 style={{ color: '#f1f5f9', fontSize: 16, fontWeight: 700, margin: '0 0 16px' }}>Edit User</h3>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 700, margin: '0 0 16px' }}>Edit User</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <input value={editUserData.firstName} onChange={e => setEditUserData(p => ({ ...p, firstName: e.target.value }))}
                   placeholder="First Name" style={INPUT} />
@@ -556,7 +556,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                 </select>
               </div>
               {editUserError && (
-                <div style={{ color: '#f87171', fontSize: 12, marginTop: 8 }}>{editUserError}</div>
+                <div style={{ color: 'var(--danger)', fontSize: 12, marginTop: 8 }}>{editUserError}</div>
               )}
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
                 <button onClick={() => { setEditUserModal(false); setEditUserError('') }} style={{
@@ -597,7 +597,7 @@ export default function AdminPage({ userRole = 'admin' }) {
         {activeTab === 'activity' && (
           <div style={{ ...CARD, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Activity Log</h2>
+              <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Activity Log</h2>
               <button onClick={() => fetchActivityLog(1)} style={{ ...BTN_SECONDARY, fontSize: 12, padding: '5px 12px' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4, verticalAlign: 'middle' }}>
                   <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
@@ -612,18 +612,18 @@ export default function AdminPage({ userRole = 'admin' }) {
                 <div style={{ overflowX: 'auto', maxHeight: 500, overflowY: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                     <thead style={{ position: 'sticky', top: 0 }}>
-                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#1e3a5f' }}>
-                        <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>User</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Action</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Details</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>IP</th>
-                        <th style={{ textAlign: 'right', padding: '8px 12px', color: '#64748b', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Time</th>
+                      <tr style={{ borderBottom: '1px solid var(--track-bg)', background: 'var(--table-header)' }}>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-muted)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>User</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-muted)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Action</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-muted)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Details</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-muted)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>IP</th>
+                        <th style={{ textAlign: 'right', padding: '8px 12px', color: 'var(--text-muted)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>Time</th>
                       </tr>
                     </thead>
                     <tbody>
                       {activityLog.map(entry => (
-                        <tr key={entry.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                          <td style={{ padding: '8px 12px', color: '#e2e8f0' }}>
+                        <tr key={entry.id} style={{ borderBottom: '1px solid var(--row-bg)' }}>
+                          <td style={{ padding: '8px 12px', color: 'var(--text-input)' }}>
                             {entry.first_name ? `${entry.first_name} ${entry.last_name || ''}`.trim() : entry.email || 'System'}
                           </td>
                           <td style={{ padding: '8px 12px' }}>
@@ -631,24 +631,24 @@ export default function AdminPage({ userRole = 'admin' }) {
                               display: 'inline-block', padding: '2px 7px', borderRadius: 8,
                               fontSize: 10, fontWeight: 600,
                               background: entry.action_type === 'login' ? 'rgba(34,197,94,0.15)' :
-                                entry.action_type === 'register' ? 'rgba(59,130,246,0.15)' :
+                                entry.action_type === 'register' ? 'var(--accent-bg)' :
                                 entry.action_type === 'assessment_save' ? 'rgba(168,85,247,0.15)' :
                                 entry.action_type === 'settings_update' || entry.action_type === 'program_toggle' ? 'rgba(6,182,212,0.15)' :
-                                'rgba(255,255,255,0.06)',
+                                'var(--track-bg)',
                               color: entry.action_type === 'login' ? '#4ade80' :
-                                entry.action_type === 'register' ? '#60a5fa' :
+                                entry.action_type === 'register' ? 'var(--accent-text)' :
                                 entry.action_type === 'assessment_save' ? '#c084fc' :
                                 entry.action_type === 'settings_update' || entry.action_type === 'program_toggle' ? '#22d3ee' :
-                                '#94a3b8',
+                                'var(--text-secondary)',
                             }}>
                               {entry.action_type.replace(/_/g, ' ')}
                             </span>
                           </td>
-                          <td style={{ padding: '8px 12px', color: '#94a3b8', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {entry.details || '-'}
                           </td>
-                          <td style={{ padding: '8px 12px', color: '#64748b', fontSize: 11 }}>{entry.ip_address || '-'}</td>
-                          <td style={{ padding: '8px 12px', color: '#64748b', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          <td style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: 11 }}>{entry.ip_address || '-'}</td>
+                          <td style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' }}>
                             {entry.created_at ? new Date(entry.created_at).toLocaleString() : '-'}
                           </td>
                         </tr>
@@ -662,7 +662,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                       ...BTN_SECONDARY, padding: '5px 12px', fontSize: 11,
                       opacity: activityPage <= 1 ? 0.4 : 1, cursor: activityPage <= 1 ? 'default' : 'pointer',
                     }}>Previous</button>
-                    <span style={{ color: '#64748b', fontSize: 11, padding: '6px 0' }}>Page {activityPage} of {Math.ceil(activityTotal / 100)}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 11, padding: '6px 0' }}>Page {activityPage} of {Math.ceil(activityTotal / 100)}</span>
                     <button disabled={activityPage >= Math.ceil(activityTotal / 100)} onClick={() => fetchActivityLog(activityPage + 1)} style={{
                       ...BTN_SECONDARY, padding: '5px 12px', fontSize: 11,
                       opacity: activityPage >= Math.ceil(activityTotal / 100) ? 0.4 : 1, cursor: activityPage >= Math.ceil(activityTotal / 100) ? 'default' : 'pointer',

@@ -1207,7 +1207,7 @@
   {
     "code": "DSU-BSAGRIM-031",
     "name": "BS Agribussiness Management",
-    "faculty": "Faculty of Agriculture and Related Sciences (FARS)",
+    "faculty": "Faculty of Agriculture and Life Sciences",
     "ched_priority": false,
     "compatible_strands": [
       "ABM",
@@ -1266,7 +1266,7 @@
   {
     "code": "DSU-BECE-032",
     "name": "Bachelor of Early Childhood Education",
-    "faculty": "Faculty of Teacher Education (FTED)",
+    "faculty": "Faculty of Teacher Education",
     "ched_priority": false,
     "compatible_strands": [
       "HUMSS",
@@ -1325,7 +1325,7 @@
   {
     "code": "DSU-BSNED-033",
     "name": "Bachelor of Special Needs Education (Generalist)",
-    "faculty": "Faculty of Teacher Education (FTED)",
+    "faculty": "Faculty of Teacher Education",
     "ched_priority": false,
     "compatible_strands": [
       "HUMSS",
@@ -1385,7 +1385,7 @@
   {
     "code": "DSU-BSEDFIL-034",
     "name": "BSed—Major in Filipino",
-    "faculty": "Faculty of Teacher Education (FTED)",
+    "faculty": "Faculty of Teacher Education",
     "ched_priority": false,
     "compatible_strands": [
       "HUMSS",
@@ -1444,7 +1444,7 @@
   {
     "code": "DSU-BTLE-035",
     "name": "Bachelor of Technology Livelihood Education (Home Economics & Industrial Arts)",
-    "faculty": "Faculty of Teacher Education (FTED)",
+    "faculty": "Faculty of Teacher Education",
     "ched_priority": false,
     "compatible_strands": [
       "TVL",

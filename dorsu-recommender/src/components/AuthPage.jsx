@@ -104,7 +104,7 @@ export default function AuthPage() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
+      background: 'linear-gradient(135deg, #0f172a 0%, var(--table-header) 50%, #0f172a 100%)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       padding: 24,
     }}>
@@ -113,20 +113,20 @@ export default function AuthPage() {
         animation: 'fadeInUp 0.6s ease-out both',
       }}>
         <div className="card-padding-mobile" style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          backgroundColor: 'var(--card-bg)',
+          border: '1px solid var(--card-border)',
           borderRadius: 20, padding: 40,
           backdropFilter: 'blur(12px)',
         }}>
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <img src="./logo.png" alt="DOrSU" style={{ height: 56, marginBottom: 16 }} />
               <h1 style={{
-                fontSize: 24, fontWeight: 700, color: '#f1f5f9', margin: 0,
+                fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0,
                 letterSpacing: '-0.01em',
               }}>
                 {mode === 'login' ? 'Welcome Back' : mode === 'register' ? 'Create Account' : mode === 'forgot' ? 'Reset Password' : mode === 'verify' ? 'Email Verified' : 'Set New Password'}
               </h1>
-              <p style={{ fontSize: 14, color: '#94a3b8', marginTop: 6 }}>
+              <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 6 }}>
                 {mode === 'login' ? 'Sign in to continue to the program recommender.' :
                  mode === 'register' ? 'Register to start your college program assessment.' :
                  mode === 'forgot' && !smtpConfigured ? 'Password reset is not available because the email system is not configured. Contact the administrator for assistance.' :
@@ -143,14 +143,14 @@ export default function AuthPage() {
               <div style={{ animation: 'fadeInUp 0.3s ease-out both' }}>
                 <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
                       First Name
                     </label>
                     <input value={firstName} onChange={e => setFirstName(e.target.value)}
                       placeholder="First name" style={inputStyle} autoFocus />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
                       Last Name
                     </label>
                     <input value={lastName} onChange={e => setLastName(e.target.value)}
@@ -159,15 +159,15 @@ export default function AuthPage() {
                 </div>
                 <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
-                      Middle Initial <span style={{ color: '#64748b', fontWeight: 400 }}>(optional)</span>
+                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
+                      Middle Initial <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span>
                     </label>
                     <input value={middleInitial} onChange={e => setMiddleInitial(e.target.value)}
                       placeholder="e.g. M" style={inputStyle} maxLength={2} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
-                      Extension <span style={{ color: '#64748b', fontWeight: 400 }}>(optional)</span>
+                    <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
+                      Extension <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span>
                     </label>
                     <input value={extensionName} onChange={e => setExtensionName(e.target.value)}
                       placeholder="e.g. Jr., III" style={inputStyle} />
@@ -178,7 +178,7 @@ export default function AuthPage() {
 
             {(mode === 'login' || mode === 'register' || mode === 'forgot') && (
               <div style={{ marginBottom: mode === 'forgot' ? 22 : 18 }}>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
                   Email Address
                 </label>
                 <input
@@ -195,7 +195,7 @@ export default function AuthPage() {
 
             {mode === 'reset' && (
               <div style={{ marginBottom: 22 }}>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
                   New Password
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -210,7 +210,7 @@ export default function AuthPage() {
                   <button type="button" onClick={() => setShowPwd(!showPwd)} style={{
                     position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
                     background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-                    color: '#64748b', display: 'flex', alignItems: 'center',
+                    color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
                   }}>
                     {showPwd ? (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -230,7 +230,7 @@ export default function AuthPage() {
 
             {(mode === 'login' || mode === 'register') && (
               <div style={{ marginBottom: 22 }}>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
                   Password
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -244,7 +244,7 @@ export default function AuthPage() {
                   <button type="button" onClick={() => setShowPwd(!showPwd)} style={{
                     position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
                     background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-                    color: '#64748b', display: 'flex', alignItems: 'center',
+                    color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
                   }}>
                     {showPwd ? (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -299,7 +299,7 @@ export default function AuthPage() {
               <button
                 onClick={() => switchMode('forgot')}
                 style={{
-                  background: 'none', border: 'none', color: '#60a5fa',
+                  background: 'none', border: 'none', color: 'var(--accent-text)',
                   fontSize: 13, fontWeight: 500, cursor: 'pointer', textDecoration: 'underline',
                 }}
               >
@@ -310,13 +310,13 @@ export default function AuthPage() {
 
           {(mode === 'login' || mode === 'register') && (
             <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <span style={{ fontSize: 13, color: '#64748b' }}>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                 {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}
               </span>
               <button
                 onClick={() => switchMode()}
                 style={{
-                  background: 'none', border: 'none', color: '#60a5fa',
+                  background: 'none', border: 'none', color: 'var(--accent-text)',
                   fontSize: 13, fontWeight: 600, cursor: 'pointer', marginLeft: 4,
                   textDecoration: 'underline',
                 }}
@@ -331,7 +331,7 @@ export default function AuthPage() {
               <button
                 onClick={() => switchMode('login')}
                 style={{
-                  background: 'none', border: 'none', color: '#94a3b8',
+                  background: 'none', border: 'none', color: 'var(--text-secondary)',
                   fontSize: 13, cursor: 'pointer', textDecoration: 'underline',
                 }}
               >
@@ -345,7 +345,7 @@ export default function AuthPage() {
               <button
                 onClick={() => switchMode('login')}
                 style={{
-                  background: 'none', border: 'none', color: '#60a5fa',
+                  background: 'none', border: 'none', color: 'var(--accent-text)',
                   fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline',
                 }}
               >
@@ -375,9 +375,9 @@ export default function AuthPage() {
 
 const inputStyle = {
   width: '100%', padding: '11px 14px', fontSize: 14,
-  backgroundColor: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 8, color: '#f1f5f9',
+  backgroundColor: 'var(--track-bg)',
+  border: '1px solid var(--border-strong)',
+  borderRadius: 8, color: 'var(--text-primary)',
   outline: 'none', boxSizing: 'border-box',
   transition: 'border-color 0.2s',
 }

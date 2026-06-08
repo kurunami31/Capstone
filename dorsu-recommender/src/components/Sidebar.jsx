@@ -121,10 +121,10 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
         <button onClick={onToggle} style={{
           position: 'fixed', left: 10, top: 10, zIndex: 100,
           width: 40, height: 40,
-          background: '#0b1222', border: '1px solid rgba(255,255,255,0.1)',
+          background: 'var(--sidebar-bg)', border: '1px solid var(--border-strong)',
           borderRadius: 8, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#94a3b8', padding: 0,
+          color: 'var(--text-secondary)', padding: 0,
         }}>
           <HamburgerIcon open={false} />
         </button>
@@ -140,7 +140,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
         zIndex: 100,
         transition: 'left 0.3s ease, width 0.3s ease',
       }}>
-          <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '20px 16px 16px' : '12px 10px'), borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '20px 16px 16px' : '12px 10px'), borderBottom: '1px solid var(--input-bg)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{
               width: 44, height: 44, borderRadius: 10, flexShrink: 0,
               background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
@@ -156,9 +156,9 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
             </div>
             <button onClick={onToggle} style={{
               width: 28, height: 28, flexShrink: 0, marginLeft: 'auto',
-              background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 6,
+              background: 'var(--track-bg)', border: 'none', borderRadius: 6,
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#94a3b8', padding: 0,
+              color: 'var(--text-secondary)', padding: 0,
             }}>
               <HamburgerIcon open={isMobile || open} />
             </button>
@@ -173,14 +173,14 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
                 ...barStyle,
                 padding: isMobile ? '16px 16px' : (open ? '14px 16px' : '16px 0'),
                 width: isMobile ? '100%' : (open ? '100%' : 44),
-                color: activePage === item.id ? '#60a5fa' : 'var(--text-muted, #94a3b8)',
+                color: activePage === item.id ? 'var(--accent-text)' : 'var(--text-muted, #94a3b8)',
                 fontWeight: activePage === item.id ? 600 : 400,
-                background: activePage === item.id ? 'rgba(59,130,246,0.15)' : 'transparent',
+                background: activePage === item.id ? 'var(--accent-bg)' : 'transparent',
                 borderRadius: isMobile ? 8 : (open ? 8 : 6),
                 position: 'relative',
               }}
-              onMouseEnter={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0' } }}
-              onMouseLeave={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' } }}
+              onMouseEnter={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'var(--card-bg)'; e.currentTarget.style.color = 'var(--text-input)' } }}
+              onMouseLeave={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)' } }}
             >
               <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {item.icon === 'bell' && unreadCount > 0 && (
@@ -203,7 +203,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
 
         <div style={{
           padding: isMobile ? '12px 8px' : (open ? '12px 8px' : '8px 0'),
-          borderTop: '1px solid rgba(255,255,255,0.05)',
+          borderTop: '1px solid var(--input-bg)',
           display: 'flex', flexDirection: 'column', alignItems: isMobile || open ? 'stretch' : 'center',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '8px 12px' : (open ? '8px 12px' : '4px 0'), justifyContent: isMobile || open ? 'flex-start' : 'center' }}>
@@ -211,7 +211,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               <img src={user.avatar} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
             ) : (
               <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                 </svg>
               </div>
@@ -240,11 +240,11 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               ...barStyle,
               padding: isMobile ? '14px 14px' : (open ? '12px 16px' : '14px 0'),
               width: isMobile ? '100%' : (open ? '100%' : 44),
-              color: '#64748b',
+              color: 'var(--text-muted)',
               borderRadius: isMobile ? 8 : (open ? 8 : 6),
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#e2e8f0' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#64748b' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-input)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}
           >
             <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {dark ? <SunIcon /> : <MoonIcon />}
@@ -257,11 +257,11 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               ...barStyle,
               padding: isMobile ? '14px 14px' : (open ? '12px 16px' : '14px 0'),
               width: isMobile ? '100%' : (open ? '100%' : 44),
-              color: '#64748b',
+              color: 'var(--text-muted)',
               borderRadius: isMobile ? 8 : (open ? 8 : 6),
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#f87171' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--card-bg)'; e.currentTarget.style.color = 'var(--danger)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)' }}
           >
             <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icons.logOut}</span>
             {(isMobile || open) && 'Sign Out'}
