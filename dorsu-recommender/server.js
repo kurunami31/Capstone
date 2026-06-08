@@ -512,12 +512,16 @@ async function logActivity(userId, actionType, details = '', ip = '') {
   }
 }
 
-app.get('/api/admin/stats', authenticate, requireStaff, async (_, res) => {
+app.get('/api/admin/stats', authenticate, requireStaff, async (req, res) => {
   try {
-    const totalUsers = await pool.query("SELECT COUNT(*) FROM users WHERE email != 'admin@dorsu.edu.ph'")
+    let baseCondition = "email != 'admin@dorsu.edu.ph'"
+    if (req.user.role === 'admin') {
+      baseCondition += " AND role NOT IN ('admin', 'super_admin')"
+    }
+    const totalUsers = await pool.query(`SELECT COUNT(*) FROM users WHERE ${baseCondition}`)
     const adminCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND email != 'admin@dorsu.edu.ph'")
     const recentUsers = await pool.query(
-      "SELECT id, email, first_name, last_name, avatar, role, created_at FROM users WHERE email != 'admin@dorsu.edu.ph' ORDER BY created_at DESC LIMIT 5"
+      `SELECT id, email, first_name, last_name, avatar, role, created_at FROM users WHERE ${baseCondition} ORDER BY created_at DESC LIMIT 5`
     )
     res.json({
       totalUsers: parseInt(totalUsers.rows[0].count),
@@ -588,13 +592,7 @@ app.get('/api/admin/users', authenticate, requireManager, async (req, res) => {
       })),
       total: parseInt(countResult.rows[0].count),
       page, limit,
-      _debug: {
-        countQuery, countParams,
-        dataQuery, dataParams,
-        userRole: req.user.role, userId: req.user.id,
-        dataEmails: dataResult.rows.map(r => ({ email: r.email, role: r.role })),
-        countResult: parseInt(countResult.rows[0].count),
-      },
+
     })
   } catch (err) {
     console.error('Admin users error:', err)
