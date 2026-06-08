@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react'
 import SkeletonLoader from './SkeletonLoader.jsx'
+import { calculateRecommendations } from '../engine/scoring.js'
+import programs from '../data/programs.json'
+
+function codeColor(score) {
+  if (score >= 80) return '#34d399'
+  if (score >= 60) return '#fbbf24'
+  return '#f87171'
+}
 
 export default function HistoryPage() {
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [expandedId, setExpandedId] = useState(null)
+  const [details, setDetails] = useState(null)
+  const [detailsLoading, setDetailsLoading] = useState(false)
   const limit = 20
 
   useEffect(() => {
@@ -18,6 +29,44 @@ export default function HistoryPage() {
 
   const totalPages = Math.ceil(total / limit)
 
+  const toggleExpand = async (id) => {
+    if (expandedId === id) {
+      setExpandedId(null)
+      setDetails(null)
+      return
+    }
+    setExpandedId(id)
+    setDetails(null)
+    setDetailsLoading(true)
+    try {
+      const res = await fetch(`/api/assessments/${id}/details`, { credentials: 'include' })
+      const data = await res.json()
+      if (data.fullData) {
+        const studentData = {
+          ...data.fullData,
+          name: '',
+          school: '',
+          grades: data.fullData.grades || {},
+          strandSpecificGrades: data.fullData.strandSpecificGrades || {},
+          suastTiers: data.fullData.suastTiers || {},
+          hollandCode: data.fullData.hollandCode,
+          interests: data.fullData.interests || {},
+          skills: data.fullData.skills || {},
+          gwa: data.fullData.gwa || data.gwa || 0,
+          strand: data.fullData.strand || data.strand || '',
+        }
+        const recommendations = calculateRecommendations(studentData, programs)
+        setDetails({ recommendations, fullData: true })
+      } else {
+        setDetails({ topPrograms: data.topPrograms, fullData: false })
+      }
+    } catch {
+      setDetails({ topPrograms: [], fullData: false })
+    } finally {
+      setDetailsLoading(false)
+    }
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -25,9 +74,12 @@ export default function HistoryPage() {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 28px' }}>
-          Assessment History
-        </h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>
+            Assessment History
+          </h1>
+          {!loading && <span style={{ fontSize: 13, color: '#64748b' }}>{total} total</span>}
+        </div>
 
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -58,10 +110,20 @@ export default function HistoryPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {history.map(entry => (
                 <div key={entry.id} style={{
-                  backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: 20,
+                  backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14,
                   border: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(8px)',
+                  overflow: 'hidden',
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                  <div
+                    onClick={() => toggleExpand(entry.id)}
+                    style={{
+                      padding: 20, cursor: 'pointer',
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
                     <div>
                       <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 4 }}>
                         {new Date(entry.createdAt).toLocaleDateString('en-US', {
@@ -73,23 +135,95 @@ export default function HistoryPage() {
                         <span>GWA: {entry.gwa || 'N/A'}</span>
                         {entry.hollandCode && <span>Holland: {entry.hollandCode}</span>}
                       </div>
+                      {entry.topPrograms.length > 0 && (
+                        <div style={{ marginTop: 8 }}>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {entry.topPrograms.map((p, i) => (
+                              <span key={p.code} style={{
+                                fontSize: 11, padding: '3px 10px', borderRadius: 20,
+                                backgroundColor: i === 0 ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.06)',
+                                color: i === 0 ? '#60a5fa' : '#94a3b8',
+                                border: `1px solid ${i === 0 ? 'rgba(59,130,246,0.25)' : 'rgba(255,255,255,0.08)'}`,
+                              }}>
+                                {p.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{
+                      transform: expandedId === entry.id ? 'rotate(180deg)' : '',
+                      transition: 'transform 0.2s', color: '#64748b', flexShrink: 0, marginLeft: 12,
+                    }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
                     </div>
                   </div>
-                  {entry.topPrograms.length > 0 && (
-                    <div>
-                      <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6, fontWeight: 600 }}>Top Results</div>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {entry.topPrograms.map((p, i) => (
-                          <span key={p.code} style={{
-                            fontSize: 11, padding: '3px 10px', borderRadius: 20,
-                            backgroundColor: i === 0 ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.06)',
-                            color: i === 0 ? '#60a5fa' : '#94a3b8',
-                            border: `1px solid ${i === 0 ? 'rgba(59,130,246,0.25)' : 'rgba(255,255,255,0.08)'}`,
-                          }}>
-                            {p.name}
-                          </span>
-                        ))}
-                      </div>
+
+                  {expandedId === entry.id && (
+                    <div style={{
+                      borderTop: '1px solid rgba(255,255,255,0.06)',
+                      padding: '16px 20px 20px',
+                    }}>
+                      {detailsLoading ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          <SkeletonLoader height={14} width="40%" />
+                          <SkeletonLoader height={14} width="60%" />
+                          <SkeletonLoader height={14} width="50%" />
+                        </div>
+                      ) : details?.fullData && details.recommendations?.length > 0 ? (
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8', marginBottom: 12 }}>
+                            Full Score Breakdown
+                          </div>
+                          <div style={{ display: 'grid', gap: 8 }}>
+                            {details.recommendations.map((r) => (
+                              <div key={r.program.code} style={{
+                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                borderRadius: 10, padding: '10px 14px',
+                                border: '1px solid rgba(255,255,255,0.04)',
+                              }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                  <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9' }}>
+                                    <span style={{
+                                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                      width: 20, height: 20, borderRadius: '50%', fontSize: 11,
+                                      backgroundColor: codeColor(r.totalScore), color: '#0f172a',
+                                      fontWeight: 700, marginRight: 8,
+                                    }}>{r.rank}</span>
+                                    {r.program.name}
+                                  </div>
+                                  <div style={{ fontSize: 14, fontWeight: 700, color: codeColor(r.totalScore) }}>
+                                    {r.totalScore}%
+                                  </div>
+                                </div>
+                                <div style={{
+                                  height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.06)',
+                                  marginBottom: 8, overflow: 'hidden',
+                                }}>
+                                  <div style={{
+                                    width: `${r.totalScore}%`, height: '100%',
+                                    backgroundColor: codeColor(r.totalScore),
+                                    borderRadius: 2, transition: 'width 0.5s ease',
+                                  }} />
+                                </div>
+                                <div style={{ display: 'flex', gap: 12, fontSize: 11, color: '#64748b' }}>
+                                  <span>Academic: {r.breakdown.academic}%</span>
+                                  <span>SUAST: {r.breakdown.suast}%</span>
+                                  <span>Personal: {r.breakdown.personalFit}%</span>
+                                  <span style={{ color: r.admission.color }}>Admission: {r.admission.label}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 13, color: '#64748b', textAlign: 'center', padding: '12px 0' }}>
+                          Detailed score breakdown is not available for this assessment. Top programs: {details?.topPrograms?.map(p => p.name).join(', ') || 'N/A'}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

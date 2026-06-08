@@ -16,6 +16,7 @@ import ProfilePage from './components/ProfilePage.jsx'
 import FAQPage from './components/FAQPage.jsx'
 import AdminPage from './components/AdminPage.jsx'
 import HistoryPage from './components/HistoryPage.jsx'
+import UserDashboard from './components/UserDashboard.jsx'
 import ProgramsPage from './components/ProgramsPage.jsx'
 import SettingsPage from './components/SettingsPage.jsx'
 import QuestionsManager from './components/QuestionsManager.jsx'
@@ -57,7 +58,8 @@ function AppContent() {
   }, [user])
 
   const [consented, setConsented] = useState(false)
-  const [showLanding, setShowLanding] = useState(true)
+  const [showLanding, setShowLanding] = useState(false)
+  const [showDashboard, setShowDashboard] = useState(true)
   const [showProfile, setShowProfile] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [showFAQ, setShowFAQ] = useState(false)
@@ -148,6 +150,16 @@ function AppContent() {
           gwa: studentData.gwa || 0,
           hollandCode: hollandCode?.code || '',
           topPrograms: results.slice(0, 5).map(r => r.program.code),
+          fullData: {
+            grades: studentData.grades || {},
+            strandSpecificGrades: studentData.strandSpecificGrades || {},
+            suastTiers: studentData.suastTiers || {},
+            hollandCode: hollandCode || null,
+            interests: studentData.interests || {},
+            skills: studentData.skills || {},
+            gwa: studentData.gwa || 0,
+            strand: studentData.strand || '',
+          },
         }),
       }).catch(err => console.error('Failed to save assessment results', err))
     }
@@ -161,11 +173,12 @@ function AppContent() {
     const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ')
     updateData({ name: fullName, school }); setStep(1)
   }
+  const isStaff = ['admin', 'super_admin', 'department_head', 'counselor'].includes(user?.role)
   const handleGetStarted = () => {
     if (savedProgress && savedProgress.step > 0) {
       setShowResumePrompt(true)
     } else {
-      setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setStep(0)
+      setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setStep(0)
     }
   }
   const handleResume = () => {
@@ -177,22 +190,29 @@ function AppContent() {
   const handleNewAssessment = () => {
     setSavedProgress(null)
     setShowResumePrompt(false)
-    setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setStep(0)
+    setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setStep(0)
     fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(err => console.error('Failed to delete saved progress on new assessment', err))
   }
-  const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
+  const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false) }
   const handleBackFromProfile = () => setShowProfile(false)
-  const handleShowHistory = () => { setShowHistory(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
+  const handleShowHistory = () => { setShowHistory(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false) }
   const handleBackFromHistory = () => setShowHistory(false)
-  const handleShowFAQ = () => { setShowFAQ(true); setShowLanding(false); setShowProfile(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
+  const handleShowFAQ = () => { setShowFAQ(true); setShowLanding(false); setShowProfile(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false) }
   const handleBackFromFAQ = () => setShowFAQ(false)
-  const handleShowAdmin = () => { setShowAdmin(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
+  const handleShowAdmin = () => { setShowAdmin(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false) }
   const handleBackFromAdmin = () => setShowAdmin(false)
-  const handleShowPrograms = () => { setShowPrograms(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
-  const handleShowSettings = () => { setShowSettings(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowQuestions(false); setShowReview(false) }
-  const handleShowQuestions = () => { setShowQuestions(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowReview(false) }
-  const handleShowReview = () => { setShowReview(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false) }
-  const handleGoHome = () => { setShowLanding(true); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
+  const handleShowPrograms = () => { setShowPrograms(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false) }
+  const handleShowSettings = () => { setShowSettings(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false) }
+  const handleShowQuestions = () => { setShowQuestions(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowReview(false); setShowDashboard(false) }
+  const handleShowReview = () => { setShowReview(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowDashboard(false) }
+  const handleGoHome = () => {
+    if (isStaff) {
+      setShowLanding(true); setShowDashboard(false)
+    } else {
+      setShowDashboard(true); setShowLanding(false)
+    }
+    setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false)
+  }
 
   if (loading) {
     return (
@@ -258,6 +278,7 @@ function AppContent() {
   else if (showReview) activePage = 'review'
   else if (showFAQ) activePage = 'faq'
   else if (showAdmin) activePage = 'admin'
+  else if (showDashboard) activePage = 'home'
   else if (!showLanding) activePage = 'assessment'
 
   const renderAssessmentProgress = () => {
@@ -342,6 +363,8 @@ function AppContent() {
     mainContent = <FAQPage />
   } else if (showAdmin) {
     mainContent = <AdminPage userRole={user?.role} />
+  } else if (showDashboard) {
+    mainContent = <UserDashboard onStartAssessment={handleGetStarted} onViewHistory={handleShowHistory} />
   } else if (showLanding) {
     mainContent = <LandingPage onGetStarted={handleGetStarted} user={user} />
   } else {

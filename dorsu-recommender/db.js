@@ -52,6 +52,7 @@ async function initDB() {
       gwa REAL NOT NULL DEFAULT 0,
       holland_code TEXT NOT NULL DEFAULT '',
       top_programs TEXT NOT NULL DEFAULT '[]',
+      full_data JSONB,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `)
@@ -162,6 +163,7 @@ async function initDB() {
   await pool.query('CREATE INDEX IF NOT EXISTS idx_password_resets_token ON password_resets(token)').catch(() => {})
   await pool.query('CREATE INDEX IF NOT EXISTS idx_email_verifications_token ON email_verifications(token)').catch(() => {})
   await pool.query('CREATE INDEX IF NOT EXISTS idx_counselor_notes_assessment_id ON counselor_notes(assessment_id)').catch(() => {})
+  await pool.query(`ALTER TABLE assessments ADD COLUMN IF NOT EXISTS full_data JSONB`).catch(() => {})
 
   console.log('Database initialized.')
 }

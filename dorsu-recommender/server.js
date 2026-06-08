@@ -910,7 +910,7 @@ app.get('/api/questions/:step', authenticate, async (req, res) => {
 
 app.post('/api/assessment/save', authenticate, async (req, res) => {
   try {
-    const { strand, gwa, hollandCode, topPrograms } = req.body
+    const { strand, gwa, hollandCode, topPrograms, fullData } = req.body
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
     // Check cooldown unless admin/counselor
     if (req.user.role === 'user') {
@@ -927,9 +927,9 @@ app.post('/api/assessment/save', authenticate, async (req, res) => {
       }
     }
     await pool.query(
-      `INSERT INTO assessments (id, user_id, strand, gwa, holland_code, top_programs, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-      [id, req.user.id, strand || '', gwa || 0, hollandCode || '[]', JSON.stringify(topPrograms || [])]
+      `INSERT INTO assessments (id, user_id, strand, gwa, holland_code, top_programs, full_data, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
+      [id, req.user.id, strand || '', gwa || 0, hollandCode || '[]', JSON.stringify(topPrograms || []), fullData ? JSON.stringify(fullData) : null]
     )
     // Clear saved progress on completion
     await pool.query('DELETE FROM assessment_progress WHERE user_id = $1', [req.user.id])
@@ -982,6 +982,46 @@ app.get('/api/assessments/history', authenticate, async (req, res) => {
     res.json({ history, total, page, limit })
   } catch (err) {
     console.error('Assessment history error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Assessment details with full results ----
+app.get('/api/assessments/:id/details', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, strand, gwa, holland_code, top_programs, full_data, created_at
+       FROM assessments WHERE id = $1 AND user_id = $2`,
+      [req.params.id, req.user.id]
+    )
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Assessment not found.' })
+
+    const row = result.rows[0]
+
+    const programMap = {}
+    for (const p of programs) programMap[p.code] = p.name
+
+    const topPrograms = JSON.parse(row.top_programs || '[]').map(code => ({
+      code,
+      name: programMap[code] || code,
+    }))
+
+    let fullData = null
+    if (row.full_data) {
+      fullData = typeof row.full_data === 'string' ? JSON.parse(row.full_data) : row.full_data
+    }
+
+    res.json({
+      id: row.id,
+      strand: row.strand,
+      gwa: row.gwa,
+      hollandCode: row.holland_code,
+      topPrograms,
+      fullData,
+      createdAt: row.created_at,
+    })
+  } catch (err) {
+    console.error('Assessment details error:', err)
     res.status(500).json({ error: 'Server error.' })
   }
 })
@@ -1039,6 +1079,64 @@ app.get('/api/assessments/last', authenticate, async (req, res) => {
     res.json({ lastAssessment: result.rows[0].created_at })
   } catch (err) {
     console.error('Last assessment error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- User dashboard summary ----
+app.get('/api/user/summary', authenticate, async (req, res) => {
+  try {
+    const [assessments, userData] = await Promise.all([
+      pool.query(
+        `SELECT id, strand, gwa, holland_code, top_programs, created_at
+         FROM assessments WHERE user_id = $1
+         ORDER BY created_at DESC LIMIT 1`,
+        [req.user.id]
+      ),
+      pool.query(
+        'SELECT email, first_name, last_name, avatar, email_verified, created_at FROM users WHERE id = $1',
+        [req.user.id]
+      ),
+    ])
+
+    const user = userData.rows[0]
+    if (!user) return res.status(404).json({ error: 'User not found.' })
+
+    const programMap = {}
+    for (const p of programs) programMap[p.code] = p.name
+
+    const lastAssessment = assessments.rows[0] || null
+    const lastAssessmentData = lastAssessment ? {
+      id: lastAssessment.id,
+      strand: lastAssessment.strand,
+      gwa: lastAssessment.gwa,
+      hollandCode: lastAssessment.holland_code,
+      topPrograms: JSON.parse(lastAssessment.top_programs || '[]').map(code => ({
+        code,
+        name: programMap[code] || code,
+      })),
+      createdAt: lastAssessment.created_at,
+    } : null
+
+    const countResult = await pool.query(
+      'SELECT COUNT(*)::int AS cnt FROM assessments WHERE user_id = $1',
+      [req.user.id]
+    )
+
+    res.json({
+      profile: {
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        avatar: user.avatar,
+        emailVerified: user.email_verified,
+        createdAt: user.created_at,
+      },
+      lastAssessment: lastAssessmentData,
+      assessmentCount: countResult.rows[0].cnt,
+    })
+  } catch (err) {
+    console.error('User summary error:', err)
     res.status(500).json({ error: 'Server error.' })
   }
 })
