@@ -238,6 +238,9 @@ export default function AdminPage({ userRole = 'admin' }) {
 
   const totalAssessments = analytics.programPopularity.reduce((a, p) => a + p.count, 0)
   const isManager = ['admin', 'super_admin'].includes(userRole)
+  const visibleUsers = userRole === 'admin'
+    ? users.filter(u => u.role !== 'admin' && u.role !== 'super_admin')
+    : users
   const tabs = isManager ? ['dashboard', 'users', 'activity'] : ['dashboard']
 
   return (
@@ -357,7 +360,7 @@ export default function AdminPage({ userRole = 'admin' }) {
 
             {loading ? (
               <div style={{ padding: 20 }}><SkeletonLoader height={14} width="40%" style={{ margin: '0 auto' }} /></div>
-            ) : users.length === 0 ? (
+            ) : visibleUsers.length === 0 ? (
               <div style={{ color: '#64748b', fontSize: 13, padding: 20, textAlign: 'center' }}>No users found.</div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
@@ -370,7 +373,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map(u => (
+                    {visibleUsers.map(u => (
                       <>
                         <tr
                           key={u.id}
