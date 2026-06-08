@@ -23,7 +23,7 @@ export default function CounselorDashboard() {
       const data = await res.json()
       setAssessments(data.assessments || [])
       setTotal(data.total || 0)
-    } catch {}
+    } catch (e) { console.error('Fetch assessments error:', e) }
   }
 
   useEffect(() => { fetchAssessments(1) }, [])
@@ -37,7 +37,7 @@ export default function CounselorDashboard() {
         body: JSON.stringify({ assessmentId, notes: editNotes, status: editStatus }),
       })
       await fetchAssessments(page)
-    } catch {}
+    } catch (e) { console.error('Save note error:', e) }
     setSaving(false)
   }
 

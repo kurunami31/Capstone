@@ -45,13 +45,13 @@ export default function ProgramsPage({ activePrograms }) {
     try {
       const res = await fetch('/api/programs/status', { credentials: 'include' })
       if (res.ok) setLocalActivePrograms(await res.json())
-    } catch {}
+    } catch (e) { console.error('Fetch programs error:', e) }
   }
 
   async function fetchActivityLog() {
     try {
       await fetch('/api/admin/activity?page=1&limit=1', { credentials: 'include' })
-    } catch {}
+    } catch (e) { console.error('Activity log error:', e) }
   }
 
   return (
@@ -109,7 +109,7 @@ export default function ProgramsPage({ activePrograms }) {
                             setLocalActivePrograms(prev => ({ ...prev, [data.code]: data.active }))
                             fetchActivityLog()
                           }
-                        } catch {}
+                          } catch (e) { console.error('Toggle program error:', e) }
                       }}
                       style={{
                         padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
@@ -142,7 +142,7 @@ export default function ProgramsPage({ activePrograms }) {
                             fetchProgramStatus()
                             fetchActivityLog()
                           }
-                        } catch {}
+                        } catch (e) { console.error('Delete program error:', e) }
                       }}
                       style={{
                         padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(248,113,113,0.3)',

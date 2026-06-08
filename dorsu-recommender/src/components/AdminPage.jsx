@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import SkeletonLoader from './SkeletonLoader.jsx'
 
 const CARD = {
@@ -141,6 +141,7 @@ export default function AdminPage({ userRole = 'admin' }) {
   const [editUserError, setEditUserError] = useState('')
   const [activityPage, setActivityPage] = useState(1)
   const [activityTotal, setActivityTotal] = useState(0)
+  const searchTimer = useRef(null)
 
   async function fetchStats() {
     try {
@@ -184,7 +185,7 @@ export default function AdminPage({ userRole = 'admin' }) {
       try {
         const res = await fetch(ep.url, { credentials: 'include' })
         if (res.ok) results[ep.key] = await res.json()
-      } catch {}
+      } catch (e) { console.error('Analytics fetch error:', e) }
     }
     setAnalytics(prev => ({ ...prev, ...results }))
   }
@@ -199,7 +200,7 @@ export default function AdminPage({ userRole = 'admin' }) {
         setActivityTotal(data.total || 0)
         if (p !== undefined) setActivityPage(p)
       }
-    } catch {}
+    } catch (e) { console.error('Activity log fetch error:', e) }
   }
 
   useEffect(() => {
@@ -226,7 +227,8 @@ export default function AdminPage({ userRole = 'admin' }) {
 
   function handleSearch(val) {
     setSearch(val)
-    fetchUsers(1, val)
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => fetchUsers(1, val), 300)
   }
 
   function toggleRow(id) {
@@ -468,10 +470,11 @@ export default function AdminPage({ userRole = 'admin' }) {
                               </div>
                               <div style={{ marginTop: 12, display: 'flex', gap: 8, padding: '0 24px 16px 48px' }}>
                                 <button onClick={async () => {
+                                  if (!confirm('Reset cooldown for this user? Their latest assessment attempt will be removed.')) return
                                   try {
                                     const res = await fetch(`/api/admin/users/${u.id}/reset-cooldown`, { method: 'POST', credentials: 'include' })
                                     if (res.ok) fetchActivityLog()
-                                  } catch {}
+                                  } catch (e) { console.error('Cooldown reset error:', e) }
                                 }} style={{
                                   padding: '5px 12px', borderRadius: 8, border: '1px solid rgba(234,179,8,0.3)',
                                   background: 'rgba(234,179,8,0.1)', color: '#fbbf24', fontSize: 11, fontWeight: 600, cursor: 'pointer',

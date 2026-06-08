@@ -73,7 +73,7 @@ export default function SettingsPage({ settings }) {
                         body: JSON.stringify({ settings: localSettings }),
                       })
                       if (res.ok) {
-                        try { await fetch('/api/admin/activity?page=1&limit=1', { credentials: 'include' }) } catch {}
+                        try { await fetch('/api/admin/activity?page=1&limit=1', { credentials: 'include' }) } catch (e) { console.error('Activity log error:', e) }
                       }
                     }}
                     style={{
@@ -93,7 +93,7 @@ export default function SettingsPage({ settings }) {
                         body: JSON.stringify({ settings: defaults }),
                       })
                       if (res.ok) {
-                        try { await fetch('/api/admin/activity?page=1&limit=1', { credentials: 'include' }) } catch {}
+                        try { await fetch('/api/admin/activity?page=1&limit=1', { credentials: 'include' }) } catch (e) { console.error('Activity log error:', e) }
                       }
                     }}
                     style={{

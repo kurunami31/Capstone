@@ -623,6 +623,7 @@ app.delete('/api/admin/users/:id', authenticate, requireManager, async (req, res
     await pool.query('DELETE FROM counselor_notes WHERE assessment_id IN (SELECT id FROM assessments WHERE user_id = $1)', [req.params.id])
     await pool.query('DELETE FROM assessments WHERE user_id = $1', [req.params.id])
     await pool.query('DELETE FROM users WHERE id = $1', [req.params.id])
+    logActivity(req.user.id, 'user_delete', `Deleted user: ${target.rows[0].email} (${target.rows[0].role})`, req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Admin delete user error:', err)

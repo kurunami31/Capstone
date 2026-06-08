@@ -33,7 +33,7 @@ export default function QuestionsManager() {
       const res = await fetch('/api/admin/questions', { credentials: 'include' })
       const data = await res.json()
       setQuestions(data)
-    } catch {}
+    } catch (e) { console.error('Fetch questions error:', e) }
   }
 
   useEffect(() => { fetchQuestions() }, [])
@@ -67,14 +67,15 @@ export default function QuestionsManager() {
       setEditId(null)
       setForm({ step: 'holland', questionKey: '', questionText: '', questionType: 'text', options: '', sortOrder: 0 })
       await fetchQuestions()
-    } catch {}
+    } catch (e) { console.error('Save question error:', e) }
   }
 
   const remove = async (id) => {
+    if (!confirm('Delete this question? This cannot be undone.')) return
     try {
       await fetch(`/api/admin/questions/${id}`, { method: 'DELETE', credentials: 'include' })
       await fetchQuestions()
-    } catch {}
+    } catch (e) { console.error('Delete question error:', e) }
   }
 
   return (
