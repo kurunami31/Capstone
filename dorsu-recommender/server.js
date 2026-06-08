@@ -41,7 +41,7 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim
 const rateLimitStore = {}
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000
 const AUTH_RATE_LIMIT_MAX = 100
-const UNAUTH_RATE_LIMIT_MAX = 20
+const UNAUTH_RATE_LIMIT_MAX = 60
 
 app.use(express.json({ limit: '1mb' }))
 app.use(cookieParser())
