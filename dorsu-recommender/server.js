@@ -427,6 +427,18 @@ function checkSensitiveRateLimit(key, max, windowMs) {
   return true
 }
 
+async function persistChatMessage(userId, role, message) {
+  try {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+    await pool.query(
+      'INSERT INTO chat_messages (id, user_id, role, message, created_at) VALUES ($1, $2, $3, $4, NOW())',
+      [id, userId, role, message]
+    )
+  } catch (err) {
+    console.error('Chat persist error:', err)
+  }
+}
+
 app.post('/api/chat', authenticate, async (req, res) => {
   if (!checkSensitiveRateLimit(`chat_${req.user.id}`, 30, 15 * 60 * 1000)) {
     return res.status(429).json({ error: 'Too many requests. Try again later.' })
@@ -436,6 +448,8 @@ app.post('/api/chat', authenticate, async (req, res) => {
     if (!message || !message.trim()) {
       return res.status(400).json({ error: 'Message is required.' })
     }
+
+    await persistChatMessage(req.user.id, 'user', message)
 
     const apiKey = process.env.GOOGLE_API_KEY
     if (!apiKey) {
@@ -454,9 +468,14 @@ app.post('/api/chat', authenticate, async (req, res) => {
         if (lower.includes(key)) { reply = val; break }
       }
 
-      if (reply) return res.json({ reply })
+      if (reply) {
+        await persistChatMessage(req.user.id, 'bot', reply)
+        return res.json({ reply })
+      }
 
-      return res.json({ reply: 'I\'m running in offline mode. Please set the GOOGLE_API_KEY environment variable to enable AI-powered responses. In the meantime, check the FAQ page for common questions.' })
+      const fallbackReply = 'I\'m running in offline mode. Please set the GOOGLE_API_KEY environment variable to enable AI-powered responses. In the meantime, check the FAQ page for common questions.'
+      await persistChatMessage(req.user.id, 'bot', fallbackReply)
+      return res.json({ reply: fallbackReply })
     }
 
     const ai = new GoogleGenAI({ apiKey })
@@ -489,10 +508,29 @@ app.post('/api/chat', authenticate, async (req, res) => {
       .replace(/^#{1,6}\s+/gm, '')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .trim()
+    await persistChatMessage(req.user.id, 'bot', reply)
     res.json({ reply })
   } catch (err) {
     console.error('Chat error:', err)
     res.status(500).json({ error: 'Failed to get AI response.' })
+  }
+})
+
+app.get('/api/chat/history', authenticate, async (req, res) => {
+  try {
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50))
+    const result = await pool.query(
+      'SELECT role, message, created_at FROM chat_messages WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2',
+      [req.user.id, limit * 2]
+    )
+    const messages = result.rows.reverse().map(r => ({
+      role: r.role === 'user' ? 'user' : 'bot',
+      text: r.message,
+    }))
+    res.json({ history: messages })
+  } catch (err) {
+    console.error('Chat history error:', err)
+    res.status(500).json({ error: 'Server error.' })
   }
 })
 
@@ -934,6 +972,7 @@ app.post('/api/assessment/save', authenticate, async (req, res) => {
     // Clear saved progress on completion
     await pool.query('DELETE FROM assessment_progress WHERE user_id = $1', [req.user.id])
     logActivity(req.user.id, 'assessment_save', 'Assessment completed', req.ip || '')
+    createNotification(req.user.id, 'assessment', 'Assessment Completed', 'Your assessment has been saved. View your top program recommendations.', '')
     const userResult = await pool.query('SELECT email, first_name, last_name FROM users WHERE id = $1', [req.user.id])
     if (userResult.rows.length > 0) {
       notifyAssessmentCompleted(userResult.rows[0], topPrograms || [])
@@ -1113,6 +1152,113 @@ app.delete('/api/favorites/:programCode', authenticate, async (req, res) => {
     res.json({ success: true })
   } catch (err) {
     console.error('Remove favorite error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Data export ----
+app.get('/api/export/my-data', authenticate, async (req, res) => {
+  try {
+    const [userResult, assessmentsResult] = await Promise.all([
+      pool.query('SELECT email, first_name, last_name, middle_initial, extension_name, role, avatar, email_verified, created_at FROM users WHERE id = $1', [req.user.id]),
+      pool.query('SELECT strand, gwa, holland_code, top_programs, created_at FROM assessments WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]),
+    ])
+    const user = userResult.rows[0]
+    if (!user) return res.status(404).json({ error: 'User not found.' })
+    res.json({
+      profile: {
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        middleInitial: user.middle_initial,
+        extensionName: user.extension_name,
+        role: user.role,
+        emailVerified: user.email_verified,
+        createdAt: user.created_at,
+      },
+      assessments: assessmentsResult.rows.map(r => ({
+        strand: r.strand,
+        gwa: r.gwa,
+        hollandCode: r.holland_code,
+        topPrograms: JSON.parse(r.top_programs || '[]'),
+        createdAt: r.created_at,
+      })),
+      exportedAt: new Date().toISOString(),
+    })
+  } catch (err) {
+    console.error('Data export error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- Notifications ----
+async function createNotification(userId, type, title, body = '', link = '') {
+  try {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+    await pool.query(
+      'INSERT INTO notifications (id, user_id, type, title, body, link, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
+      [id, userId, type, title, body, link]
+    )
+  } catch (err) {
+    console.error('Create notification error:', err)
+  }
+}
+
+app.get('/api/notifications', authenticate, async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20))
+    const offset = (page - 1) * limit
+    const [countResult, result] = await Promise.all([
+      pool.query('SELECT COUNT(*)::int AS cnt FROM notifications WHERE user_id = $1', [req.user.id]),
+      pool.query('SELECT id, type, title, body, link, is_read, created_at FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3', [req.user.id, limit, offset]),
+    ])
+    res.json({
+      notifications: result.rows.map(r => ({
+        id: r.id,
+        type: r.type,
+        title: r.title,
+        body: r.body,
+        link: r.link,
+        isRead: r.is_read,
+        createdAt: r.created_at,
+      })),
+      total: countResult.rows[0].cnt,
+      page,
+      limit,
+    })
+  } catch (err) {
+    console.error('Get notifications error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.get('/api/notifications/unread-count', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT COUNT(*)::int AS cnt FROM notifications WHERE user_id = $1 AND is_read = false', [req.user.id])
+    res.json({ count: result.rows[0].cnt })
+  } catch (err) {
+    console.error('Unread count error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.put('/api/notifications/:id/read', authenticate, async (req, res) => {
+  try {
+    await pool.query('UPDATE notifications SET is_read = true WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id])
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Mark read error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.put('/api/notifications/read-all', authenticate, async (req, res) => {
+  try {
+    await pool.query('UPDATE notifications SET is_read = true WHERE user_id = $1', [req.user.id])
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Mark all read error:', err)
     res.status(500).json({ error: 'Server error.' })
   }
 })

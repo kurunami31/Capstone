@@ -6,13 +6,28 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const bottomRef = useRef(null)
 
   useEffect(() => {
-    if (open && messages.length === 0) {
-      setMessages([
-        { role: 'bot', text: 'Hi! I\'m the DOrSU assistant. Ask me anything about the program recommender system, the assessment process, or DOrSU programs.' },
-      ])
+    if (open && !historyLoaded) {
+      setHistoryLoaded(true)
+      fetch('/api/chat/history?limit=50', { credentials: 'include' })
+        .then(r => r.json())
+        .then(data => {
+          if (data.history && data.history.length > 0) {
+            setMessages(data.history)
+          } else {
+            setMessages([
+              { role: 'bot', text: 'Hi! I\'m the DOrSU assistant. Ask me anything about the program recommender system, the assessment process, or DOrSU programs.' },
+            ])
+          }
+        })
+        .catch(() => {
+          setMessages([
+            { role: 'bot', text: 'Hi! I\'m the DOrSU assistant. Ask me anything about the program recommender system, the assessment process, or DOrSU programs.' },
+          ])
+        })
     }
   }, [open])
 

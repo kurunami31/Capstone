@@ -1,10 +1,11 @@
+import { useState, useEffect } from 'react'
+
 function HamburgerIcon({ open }) {
   const bar = {
     position: 'absolute', left: 2, right: 2, height: 2,
     borderRadius: 1, backgroundColor: 'currentColor',
     transition: 'all 0.3s ease',
   }
-
   return (
     <div style={{ position: 'relative', width: 16, height: 16, flexShrink: 0 }}>
       <span style={{ ...bar, top: open ? 7 : 3, transform: open ? 'rotate(45deg)' : 'rotate(0)' }} />
@@ -14,9 +15,22 @@ function HamburgerIcon({ open }) {
   )
 }
 
-export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onHistory, onPrograms, onSettings, onQuestions, onReview, onFAQ, onAdmin, onLogout, open, onToggle, isMobile }) {
+export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onHistory, onPrograms, onSettings, onQuestions, onReview, onFAQ, onAdmin, onNotifications, onLogout, open, onToggle, isMobile }) {
   const staffRoles = ['admin', 'super_admin', 'department_head', 'counselor']
   const isStaff = staffRoles.includes(user?.role)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    const fetchCount = () => {
+      fetch('/api/notifications/unread-count', { credentials: 'include' })
+        .then(r => r.json())
+        .then(d => setUnreadCount(d.count || 0))
+        .catch(() => {})
+    }
+    fetchCount()
+    const interval = setInterval(fetchCount, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   const navItems = [
     { id: 'home', label: 'Home', icon: 'home', action: onHome },
@@ -37,6 +51,8 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
     navItems.push({ id: 'faq', label: 'FAQ', icon: 'helpCircle', action: onFAQ })
   }
 
+  navItems.push({ id: 'notifications', label: 'Notifications', icon: 'bell', action: onNotifications })
+
   const icons = {
     home: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
     clipboard: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>,
@@ -48,6 +64,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
     clock: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
     shield: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
     logOut: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+    bell: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
   }
 
   const barStyle = {
@@ -135,11 +152,25 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
                 fontWeight: activePage === item.id ? 600 : 400,
                 background: activePage === item.id ? 'rgba(59,130,246,0.15)' : 'transparent',
                 borderRadius: isMobile ? 8 : (open ? 8 : 6),
+                position: 'relative',
               }}
               onMouseEnter={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0' } }}
               onMouseLeave={e => { if (activePage !== item.id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' } }}
             >
-              <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icons[item.icon]}</span>
+              <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {item.icon === 'bell' && unreadCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: 6, right: isMobile || open ? 14 : 0,
+                    minWidth: 16, height: 16, borderRadius: 8,
+                    backgroundColor: '#ef4444', color: '#fff',
+                    fontSize: 9, fontWeight: 700, lineHeight: '16px',
+                    textAlign: 'center', padding: '0 4px',
+                  }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+                {icons[item.icon]}
+              </span>
               {(isMobile || open) && item.label}
             </button>
           ))}
