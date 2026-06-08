@@ -93,7 +93,7 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
 
       {selectedProgram && (
         <ProgramDetailModal
-          program={selectedProgram}
+          result={{ program: selectedProgram }}
           studentData={studentData}
           onClose={() => setSelectedProgram(null)}
         />

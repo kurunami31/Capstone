@@ -109,7 +109,7 @@ export default function CareerExplorer({ studentData }) {
 
       {selectedProgram && (
         <ProgramDetailModal
-          program={selectedProgram}
+          result={{ program: selectedProgram }}
           studentData={studentData}
           onClose={() => setSelectedProgram(null)}
         />
