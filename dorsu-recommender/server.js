@@ -1016,14 +1016,18 @@ app.get('/api/assessments/last', authenticate, async (req, res) => {
   }
 })
 
-app.get('/api/admin/analytics/user-growth', authenticate, requireStaff, async (_, res) => {
+app.get('/api/admin/analytics/user-growth', authenticate, requireStaff, async (req, res) => {
   try {
+    let baseCondition = "email != 'admin@dorsu.edu.ph'"
+    if (req.user.role === 'admin') {
+      baseCondition += " AND role NOT IN ('admin', 'super_admin')"
+    }
     const result = await pool.query(`
       SELECT
         DATE_TRUNC('month', created_at) AS month,
         COUNT(*)::int AS count
       FROM users
-      WHERE email != 'admin@dorsu.edu.ph'
+      WHERE ${baseCondition}
       GROUP BY month
       ORDER BY month ASC
       LIMIT 12
