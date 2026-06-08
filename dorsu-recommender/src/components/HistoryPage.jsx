@@ -30,7 +30,8 @@ export default function HistoryPage() {
       .catch(() => setLoading(false))
   }, [page])
 
-  const uniqueStrands = [...new Set(history.map(e => e.strand).filter(Boolean))]
+  const standardStrands = ['STEM', 'ABM', 'HUMSS', 'GAS', 'TVL']
+  const uniqueStrands = [...new Set(history.map(e => e.strand).filter(Boolean))].filter(s => standardStrands.includes(s))
 
   const filtered = history.filter(entry => {
     if (searchTerm) {
@@ -124,8 +125,8 @@ export default function HistoryPage() {
                 borderRadius: 6, color: 'var(--text-primary)', outline: 'none',
               }}
             >
-              <option value="">All Strands</option>
-              {uniqueStrands.map(s => <option key={s} value={s}>{s}</option>)}
+              <option value="" style={{ color: '#1e293b' }}>All Strands</option>
+              {uniqueStrands.map(s => <option key={s} value={s} style={{ color: '#1e293b' }}>{s}</option>)}
             </select>
             <select
               value={dateFilter} onChange={e => setDateFilter(e.target.value)}

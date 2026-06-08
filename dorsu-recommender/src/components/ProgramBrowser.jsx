@@ -3,7 +3,7 @@ import programs from '../data/programs.json'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
 
 const faculties = [...new Set(programs.map(p => p.faculty))].sort()
-const allStrands = [...new Set(programs.flatMap(p => [...(p.compatible_strands || []), ...(p.alternative_strands || [])]))].filter(s => s !== 'Sports').sort()
+const allStrands = [...new Set(programs.flatMap(p => [...(p.compatible_strands || []), ...(p.alternative_strands || [])]))].filter(s => ['STEM', 'ABM', 'HUMSS', 'GAS', 'TVL'].includes(s)).sort()
 
 export default function ProgramBrowser({ activePrograms, studentData, systemSettings }) {
   const [search, setSearch] = useState('')
