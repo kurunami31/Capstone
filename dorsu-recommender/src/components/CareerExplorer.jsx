@@ -4,11 +4,11 @@ import ProgramDetailModal from './ProgramDetailModal.jsx'
 
 const facultyLogoMap = {
   'Faculty of Computing, Engineering, and Technology (FaCET)': '/logos/facet logo final.png',
-  'Faculty of Teacher Education': '/logos/FTED.jpg',
-  'Faculty of Criminal Justice Education': '/logos/FCJE.jpg',
-  'Faculty of Nursing and Allied Health Sciences': '/logos/FNAHS.jpg',
-  'Faculty of Agriculture and Life Sciences': '/logos/FALS.jpg',
-  'Faculty of Business and Management': '/logos/FBM.jpg',
+  'Faculty of Teacher Education': '/logos/FTED.png',
+  'Faculty of Criminal Justice Education': '/logos/FCJE.png',
+  'Faculty of Nursing and Allied Health Sciences': '/logos/FNAHS.png',
+  'Faculty of Agriculture and Life Sciences': '/logos/FALS.png',
+  'Faculty of Business and Management': '/logos/FBM.png',
 }
 
 const faculties = [...new Set(programs.map(p => p.faculty))].sort()
