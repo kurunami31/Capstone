@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import programs from '../data/programs.json'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
 
@@ -19,6 +19,10 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
   const [faculty, setFaculty] = useState('')
   const [strand, setStrand] = useState('')
   const [selectedProgram, setSelectedProgram] = useState(null)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 5
+
+  useEffect(() => { setPage(1) }, [search, faculty, strand])
 
   const filtered = useMemo(() => {
     return programs.filter(p => {
@@ -34,6 +38,9 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
       return true
     })
   }, [search, faculty, strand])
+
+  const pageCount = Math.ceil(filtered.length / PAGE_SIZE)
+  const currentPrograms = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, var(--gradient-start, #0f172a) 0%, var(--gradient-mid, #1e3a5f) 50%, var(--gradient-end, #0f172a) 100%)', padding: '24px 20px 60px' }}>
@@ -82,7 +89,7 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 14 }}>
-            {filtered.map(p => (
+            {currentPrograms.map(p => (
               <ProgramCard
                 key={p.code}
                 program={p}
@@ -94,9 +101,52 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
         )}
 
         {filtered.length > 0 && (
-          <p style={{ fontSize: 12, color: '#475569', marginTop: 16, textAlign: 'center' }}>
-            Showing {filtered.length} of {programs.length} programs
-          </p>
+          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+            <p style={{ fontSize: 12, color: '#475569', textAlign: 'center' }}>
+              Showing {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} programs
+            </p>
+            {pageCount > 1 && (
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  style={{
+                    padding: '6px 12px', borderRadius: 8, border: '1px solid var(--track-bg)',
+                    background: 'transparent', color: page === 1 ? 'var(--text-muted)' : 'var(--text-input)',
+                    fontSize: 12, cursor: page === 1 ? 'default' : 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  Previous
+                </button>
+                {Array.from({ length: pageCount }, (_, i) => i + 1).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    style={{
+                      width: 32, height: 32, borderRadius: 8, border: 'none',
+                      background: page === p ? 'var(--accent-bg)' : 'transparent',
+                      color: page === p ? 'var(--accent-text)' : 'var(--text-input)',
+                      fontSize: 13, fontWeight: page === p ? 700 : 400,
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+                  disabled={page === pageCount}
+                  style={{
+                    padding: '6px 12px', borderRadius: 8, border: '1px solid var(--track-bg)',
+                    background: 'transparent', color: page === pageCount ? 'var(--text-muted)' : 'var(--text-input)',
+                    fontSize: 12, cursor: page === pageCount ? 'default' : 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 

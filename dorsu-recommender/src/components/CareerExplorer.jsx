@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import programs from '../data/programs.json'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
 
@@ -17,6 +17,10 @@ export default function CareerExplorer({ studentData }) {
   const [faculty, setFaculty] = useState('')
   const [selectedProgram, setSelectedProgram] = useState(null)
   const [expanded, setExpanded] = useState(null)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 10
+
+  useEffect(() => { setPage(1) }, [faculty])
 
   const allCareers = useMemo(() => {
     const map = {}
@@ -34,6 +38,9 @@ export default function CareerExplorer({ studentData }) {
     if (!faculty) return allCareers
     return allCareers.filter(([, progs]) => progs.some(p => p.faculty === faculty))
   }, [faculty, allCareers])
+
+  const pageCount = Math.ceil(filtered.length / PAGE_SIZE)
+  const currentCareers = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, var(--gradient-start, #0f172a) 0%, var(--gradient-mid, #1e3a5f) 50%, var(--gradient-end, #0f172a) 100%)', padding: '24px 20px 60px' }}>
@@ -59,8 +66,9 @@ export default function CareerExplorer({ studentData }) {
             <p style={{ fontSize: 15, margin: 0 }}>No careers found.</p>
           </div>
         ) : (
+          <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {filtered.map(([career, progs]) => (
+            {currentCareers.map(([career, progs]) => (
               <div key={career} style={{
                 borderRadius: 16,
                 border: '1px solid var(--track-bg)',
@@ -118,6 +126,48 @@ export default function CareerExplorer({ studentData }) {
               </div>
             ))}
           </div>
+          {filtered.length > 0 && pageCount > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 6, alignItems: 'center', marginTop: 16 }}>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                style={{
+                  padding: '6px 12px', borderRadius: 8, border: '1px solid var(--track-bg)',
+                  background: 'transparent', color: page === 1 ? 'var(--text-muted)' : 'var(--text-input)',
+                  fontSize: 12, cursor: page === 1 ? 'default' : 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                Previous
+              </button>
+              {Array.from({ length: pageCount }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  style={{
+                    width: 32, height: 32, borderRadius: 8, border: 'none',
+                    background: page === p ? 'var(--accent-bg)' : 'transparent',
+                    color: page === p ? 'var(--accent-text)' : 'var(--text-input)',
+                    fontSize: 13, fontWeight: page === p ? 700 : 400,
+                    cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+                disabled={page === pageCount}
+                style={{
+                  padding: '6px 12px', borderRadius: 8, border: '1px solid var(--track-bg)',
+                  background: 'transparent', color: page === pageCount ? 'var(--text-muted)' : 'var(--text-input)',
+                  fontSize: 12, cursor: page === pageCount ? 'default' : 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                Next
+              </button>
+            </div>
+          )}
+          </>
         )}
       </div>
 
