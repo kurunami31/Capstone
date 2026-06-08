@@ -2,12 +2,12 @@ import { useMemo } from 'react'
 import { generateExplanations, calculateSkillsGap } from '../engine/explanations.js'
 
 const facultyLogoMap = {
-  'Faculty of Computing, Engineering, and Technology': '/logos/facet logo final.png',
-  'Teacher Education': '/logos/FTED.jpg',
-  'Criminal Justice Education': '/logos/FCJE.jpg',
-  'Nursing and Allied Health Sciences': '/logos/FNAHS.jpg',
-  'Agriculture and Life Sciences': '/logos/FALS.jpg',
-  'Business and Management': '/logos/FBM.jpg',
+  'Faculty of Computing, Engineering, and Technology (FaCET)': '/logos/facet logo final.png',
+  'Faculty of Teacher Education': '/logos/FTED.jpg',
+  'Faculty of Criminal Justice Education': '/logos/FCJE.jpg',
+  'Faculty of Nursing and Allied Health Sciences': '/logos/FNAHS.jpg',
+  'Faculty of Agriculture and Life Sciences': '/logos/FALS.jpg',
+  'Faculty of Business and Management': '/logos/FBM.jpg',
 }
 
 function codeColor(score) {

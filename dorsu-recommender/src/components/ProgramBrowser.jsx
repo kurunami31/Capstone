@@ -6,12 +6,12 @@ const faculties = [...new Set(programs.map(p => p.faculty))].sort()
 const allStrands = [...new Set(programs.flatMap(p => [...(p.compatible_strands || []), ...(p.alternative_strands || [])]))].filter(s => ['STEM', 'ABM', 'HUMSS', 'GAS', 'TVL'].includes(s)).sort()
 
 const facultyLogoMap = {
-  'Faculty of Computing, Engineering, and Technology': '/logos/facet logo final.png',
-  'Teacher Education': '/logos/FTED.jpg',
-  'Criminal Justice Education': '/logos/FCJE.jpg',
-  'Nursing and Allied Health Sciences': '/logos/FNAHS.jpg',
-  'Agriculture and Life Sciences': '/logos/FALS.jpg',
-  'Business and Management': '/logos/FBM.jpg',
+  'Faculty of Computing, Engineering, and Technology (FaCET)': '/logos/facet logo final.png',
+  'Faculty of Teacher Education': '/logos/FTED.jpg',
+  'Faculty of Criminal Justice Education': '/logos/FCJE.jpg',
+  'Faculty of Nursing and Allied Health Sciences': '/logos/FNAHS.jpg',
+  'Faculty of Agriculture and Life Sciences': '/logos/FALS.jpg',
+  'Faculty of Business and Management': '/logos/FBM.jpg',
 }
 
 export default function ProgramBrowser({ activePrograms, studentData, systemSettings }) {
