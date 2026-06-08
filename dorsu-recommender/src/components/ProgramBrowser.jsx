@@ -46,12 +46,12 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
               }}
           />
           <select value={faculty} onChange={e => setFaculty(e.target.value)} style={selectStyle}>
-            <option value="" style={{ color: 'var(--text-primary)' }}>All Faculties</option>
-            {faculties.map(f => <option key={f} value={f} style={{ color: 'var(--text-primary)' }}>{f}</option>)}
+            <option value="">All Faculties</option>
+            {faculties.map(f => <option key={f} value={f}>{f}</option>)}
           </select>
           <select value={strand} onChange={e => setStrand(e.target.value)} style={selectStyle}>
-            <option value="" style={{ color: 'var(--text-primary)' }}>All Strands</option>
-            {allStrands.map(s => <option key={s} value={s} style={{ color: 'var(--text-primary)' }}>{s}</option>)}
+            <option value="">All Strands</option>
+            {allStrands.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           {(search || faculty || strand) && (
             <button onClick={() => { setSearch(''); setFaculty(''); setStrand('') }} style={{
@@ -104,7 +104,7 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
 
 const selectStyle = {
   padding: '10px 14px', borderRadius: 10, border: '1px solid var(--input-border, rgba(255,255,255,0.1))',
-  background: 'var(--input-bg, rgba(255,255,255,0.05))', color: 'var(--text-primary, #e2e8f0)',
+  background: 'var(--input-bg, rgba(255,255,255,0.05))', color: 'var(--text-input)',
   fontSize: 13, outline: 'none', cursor: 'pointer', fontFamily: 'inherit',
   minWidth: 160,
 }
