@@ -17,6 +17,9 @@ export default function HistoryPage() {
   const [expandedId, setExpandedId] = useState(null)
   const [details, setDetails] = useState(null)
   const [detailsLoading, setDetailsLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [strandFilter, setStrandFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
   const limit = 20
 
   useEffect(() => {
@@ -26,6 +29,23 @@ export default function HistoryPage() {
       .then(data => { setHistory(data.history || []); setTotal(data.total || 0); setLoading(false) })
       .catch(() => setLoading(false))
   }, [page])
+
+  const uniqueStrands = [...new Set(history.map(e => e.strand).filter(Boolean))]
+
+  const filtered = history.filter(entry => {
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      const matchName = entry.topPrograms.some(p => p.name.toLowerCase().includes(term))
+      if (!matchName) return false
+    }
+    if (strandFilter && entry.strand !== strandFilter) return false
+    if (dateFilter) {
+      const days = parseInt(dateFilter)
+      const cutoff = new Date(Date.now() - days * 86400000)
+      if (new Date(entry.createdAt) < cutoff) return false
+    }
+    return true
+  })
 
   const totalPages = Math.ceil(total / limit)
 
@@ -81,6 +101,48 @@ export default function HistoryPage() {
           {!loading && <span style={{ fontSize: 13, color: '#64748b' }}>{total} total</span>}
         </div>
 
+        {!loading && history.length > 0 && (
+          <div style={{
+            display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap',
+            padding: 12, backgroundColor: 'rgba(255,255,255,0.03)',
+            borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)',
+          }}>
+            <input
+              value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Search by program name..."
+              style={{
+                flex: 1, minWidth: 160, padding: '8px 12px', fontSize: 13,
+                backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 6, color: '#f1f5f9', outline: 'none',
+              }}
+            />
+            <select
+              value={strandFilter} onChange={e => setStrandFilter(e.target.value)}
+              style={{
+                padding: '8px 12px', fontSize: 13, minWidth: 100,
+                backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 6, color: '#f1f5f9', outline: 'none',
+              }}
+            >
+              <option value="">All Strands</option>
+              {uniqueStrands.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <select
+              value={dateFilter} onChange={e => setDateFilter(e.target.value)}
+              style={{
+                padding: '8px 12px', fontSize: 13, minWidth: 100,
+                backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 6, color: '#f1f5f9', outline: 'none',
+              }}
+            >
+              <option value="">All Time</option>
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+            </select>
+          </div>
+        )}
+
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[1, 2, 3].map(i => (
@@ -98,7 +160,7 @@ export default function HistoryPage() {
               </div>
             ))}
           </div>
-        ) : history.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div style={{
             backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 40,
             border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center',
@@ -108,7 +170,7 @@ export default function HistoryPage() {
         ) : (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {history.map(entry => (
+              {filtered.map(entry => (
                 <div key={entry.id} style={{
                   backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14,
                   border: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(8px)',

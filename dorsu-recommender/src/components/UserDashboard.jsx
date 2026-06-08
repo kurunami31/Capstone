@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
+import AchievementBadges from './AchievementBadges.jsx'
+import careerTips from '../data/career-tips.json'
+import QuickQuiz from './QuickQuiz.jsx'
 
 export default function UserDashboard({ onStartAssessment, onViewHistory }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState([])
+  const [showQuiz, setShowQuiz] = useState(false)
+  const [consistency, setConsistency] = useState(null)
+  const todayTip = careerTips[new Date().getDate() % careerTips.length]
 
   useEffect(() => {
     fetch('/api/user/summary', { credentials: 'include' })
@@ -13,6 +19,10 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
     fetch('/api/favorites', { credentials: 'include' })
       .then(r => r.json())
       .then(f => setFavorites(f || []))
+      .catch(() => {})
+    fetch('/api/user/consistency', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => { if (d.stability !== null) setConsistency(d) })
       .catch(() => {})
   }, [])
 
@@ -208,6 +218,25 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
             </div>
           )}
 
+          <div className="card-padding-mobile" style={{
+            backgroundColor: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 20, padding: 28,
+            backdropFilter: 'blur(12px)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>
+                Today's Career Tip
+              </h2>
+            </div>
+            <p style={{ color: '#94a3b8', fontSize: 14, margin: 0, lineHeight: 1.5 }}>
+              {todayTip}
+            </p>
+          </div>
+
           {favorites.length > 0 && (
             <div className="card-padding-mobile" style={{
               backgroundColor: 'rgba(255,255,255,0.04)',
@@ -233,8 +262,41 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
               </div>
             </div>
           )}
+          {consistency && (
+            <div className="card-padding-mobile" style={{
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 20, padding: 28,
+              backdropFilter: 'blur(12px)',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 32, fontWeight: 800, color: consistency.stability >= 80 ? '#34d399' : consistency.stability >= 50 ? '#fbbf24' : '#f87171' }}>
+                {consistency.stability}%
+              </div>
+              <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 4 }}>
+                Assessment Consistency ({consistency.assessmentCount} assessments)
+              </div>
+              <p style={{ fontSize: 12, color: '#64748b', margin: '8px 0 0', lineHeight: 1.4 }}>
+                {consistency.stability >= 80 ? 'Your interests and preferences are very stable.' :
+                 consistency.stability >= 50 ? 'Your preferences show some variation across assessments.' :
+                 'Your interests seem to be evolving — that\'s normal!'}
+              </p>
+            </div>
+          )}
+
+          <AchievementBadges />
+
+          <button onClick={() => setShowQuiz(true)} style={{
+            padding: '12px 24px', fontSize: 14, fontWeight: 600,
+            backgroundColor: 'rgba(139,92,246,0.15)', color: '#a78bfa',
+            border: '1px solid rgba(139,92,246,0.3)', borderRadius: 10, cursor: 'pointer',
+            width: '100%', textAlign: 'center',
+          }}>
+            Quick Personality Quiz
+          </button>
         </div>
       </div>
+      {showQuiz && <QuickQuiz onClose={() => setShowQuiz(false)} />}
     </div>
   )
 }

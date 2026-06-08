@@ -82,7 +82,9 @@ function AppContent() {
   const [emailVerified, setEmailVerified] = useState(true)
   const [smtpConfigured, setSmtpConfigured] = useState(false)
   const [verifMsg, setVerifMsg] = useState('')
+  const [autoSaveStatus, setAutoSaveStatus] = useState('')
   const autoSaveRef = useRef(null)
+  const autoSaveTimerRef = useRef(null)
 
   // Check email verification status
   useEffect(() => {
@@ -111,12 +113,21 @@ function AppContent() {
   useEffect(() => {
     if (!user || step === 0 || showLanding) return
     if (currentStep === 'results') return
+    setAutoSaveStatus('Saving...')
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
     autoSaveRef.current = setTimeout(() => {
       fetch('/api/assessment/progress', {
         method: 'PUT', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ step, data: studentData }),
-      }).catch(err => console.error('Failed to auto-save progress', err))
+      }).then(() => {
+        setAutoSaveStatus('Auto-saved at ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))
+        autoSaveTimerRef.current = setTimeout(() => setAutoSaveStatus(''), 5000)
+      }).catch(err => {
+        console.error('Failed to auto-save progress', err)
+        setAutoSaveStatus('Auto-save failed')
+        autoSaveTimerRef.current = setTimeout(() => setAutoSaveStatus(''), 5000)
+      })
     }, 500)
     return () => clearTimeout(autoSaveRef.current)
   }, [step, studentData, user, showLanding])
@@ -163,6 +174,8 @@ function AppContent() {
             strand: studentData.strand || '',
           },
         }),
+      }).then(() => {
+        fetch('/api/achievements/check', { method: 'POST', credentials: 'include' }).catch(() => {})
       }).catch(err => console.error('Failed to save assessment results', err))
     }
   }, [currentStep === 'results'])
@@ -297,6 +310,11 @@ function AppContent() {
           </span>
           <span style={{ fontSize: 12, color: '#64748b' }}>{pct}% complete</span>
         </div>
+        {autoSaveStatus && (
+          <div style={{ textAlign: 'right', fontSize: 11, color: '#64748b', marginBottom: 4 }}>
+            {autoSaveStatus}
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
           {STEPS.slice(0, -1).map((s, i) => (
             <div key={s} style={{

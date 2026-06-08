@@ -17,6 +17,7 @@ export default function AuthPage() {
   const [submitting, setSubmitting] = useState(false)
   const [forgotSent, setForgotSent] = useState(false)
   const [resetDone, setResetDone] = useState(false)
+  const [smtpConfigured, setSmtpConfigured] = useState(true)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -47,6 +48,11 @@ export default function AuthPage() {
         })
         .catch(() => setError('Failed to verify reset token.'))
     }
+
+    fetch('/api/check-smtp')
+      .then(r => r.json())
+      .then(d => setSmtpConfigured(d.configured))
+      .catch(() => {})
   }, [])
 
   const handleSubmit = async (e) => {
@@ -123,6 +129,7 @@ export default function AuthPage() {
               <p style={{ fontSize: 14, color: '#94a3b8', marginTop: 6 }}>
                 {mode === 'login' ? 'Sign in to continue to the program recommender.' :
                  mode === 'register' ? 'Register to start your college program assessment.' :
+                 mode === 'forgot' && !smtpConfigured ? 'Password reset is not available because the email system is not configured. Contact the administrator for assistance.' :
                  mode === 'forgot' && !forgotSent ? 'Enter your email to receive a reset link.' :
                  mode === 'forgot' && forgotSent ? 'Check your email for the reset link.' :
                  mode === 'verify' ? error || 'Your email has been verified! You can now sign in.' :
@@ -181,7 +188,7 @@ export default function AuthPage() {
                   placeholder={mode === 'register' ? 'DOrSU email or personal email' : 'you@example.com'}
                   style={inputStyle}
                   autoFocus={mode === 'login' || mode === 'forgot'}
-                  disabled={forgotSent}
+                  disabled={forgotSent || (mode === 'forgot' && !smtpConfigured)}
                 />
               </div>
             )}
@@ -267,18 +274,19 @@ export default function AuthPage() {
 
             <button
               type="submit"
-              disabled={submitting || forgotSent}
+              disabled={submitting || forgotSent || (mode === 'forgot' && !smtpConfigured)}
               style={{
                 width: '100%', padding: '14px 0', fontSize: 15, fontWeight: 700,
                 backgroundColor: '#2563eb', color: '#fff',
-                border: 'none', borderRadius: 10, cursor: (submitting || forgotSent) ? 'not-allowed' : 'pointer',
-                opacity: (submitting || forgotSent) ? 0.6 : 1,
+                border: 'none', borderRadius: 10, cursor: (submitting || forgotSent || (mode === 'forgot' && !smtpConfigured)) ? 'not-allowed' : 'pointer',
+                opacity: (submitting || forgotSent || (mode === 'forgot' && !smtpConfigured)) ? 0.6 : 1,
                 transition: 'all 0.2s',
               }}
             >
               {submitting ? 'Please wait...' :
                mode === 'login' ? 'Sign In' :
                mode === 'register' ? 'Create Account' :
+               mode === 'forgot' && !smtpConfigured ? 'Unavailable' :
                mode === 'forgot' && !forgotSent ? 'Send Reset Link' :
                mode === 'forgot' && forgotSent ? 'Email Sent' :
                mode === 'reset' && !resetDone ? 'Reset Password' :

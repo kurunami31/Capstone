@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import generatePDF from './Report.jsx'
 import ComparisonView from './ComparisonView.jsx'
+import HollandChart from './HollandChart.jsx'
+import ProgramDetailModal from './ProgramDetailModal.jsx'
 
 function codeColor(score) {
   if (score >= 80) return '#34d399'
@@ -27,6 +29,7 @@ export default function Results({ studentData, results, onRestart }) {
   const [showCompare, setShowCompare] = useState(false)
   const [favorites, setFavorites] = useState(new Set())
   const [favLoading, setFavLoading] = useState(new Set())
+  const [detailProgram, setDetailProgram] = useState(null)
 
   useEffect(() => {
     fetch('/api/favorites', { credentials: 'include' })
@@ -81,7 +84,7 @@ export default function Results({ studentData, results, onRestart }) {
         <div>
           <h2 style={{ fontSize: 24, margin: 0, color: '#f1f5f9' }}>Your Top Program Matches</h2>
           <p style={{ color: '#94a3b8', margin: '4px 0 0 0', fontSize: 14 }}>
-            {studentData.name} | {studentData.strand} Strand | GWA: {studentData.gwa}
+            {studentData.name} | {studentData.school} | {studentData.strand} Strand | GWA: {studentData.gwa}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -116,7 +119,16 @@ export default function Results({ studentData, results, onRestart }) {
                   {r.rank}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 16, color: '#f1f5f9' }}>{r.program.name}</div>
+                  <button onClick={() => setDetailProgram(r)} style={{
+                    background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                    fontWeight: 600, fontSize: 16, color: '#f1f5f9', textAlign: 'left',
+                    fontFamily: 'inherit',
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#60a5fa'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#f1f5f9'}
+                  >
+                    {r.program.name}
+                  </button>
                   <div style={{ fontSize: 13, color: '#64748b' }}>{r.program.faculty}</div>
                 </div>
               </div>
@@ -186,15 +198,40 @@ export default function Results({ studentData, results, onRestart }) {
                   <span style={{ ...statValue, color: admissionColor(r.admission.label) }}>
                     {r.admission.label}
                   </span>
+                  <div style={{
+                    marginTop: 6, height: 4, borderRadius: 2,
+                    backgroundColor: 'rgba(255,255,255,0.06)', overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      width: r.admission.label === 'High' ? '85%' : r.admission.label === 'Moderate' ? '60%' : '35%',
+                      height: '100%', borderRadius: 2,
+                      backgroundColor: admissionColor(r.admission.label),
+                      transition: 'width 0.5s ease',
+                    }} />
+                  </div>
+                  <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
+                    {r.admission.value}
+                  </div>
                 </div>
               </div>
             </div>
 
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {r.program.ched_priority && (
               <div style={{ fontSize: 12, color: '#60a5fa', backgroundColor: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.15)', padding: '4px 10px', borderRadius: 4, display: 'inline-block' }}>
                 CHED Priority Course
               </div>
             )}
+
+            {studentData.hollandScores && Object.keys(studentData.hollandScores).length > 0 && (
+              <HollandChart scores={studentData.hollandScores} />
+            )}
+              {r.program.is_board_program && (
+                <div style={{ fontSize: 12, color: '#34d399', backgroundColor: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.15)', padding: '4px 10px', borderRadius: 4, display: 'inline-block' }}>
+                  {r.program.board_exam ? `Licensure: ${r.program.board_exam}` : 'Board Program'}
+                </div>
+              )}
+            </div>
 
             {r.program.career_paths && r.program.career_paths.length > 0 && (
               <div style={{ marginTop: 12 }}>
@@ -216,6 +253,13 @@ export default function Results({ studentData, results, onRestart }) {
         ))}
       </div>
 
+      {detailProgram && (
+        <ProgramDetailModal
+          result={detailProgram}
+          studentData={studentData}
+          onClose={() => setDetailProgram(null)}
+        />
+      )}
       {showCompare && (
         <ComparisonView
           results={results.filter(r => selected.includes(r.program.code))}

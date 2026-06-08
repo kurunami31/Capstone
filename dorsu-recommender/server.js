@@ -1263,6 +1263,98 @@ app.put('/api/notifications/read-all', authenticate, async (req, res) => {
   }
 })
 
+// ---- Achievements ----
+app.get('/api/achievements', authenticate, async (req, res) => {
+  try {
+    const [allResult, earnedResult] = await Promise.all([
+      pool.query('SELECT key, name, description, icon FROM achievements ORDER BY key'),
+      pool.query('SELECT achievement_key FROM user_achievements WHERE user_id = $1', [req.user.id]),
+    ])
+    const earned = new Set(earnedResult.rows.map(r => r.achievement_key))
+    const achievements = allResult.rows.map(a => ({
+      ...a,
+      earned: earned.has(a.key),
+    }))
+    res.json({ achievements })
+  } catch (err) {
+    console.error('Achievements error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.post('/api/achievements/check', authenticate, async (req, res) => {
+  try {
+    const [assessments, favorites, user] = await Promise.all([
+      pool.query('SELECT COUNT(*)::int AS cnt, COALESCE(AVG(gwa), 0)::float AS avg_gwa FROM assessments WHERE user_id = $1', [req.user.id]),
+      pool.query('SELECT COUNT(*)::int AS cnt FROM user_favorites WHERE user_id = $1', [req.user.id]),
+      pool.query('SELECT gwa FROM assessments WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1', [req.user.id]),
+    ])
+    const totalAssessments = assessments.rows[0].cnt
+    const avgGwa = assessments.rows[0].avg_gwa
+    const totalFavorites = favorites.rows[0].cnt
+
+    const toAward = []
+    if (totalAssessments >= 1) toAward.push('first_assessment')
+    if (totalAssessments >= 3) toAward.push('veteran')
+    if (avgGwa >= 90) toAward.push('scholar')
+    if (totalFavorites >= 5) toAward.push('committed')
+
+    const newlyAwarded = []
+    for (const key of toAward) {
+      const existing = await pool.query('SELECT id FROM user_achievements WHERE user_id = $1 AND achievement_key = $2', [req.user.id, key])
+      if (existing.rows.length === 0) {
+        const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+        await pool.query('INSERT INTO user_achievements (id, user_id, achievement_key) VALUES ($1, $2, $3)', [id, req.user.id, key])
+        const a = await pool.query('SELECT name FROM achievements WHERE key = $1', [key])
+        newlyAwarded.push(a.rows[0]?.name || key)
+      }
+    }
+    res.json({ newlyAwarded })
+  } catch (err) {
+    console.error('Achievements check error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+// ---- User consistency score ----
+app.get('/api/user/consistency', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT full_data, top_programs, created_at FROM assessments
+       WHERE user_id = $1 AND full_data IS NOT NULL
+       ORDER BY created_at DESC LIMIT 2`,
+      [req.user.id]
+    )
+    if (result.rows.length < 2) {
+      return res.json({ stability: null, assessmentCount: result.rows.length })
+    }
+
+    const [recent, previous] = result.rows
+    const recentData = typeof recent.full_data === 'string' ? JSON.parse(recent.full_data) : recent.full_data
+    const prevData = typeof previous.full_data === 'string' ? JSON.parse(previous.full_data) : previous.full_data
+
+    let matches = 0
+    let total = 0
+
+    if (recentData.hollandCode?.code && prevData.hollandCode?.code) {
+      total++
+      if (recentData.hollandCode.code === prevData.hollandCode.code) matches++
+    }
+
+    const recentPrograms = JSON.parse(recent.top_programs || '[]')
+    const prevPrograms = JSON.parse(previous.top_programs || '[]')
+    const overlap = recentPrograms.filter(p => prevPrograms.includes(p))
+    total += 5
+    matches += overlap.length
+
+    const stability = total > 0 ? Math.round((matches / total) * 100) : null
+    res.json({ stability, assessmentCount: result.rows.length + 1 })
+  } catch (err) {
+    console.error('Consistency error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
 // ---- Check last assessment (for retake cooldown) ----
 app.get('/api/assessments/last', authenticate, async (req, res) => {
   try {
@@ -1627,6 +1719,11 @@ app.get('/api/email-verified', authenticate, async (req, res) => {
     console.error('Email verified status error:', err)
     res.status(500).json({ error: 'Server error.' })
   }
+})
+
+// ---- Check SMTP config ----
+app.get('/api/check-smtp', async (_, res) => {
+  res.json({ configured: !!(process.env.SMTP_HOST) })
 })
 
 // ---- Health check ----

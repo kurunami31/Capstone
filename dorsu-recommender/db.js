@@ -200,6 +200,41 @@ async function initDB() {
   `)
   await pool.query('CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id)').catch(() => {})
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS achievements (
+      id TEXT PRIMARY KEY,
+      key TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL,
+      icon TEXT NOT NULL DEFAULT '🏆'
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_achievements (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      achievement_key TEXT NOT NULL REFERENCES achievements(key),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(user_id, achievement_key)
+    )
+  `)
+
+  // Seed default achievements
+  const defaultAchievements = [
+    { key: 'first_assessment', name: 'First Steps', description: 'Complete your first assessment', icon: '🎯' },
+    { key: 'explorer', name: 'Explorer', description: 'Compare 3 or more programs', icon: '🔍' },
+    { key: 'scholar', name: 'Scholar', description: 'Achieve a GWA of 90 or higher', icon: '📚' },
+    { key: 'committed', name: 'Committed', description: 'Save 5 or more programs to favorites', icon: '💎' },
+    { key: 'veteran', name: 'Veteran', description: 'Take 3 or more assessments', icon: '⭐' },
+  ]
+  for (const a of defaultAchievements) {
+    await pool.query(
+      `INSERT INTO achievements (id, key, name, description, icon) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (key) DO NOTHING`,
+      [a.key, a.key, a.name, a.description, a.icon]
+    )
+  }
+
   console.log('Database initialized.')
 }
 
