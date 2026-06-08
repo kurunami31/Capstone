@@ -31,3 +31,12 @@ yarn-error.log*
 
 # Coverage
 coverage/
+
+# Source logo files in repo root
+/facet logo final.png
+/FALS.jpg
+/FBM.jpg
+/FCJE.jpg
+/FNAHS.jpg
+/FTED.jpg
+/Dorsu logo.png
