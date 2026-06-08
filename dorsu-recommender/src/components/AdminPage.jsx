@@ -165,7 +165,11 @@ export default function AdminPage({ userRole = 'admin' }) {
       setUsers(data.users)
       setTotal(data.total)
       setPage(data.page)
-      if (data._debug) { setDebugInfo(data._debug); console.log('Admin users debug:', data._debug) }
+      if (data._debug) {
+        setDebugInfo(data._debug);
+        console.log('Admin users debug:', data._debug);
+        console.log('TOTAL from server:', data.total);
+      }
     } catch (e) {
       setError(e.message)
     } finally {
@@ -342,7 +346,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                 <span style={{ fontSize: 12, color: '#64748b' }}>{total} total</span>
                 {debugInfo && (
                   <span style={{ fontSize: 10, color: '#475569', marginLeft: 8 }}>
-                    role:{debugInfo.userRole} emails:{JSON.stringify(debugInfo.dataEmails)} countQ:{debugInfo.countQuery?.slice(0,200)} p:{JSON.stringify(debugInfo.countParams)}
+                    role:{debugInfo.userRole} countResult:{debugInfo.countResult} emails:{JSON.stringify(debugInfo.dataEmails)} countQ:{debugInfo.countQuery?.slice(0,200)} p:{JSON.stringify(debugInfo.countParams)}
                   </span>
                 )}
               </div>
