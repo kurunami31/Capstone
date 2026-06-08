@@ -1,22 +1,6 @@
 import nodemailer from 'nodemailer'
-import { pool } from './db.js'
 
 let transporter = null
-let lastConfigCheck = 0
-
-async function getConfig() {
-  const now = Date.now()
-  if (now - lastConfigCheck > 60000) {
-    lastConfigCheck = now
-    const result = await pool.query(
-      "SELECT key, value FROM system_settings WHERE key LIKE 'smtp_%' OR key = 'email_from'"
-    )
-    const map = {}
-    for (const row of result.rows) map[row.key] = row.value
-    return map
-  }
-  return {}
-}
 
 async function ensureTransporter() {
   const host = process.env.SMTP_HOST

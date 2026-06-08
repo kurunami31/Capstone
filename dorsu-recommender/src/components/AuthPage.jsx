@@ -20,13 +20,14 @@ export default function AuthPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const token = params.get('token')
-    const verifyToken = params.get('verify')
+    const path = window.location.pathname
 
-    if (verifyToken) {
-      fetch(`/api/verify-email?token=${verifyToken}`)
+    if (token && path.includes('/verify-email')) {
+      fetch(`/api/verify-email?token=${token}`)
         .then(r => r.json())
         .then(data => {
           if (data.success) {
+            setMode('verify')
             window.history.replaceState({}, document.title, '/')
           } else {
             setError(data.error || 'Verification failed.')
@@ -36,7 +37,6 @@ export default function AuthPage() {
     } else if (token) {
       setResetToken(token)
       setMode('reset')
-      // Verify token
       fetch(`/api/reset-password/verify?token=${token}`)
         .then(r => r.json())
         .then(data => {

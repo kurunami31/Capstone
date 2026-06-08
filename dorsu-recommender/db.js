@@ -151,8 +151,8 @@ async function initDB() {
     )
   `)
 
-  // Mark existing users as verified
-  await pool.query("UPDATE users SET email_verified = true WHERE email_verified IS NULL OR email_verified = false").catch(() => {})
+  // Mark existing users created before email verification feature as verified
+  await pool.query("UPDATE users SET email_verified = true WHERE email_verified IS NULL").catch(() => {})
 
   console.log('Database initialized.')
 }

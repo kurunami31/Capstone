@@ -1209,7 +1209,7 @@ app.get('/api/health', async (_, res) => {
 
 app.use(express.static(join(__dirname, 'dist')))
 
-app.get('/{*path}', (_, res) => {
+app.get('*', (_, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'))
 })
 
