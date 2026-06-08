@@ -29,17 +29,22 @@ if (process.env.SENTRY_DSN) {
 
 const app = express()
 const PORT = process.env.PORT || 3000
-const JWT_SECRET = process.env.JWT_SECRET || 'dorsu-recommender-secret-change-in-production'
-const USE_INSECURE_JWT = !process.env.JWT_SECRET
-if (USE_INSECURE_JWT) {
-  console.warn('WARNING: JWT_SECRET not set. Using insecure fallback. Set JWT_SECRET in production.')
-}
+const JWT_SECRET = process.env.JWT_SECRET || (() => {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('FATAL: JWT_SECRET environment variable is required in production.')
+    process.exit(1)
+  }
+  console.warn('WARNING: JWT_SECRET not set. Using insecure fallback for development only.')
+  return 'dorsu-recommender-dev-fallback'
+})()
 const SALT_ROUNDS = 12
 const TOKEN_EXPIRY = '1h'
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
 
 const rateLimitStore = {}
+const loginRateStore = {}
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000
+const LOGIN_RATE_MAX = 5
 const AUTH_RATE_LIMIT_MAX = 100
 const UNAUTH_RATE_LIMIT_MAX = 60
 
@@ -118,6 +123,9 @@ app.post('/api/register', async (req, res) => {
     if (firstName.trim().length < 1 || lastName.trim().length < 1) {
       return res.status(400).json({ error: 'First name and last name are required.' })
     }
+    if (firstName.trim().length > 50) return res.status(400).json({ error: 'First name must be 50 characters or fewer.' })
+    if (lastName.trim().length > 50) return res.status(400).json({ error: 'Last name must be 50 characters or fewer.' })
+    if (email.length > 255) return res.status(400).json({ error: 'Email must be 255 characters or fewer.' })
 
     const lowerEmail = email.toLowerCase()
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [lowerEmail])
@@ -197,6 +205,17 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' })
     }
 
+    // Rate limit failed login attempts per IP
+    const loginIp = req.ip || req.connection.remoteAddress
+    const loginNow = Date.now()
+    if (!loginRateStore[loginIp] || loginRateStore[loginIp].window < loginNow - RATE_LIMIT_WINDOW) {
+      loginRateStore[loginIp] = { window: loginNow, count: 0 }
+    }
+    loginRateStore[loginIp].count++
+    if (loginRateStore[loginIp].count > LOGIN_RATE_MAX) {
+      return res.status(429).json({ error: 'Too many login attempts. Try again later.' })
+    }
+
     const lowerEmail = email.toLowerCase()
 
     const result = await pool.query(
@@ -206,6 +225,7 @@ app.post('/api/login', async (req, res) => {
 
     const row = result.rows[0]
     if (!row || !(await bcrypt.compare(password, row.password))) {
+      logActivity('0', 'login_failed', `Failed login attempt for: ${lowerEmail}`, req.ip || '')
       return res.status(401).json({ error: 'Invalid email or password.' })
     }
 
@@ -261,25 +281,30 @@ app.put('/api/profile', authenticate, async (req, res) => {
 
     if (firstName !== undefined) {
       if (firstName.trim().length < 1) return res.status(400).json({ error: 'First name is required.' })
+      if (firstName.trim().length > 50) return res.status(400).json({ error: 'First name must be 50 characters or fewer.' })
       updates.push(`first_name = $${idx++}`)
       values.push(firstName.trim())
     }
     if (lastName !== undefined) {
       if (lastName.trim().length < 1) return res.status(400).json({ error: 'Last name is required.' })
+      if (lastName.trim().length > 50) return res.status(400).json({ error: 'Last name must be 50 characters or fewer.' })
       updates.push(`last_name = $${idx++}`)
       values.push(lastName.trim())
     }
     if (middleInitial !== undefined) {
+      if (middleInitial.trim().length > 10) return res.status(400).json({ error: 'Middle initial must be 10 characters or fewer.' })
       updates.push(`middle_initial = $${idx++}`)
       values.push(middleInitial.trim())
     }
     if (extensionName !== undefined) {
+      if (extensionName.trim().length > 10) return res.status(400).json({ error: 'Extension name must be 10 characters or fewer.' })
       updates.push(`extension_name = $${idx++}`)
       values.push(extensionName.trim())
     }
 
     if (email !== undefined) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email format.' })
+      if (email.length > 255) return res.status(400).json({ error: 'Email must be 255 characters or fewer.' })
       const lower = email.toLowerCase()
       if (lower !== check.rows[0].email) {
         const dup = await pool.query('SELECT id FROM users WHERE email = $1', [lower])
@@ -364,6 +389,7 @@ app.post('/api/profile/picture', authenticate, async (req, res) => {
     )
 
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
+    logActivity(req.user.id, 'avatar_change', 'Profile picture updated', req.ip || '')
     res.json({ avatar: result.rows[0].avatar })
   } catch (err) {
     console.error('Picture upload error:', err)
@@ -1097,11 +1123,12 @@ app.get('/api/admin/analytics/strand-distribution', authenticate, requireStaff, 
   }
 })
 
-app.get('/api/admin/users/export', authenticate, requireManager, async (_, res) => {
+app.get('/api/admin/users/export', authenticate, requireManager, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT id, email, first_name, last_name, middle_initial, extension_name, role, created_at, updated_at FROM users WHERE email != 'admin@dorsu.edu.ph' ORDER BY created_at DESC"
     )
+    logActivity(req.user.id, 'export', 'Exported users CSV', req.ip || '')
     const headers = 'ID,Email,First Name,Last Name,Middle Initial,Extension,Role,Created At,Updated At'
     const rows = result.rows.map(r =>
       `"${r.id}","${r.email}","${r.first_name || ''}","${r.last_name || ''}","${r.middle_initial || ''}","${r.extension_name || ''}","${r.role}","${r.created_at?.toISOString?.() || r.created_at || ''}","${r.updated_at?.toISOString?.() || r.updated_at || ''}"`
@@ -1116,7 +1143,7 @@ app.get('/api/admin/users/export', authenticate, requireManager, async (_, res) 
 })
 
 // ---- Export assessments CSV (admin only) ----
-app.get('/api/admin/assessments/export', authenticate, requireManager, async (_, res) => {
+app.get('/api/admin/assessments/export', authenticate, requireManager, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT a.id, a.user_id, u.email, u.first_name, u.last_name, a.strand, a.gwa, a.holland_code, a.top_programs, a.created_at
@@ -1124,6 +1151,7 @@ app.get('/api/admin/assessments/export', authenticate, requireManager, async (_,
       JOIN users u ON u.id = a.user_id
       ORDER BY a.created_at DESC
     `)
+    logActivity(req.user.id, 'export', 'Exported assessments CSV', req.ip || '')
     const headers = 'ID,User ID,Email,First Name,Last Name,Strand,GWA,Holland Code,Top Programs,Created At'
     const rows = result.rows.map(r =>
       `"${r.id}","${r.user_id}","${r.email}","${r.first_name || ''}","${r.last_name || ''}","${r.strand}","${r.gwa}","${r.holland_code}","${r.top_programs}","${r.created_at?.toISOString?.() || r.created_at || ''}"`
@@ -1381,6 +1409,13 @@ app.post('/api/admin/programs', authenticate, requireManager, async (req, res) =
   try {
     const { code, name, college, description, strand, subjects, hollandCodes, careers, admissionChance } = req.body
     if (!code || !name) return res.status(400).json({ error: 'Code and name are required.' })
+    if (code.length > 20) return res.status(400).json({ error: 'Program code must be 20 characters or fewer.' })
+    if (name.length > 200) return res.status(400).json({ error: 'Program name must be 200 characters or fewer.' })
+    if (college && college.length > 100) return res.status(400).json({ error: 'College name must be 100 characters or fewer.' })
+    if (strand !== undefined && !Array.isArray(strand)) return res.status(400).json({ error: 'Strand must be an array.' })
+    if (subjects !== undefined && !Array.isArray(subjects)) return res.status(400).json({ error: 'Subjects must be an array.' })
+    if (hollandCodes !== undefined && !Array.isArray(hollandCodes)) return res.status(400).json({ error: 'Holland codes must be an array.' })
+    if (careers !== undefined && !Array.isArray(careers)) return res.status(400).json({ error: 'Careers must be an array.' })
 
     if (programs.some(p => p.code === code)) {
       return res.status(409).json({ error: 'Program with this code already exists.' })
@@ -1410,6 +1445,13 @@ app.put('/api/admin/programs/:code', authenticate, requireManager, async (req, r
     if (idx === -1) return res.status(404).json({ error: 'Program not found.' })
 
     const updates = req.body
+    if (updates.name !== undefined && updates.name.length > 200) return res.status(400).json({ error: 'Program name must be 200 characters or fewer.' })
+    if (updates.college !== undefined && updates.college.length > 100) return res.status(400).json({ error: 'College name must be 100 characters or fewer.' })
+    if (updates.code !== undefined && updates.code.length > 20) return res.status(400).json({ error: 'Program code must be 20 characters or fewer.' })
+    if (updates.strand !== undefined && !Array.isArray(updates.strand)) return res.status(400).json({ error: 'Strand must be an array.' })
+    if (updates.subjects !== undefined && !Array.isArray(updates.subjects)) return res.status(400).json({ error: 'Subjects must be an array.' })
+    if (updates.hollandCodes !== undefined && !Array.isArray(updates.hollandCodes)) return res.status(400).json({ error: 'Holland codes must be an array.' })
+    if (updates.careers !== undefined && !Array.isArray(updates.careers)) return res.status(400).json({ error: 'Careers must be an array.' })
     for (const key of Object.keys(updates)) {
       if (key !== 'code') programs[idx][key] = updates[key]
     }

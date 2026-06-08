@@ -102,6 +102,7 @@ export default function ProgramsPage({ activePrograms }) {
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button
                       onClick={async () => {
+                        if (active && !confirm(`Disable "${prog.name}"? It will no longer be recommended.`)) return
                         try {
                           const res = await fetch(`/api/admin/programs/${prog.code}/toggle`, { method: 'PUT', credentials: 'include' })
                           if (res.ok) {
