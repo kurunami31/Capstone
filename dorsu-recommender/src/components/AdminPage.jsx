@@ -128,7 +128,7 @@ function PieChart({ data, labelKey, valueKey, colors }) {
 }
 
 export default function AdminPage({ settings = {}, activePrograms = null, userRole = 'admin' }) {
-  const [activeTab, setActiveTab] = useState(userRole === 'admin' ? 'dashboard' : 'review')
+  const [activeTab, setActiveTab] = useState(['admin', 'super_admin'].includes(userRole) ? 'dashboard' : 'review')
   const [stats, setStats] = useState(null)
   const [analytics, setAnalytics] = useState({ userGrowth: [], programPopularity: [], hollandDistribution: [], strandDistribution: [] })
   const [users, setUsers] = useState([])
@@ -273,7 +273,7 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Admin Panel</h1>
           <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3, flexWrap: 'wrap' }}>
-            {(userRole === 'admin'
+            {(['admin', 'super_admin'].includes(userRole)
               ? ['dashboard', 'users', 'activity', 'programs', 'settings', 'questions', 'review']
               : ['review']
             ).map(tab => (
