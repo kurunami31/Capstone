@@ -36,8 +36,12 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
           </div>
           <button onClick={onClose} style={{
             background: 'none', border: 'none', color: '#94a3b8',
-            cursor: 'pointer', fontSize: 20, padding: '0 4px', flexShrink: 0,
-          }}>✕</button>
+            cursor: 'pointer', padding: '4px', display: 'flex', flexShrink: 0,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
 
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
@@ -142,7 +146,7 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
                       backgroundColor: '#3b82f6',
                     }} />
                   </div>
-                  <span style={{ width: 30, textAlign: 'right', color: '#64748b' }}>×{weight}</span>
+                  <span style={{ width: 30, textAlign: 'right', color: '#64748b' }}>x{weight}</span>
                   {grade > 0 && <span style={{ width: 30, textAlign: 'right', color: codeColor(grade) }}>{grade}</span>}
                 </div>
               )
@@ -181,7 +185,7 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
           </h3>
           <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8 }}>
             You meet <strong style={{ color: '#f1f5f9' }}>{metCount}</strong> of <strong style={{ color: '#f1f5f9' }}>{skillsGap.length}</strong> required skills
-            {metCount === skillsGap.length ? ' — great fit!' : metCount >= skillsGap.length / 2 ? ' — close to the target.' : ' — room for improvement.'}
+            {metCount === skillsGap.length ? ' - great fit!' : metCount >= skillsGap.length / 2 ? ' - close to the target.' : ' - room for improvement.'}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {skillsGap.map(s => (
@@ -217,7 +221,7 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
                   marginLeft: 'auto', fontWeight: 600,
                   color: s.gap >= 0 ? '#34d399' : s.gap >= -1 ? '#fbbf24' : '#f87171',
                 }}>
-                  {s.gap >= 0 ? '✓ Met' : s.gap >= -1 ? '~ Close' : `−${Math.abs(s.gap)}`}
+                  {s.gap >= 0 ? 'Met' : s.gap >= -1 ? 'Close' : `-${Math.abs(s.gap)}`}
                 </span>
               </div>
             ))}

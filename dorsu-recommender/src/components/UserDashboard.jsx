@@ -211,7 +211,11 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                     border: `1px solid ${i === 0 ? 'rgba(59,130,246,0.25)' : 'rgba(255,255,255,0.08)'}`,
                     fontWeight: i === 0 ? 600 : 400,
                   }}>
-                    {i === 0 && '★ '}{p.name}
+                    {i === 0 && (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#60a5fa" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 2, verticalAlign: 'middle' }}>
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                      </svg>
+                    )}{p.name}
                   </span>
                 ))}
               </div>
@@ -279,7 +283,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
               <p style={{ fontSize: 12, color: '#64748b', margin: '8px 0 0', lineHeight: 1.4 }}>
                 {consistency.stability >= 80 ? 'Your interests and preferences are very stable.' :
                  consistency.stability >= 50 ? 'Your preferences show some variation across assessments.' :
-                 'Your interests seem to be evolving — that\'s normal!'}
+                 "Your interests seem to be evolving - that's normal!"}
               </p>
             </div>
           )}

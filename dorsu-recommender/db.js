@@ -206,7 +206,7 @@ async function initDB() {
       key TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
       description TEXT NOT NULL,
-      icon TEXT NOT NULL DEFAULT '🏆'
+      icon TEXT NOT NULL DEFAULT ''
     )
   `)
 
@@ -222,16 +222,16 @@ async function initDB() {
 
   // Seed default achievements
   const defaultAchievements = [
-    { key: 'first_assessment', name: 'First Steps', description: 'Complete your first assessment', icon: '🎯' },
-    { key: 'explorer', name: 'Explorer', description: 'Compare 3 or more programs', icon: '🔍' },
-    { key: 'scholar', name: 'Scholar', description: 'Achieve a GWA of 90 or higher', icon: '📚' },
-    { key: 'committed', name: 'Committed', description: 'Save 5 or more programs to favorites', icon: '💎' },
-    { key: 'veteran', name: 'Veteran', description: 'Take 3 or more assessments', icon: '⭐' },
+    { key: 'first_assessment', name: 'First Steps', description: 'Complete your first assessment' },
+    { key: 'explorer', name: 'Explorer', description: 'Compare 3 or more programs' },
+    { key: 'scholar', name: 'Scholar', description: 'Achieve a GWA of 90 or higher' },
+    { key: 'committed', name: 'Committed', description: 'Save 5 or more programs to favorites' },
+    { key: 'veteran', name: 'Veteran', description: 'Take 3 or more assessments' },
   ]
   for (const a of defaultAchievements) {
     await pool.query(
-      `INSERT INTO achievements (id, key, name, description, icon) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (key) DO NOTHING`,
-      [a.key, a.key, a.name, a.description, a.icon]
+      `INSERT INTO achievements (id, key, name, description) VALUES ($1, $2, $3, $4) ON CONFLICT (key) DO NOTHING`,
+      [a.key, a.key, a.name, a.description]
     )
   }
 
