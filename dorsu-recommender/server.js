@@ -540,10 +540,22 @@ app.get('/api/admin/users', authenticate, requireManager, async (req, res) => {
     const offset = (page - 1) * limit
     const search = req.query.search || ''
 
-    let countQuery = "SELECT COUNT(*) FROM users WHERE email != 'admin@dorsu.edu.ph'"
-    let dataQuery = "SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at FROM users WHERE email != 'admin@dorsu.edu.ph'"
+    const conditions = ["email != 'admin@dorsu.edu.ph'"]
     const params = []
     let paramIdx = 1
+
+    // Admin (not super_admin) cannot see other admin or super_admin accounts
+    if (req.user.role === 'admin') {
+      conditions.push(`id != $${paramIdx}`)
+      params.push(req.user.id)
+      paramIdx++
+      conditions.push(`role NOT IN ('admin', 'super_admin')`)
+    }
+
+    let whereClause = 'WHERE ' + conditions.join(' AND ')
+
+    let countQuery = 'SELECT COUNT(*) FROM users ' + whereClause
+    let dataQuery = 'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at FROM users ' + whereClause
 
     if (search) {
       const filter = ` AND (LOWER(first_name) LIKE $${paramIdx} OR LOWER(last_name) LIKE $${paramIdx} OR LOWER(email) LIKE $${paramIdx})`
@@ -556,9 +568,16 @@ app.get('/api/admin/users', authenticate, requireManager, async (req, res) => {
     dataQuery += ' ORDER BY created_at DESC LIMIT $' + paramIdx + ' OFFSET $' + (paramIdx + 1)
     params.push(limit, offset)
 
+    let dataParams = [...params]
+    // Build count params (same as data params but without LIMIT/OFFSET)
+    let countParams = []
+    let ci = 1
+    if (req.user.role === 'admin') { countParams.push(req.user.id); ci++ }
+    if (search) countParams.push(`%${search.toLowerCase()}%`)
+
     const [countResult, dataResult] = await Promise.all([
-      pool.query(countQuery, search ? [`%${search.toLowerCase()}%`] : []),
-      pool.query(dataQuery, params),
+      pool.query(countQuery, countParams),
+      pool.query(dataQuery, dataParams),
     ])
 
     res.json({
