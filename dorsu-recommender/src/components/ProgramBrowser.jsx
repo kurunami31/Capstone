@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import programs from '../data/programs.json'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
+import CustomSelect from './CustomSelect.jsx'
 
 const faculties = [...new Set(programs.map(p => p.faculty))].sort()
 const allStrands = [...new Set(programs.flatMap(p => [...(p.compatible_strands || []), ...(p.alternative_strands || [])]))].sort()
@@ -45,14 +46,16 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
                 fontSize: 14, outline: 'none', fontFamily: 'inherit',
               }}
           />
-          <select value={faculty} onChange={e => setFaculty(e.target.value)} style={selectStyle}>
-            <option value="">All Faculties</option>
-            {faculties.map(f => <option key={f} value={f}>{f}</option>)}
-          </select>
-          <select value={strand} onChange={e => setStrand(e.target.value)} style={selectStyle}>
-            <option value="">All Strands</option>
-            {allStrands.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <CustomSelect
+            value={faculty} onChange={setFaculty}
+            options={faculties.map(f => ({ value: f, label: f }))}
+            placeholder="All Faculties"
+          />
+          <CustomSelect
+            value={strand} onChange={setStrand}
+            options={allStrands.map(s => ({ value: s, label: s }))}
+            placeholder="All Strands"
+          />
           {(search || faculty || strand) && (
             <button onClick={() => { setSearch(''); setFaculty(''); setStrand('') }} style={{
               padding: '10px 16px', borderRadius: 10, border: '1px solid var(--border-strong)',
@@ -100,13 +103,6 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
       )}
     </div>
   )
-}
-
-const selectStyle = {
-  padding: '10px 14px', borderRadius: 10, border: '1px solid var(--input-border, rgba(255,255,255,0.1))',
-  background: 'var(--input-bg, rgba(255,255,255,0.05))', color: 'var(--text-input)',
-  fontSize: 13, outline: 'none', cursor: 'pointer', fontFamily: 'inherit',
-  minWidth: 160,
 }
 
 function ProgramCard({ program: p, active, onClick }) {
