@@ -15,16 +15,19 @@ function HamburgerIcon({ open }) {
 }
 
 export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onHistory, onFAQ, onAdmin, onLogout, open, onToggle, isMobile }) {
+  const staffRoles = ['admin', 'super_admin', 'department_head', 'counselor']
+  const isStaff = staffRoles.includes(user?.role)
+
   const navItems = [
     { id: 'home', label: 'Home', icon: 'home', action: onHome },
   ]
 
-  if (user?.role !== 'admin') {
+  if (!isStaff) {
     navItems.push({ id: 'profile', label: 'Profile', icon: 'user', action: onProfile })
     navItems.push({ id: 'history', label: 'History', icon: 'clock', action: onHistory })
   }
 
-  if (user?.role === 'admin') {
+  if (isStaff) {
     navItems.push({ id: 'admin', label: 'Admin', icon: 'shield', action: onAdmin })
   } else {
     navItems.push({ id: 'faq', label: 'FAQ', icon: 'helpCircle', action: onFAQ })
@@ -154,8 +157,15 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
                 <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user?.firstName || ''} {user?.lastName || ''}
                 </div>
-                {user?.role === 'admin' && (
-                  <span style={{ fontSize: 10, color: '#22d3ee', fontWeight: 600 }}>Admin</span>
+                {user?.role && user?.role !== 'user' && (
+                  <span style={{ fontSize: 10, color: '#22d3ee', fontWeight: 600 }}>
+                    {{
+                      super_admin: 'Super Admin',
+                      admin: 'Admin',
+                      department_head: 'Dept Head',
+                      counselor: 'Counselor',
+                    }[user.role] || user.role}
+                  </span>
                 )}
               </div>
             )}

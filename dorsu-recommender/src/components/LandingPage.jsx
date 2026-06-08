@@ -8,7 +8,7 @@ function daysUntil(date) {
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
-export default function LandingPage({ onGetStarted }) {
+export default function LandingPage({ onGetStarted, user }) {
   const [lastAssessment, setLastAssessment] = useState(null)
   const [loadingStatus, setLoadingStatus] = useState(true)
 
@@ -59,7 +59,17 @@ export default function LandingPage({ onGetStarted }) {
         <p className="hero-tagline" style={{ fontSize: 14, opacity: 0.65, marginBottom: 24, letterSpacing: '0.02em' }}>
           SHS Strand &bull; Grades &bull; Aptitude &bull; Personality &bull; Interests &bull; Skills
         </p>
-        {onCooldown ? (
+        {['admin', 'super_admin', 'department_head', 'counselor'].includes(user?.role) ? (
+          <div style={{
+            padding: '14px 24px', borderRadius: 12,
+            backgroundColor: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.2)',
+            display: 'inline-block',
+          }}>
+            <p style={{ color: '#60a5fa', fontSize: 15, fontWeight: 600, margin: 0 }}>
+              Welcome, {user?.firstName || 'Staff'}! Use the sidebar to access the admin panel.
+            </p>
+          </div>
+        ) : onCooldown ? (
           <div>
             <div style={{
               padding: '14px 24px', borderRadius: 12,

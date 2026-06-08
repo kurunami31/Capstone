@@ -154,6 +154,15 @@ async function initDB() {
   // Mark existing users created before email verification feature as verified
   await pool.query("UPDATE users SET email_verified = true WHERE email_verified IS NULL").catch(() => {})
 
+  // Performance indexes
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_assessments_user_id ON assessments(user_id)').catch(() => {})
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_assessments_created_at ON assessments(created_at)').catch(() => {})
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_activity_log_user_id ON activity_log(user_id)').catch(() => {})
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_activity_log_created_at ON activity_log(created_at)').catch(() => {})
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_password_resets_token ON password_resets(token)').catch(() => {})
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_email_verifications_token ON email_verifications(token)').catch(() => {})
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_counselor_notes_assessment_id ON counselor_notes(assessment_id)').catch(() => {})
+
   console.log('Database initialized.')
 }
 

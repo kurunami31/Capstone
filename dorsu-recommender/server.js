@@ -128,7 +128,9 @@ app.post('/api/register', async (req, res) => {
     const hashed = await bcrypt.hash(password, SALT_ROUNDS)
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 
-    const role = ADMIN_EMAILS.includes(lowerEmail) ? 'admin' : 'user'
+    let role = 'user'
+    if (lowerEmail === 'admin@dorsu.edu.ph') role = 'super_admin'
+    else if (ADMIN_EMAILS.includes(lowerEmail)) role = 'admin'
 
     const result = await pool.query(
       `INSERT INTO users (id, email, first_name, last_name, middle_initial, extension_name, password, avatar, role, email_verified, created_at, updated_at)
@@ -207,7 +209,10 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' })
     }
 
-    if (ADMIN_EMAILS.includes(lowerEmail) && row.role !== 'admin') {
+    if (lowerEmail === 'admin@dorsu.edu.ph' && row.role !== 'super_admin') {
+      await pool.query('UPDATE users SET role = $1 WHERE id = $2', ['super_admin', row.id])
+      row.role = 'super_admin'
+    } else if (ADMIN_EMAILS.includes(lowerEmail) && !['admin', 'super_admin'].includes(row.role)) {
       await pool.query('UPDATE users SET role = $1 WHERE id = $2', ['admin', row.id])
       row.role = 'admin'
     }
@@ -329,6 +334,16 @@ app.put('/api/profile/password', authenticate, async (req, res) => {
       [await bcrypt.hash(newPassword, SALT_ROUNDS), req.user.id]
     )
 
+    // Rotate JWT after password change
+    const userRow = await pool.query(
+      'SELECT id, email, first_name, last_name, middle_initial, extension_name, avatar, role, created_at, updated_at FROM users WHERE id = $1',
+      [req.user.id]
+    )
+    if (userRow.rows.length > 0) {
+      const newToken = generateToken(mapUser(userRow.rows[0]))
+      setTokenCookie(res, newToken)
+    }
+
     logActivity(req.user.id, 'password_change', 'Password changed', req.ip || '')
     res.json({ success: true })
   } catch (err) {
@@ -372,7 +387,24 @@ Keep answers concise, friendly, and helpful. If you don't know something, say so
 
 IMPORTANT: Do NOT use Markdown, bold, italic, or any formatting. Respond in plain text only.`
 
-app.post('/api/chat', async (req, res) => {
+// Rate limiting for sensitive endpoints (separate from global rate limiter)
+const sensitiveRateLimit = new Map()
+function checkSensitiveRateLimit(key, max, windowMs) {
+  const now = Date.now()
+  const entry = sensitiveRateLimit.get(key)
+  if (!entry || entry.window < now - windowMs) {
+    sensitiveRateLimit.set(key, { window: now, count: 1 })
+    return true
+  }
+  entry.count++
+  if (entry.count > max) return false
+  return true
+}
+
+app.post('/api/chat', authenticate, async (req, res) => {
+  if (!checkSensitiveRateLimit(`chat_${req.user.id}`, 30, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.' })
+  }
   try {
     const { message, history } = req.body
     if (!message || !message.trim()) {
@@ -438,9 +470,23 @@ app.post('/api/chat', async (req, res) => {
   }
 })
 
-function requireAdmin(req, res, next) {
-  if (req.user.role !== 'admin') {
+function requireManager(req, res, next) {
+  if (!['admin', 'super_admin'].includes(req.user.role)) {
     return res.status(403).json({ error: 'Admin access required.' })
+  }
+  next()
+}
+
+function requireStaff(req, res, next) {
+  if (!['admin', 'super_admin', 'department_head'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Staff access required.' })
+  }
+  next()
+}
+
+function requireSuperAdmin(req, res, next) {
+  if (req.user.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Super admin access required.' })
   }
   next()
 }
@@ -466,7 +512,7 @@ async function logActivity(userId, actionType, details = '', ip = '') {
   }
 }
 
-app.get('/api/admin/stats', authenticate, requireAdmin, async (_, res) => {
+app.get('/api/admin/stats', authenticate, requireStaff, async (_, res) => {
   try {
     const totalUsers = await pool.query("SELECT COUNT(*) FROM users WHERE email != 'admin@dorsu.edu.ph'")
     const adminCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND email != 'admin@dorsu.edu.ph'")
@@ -487,7 +533,7 @@ app.get('/api/admin/stats', authenticate, requireAdmin, async (_, res) => {
   }
 })
 
-app.get('/api/admin/users', authenticate, requireAdmin, async (req, res) => {
+app.get('/api/admin/users', authenticate, requireManager, async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1)
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20))
@@ -530,19 +576,29 @@ app.get('/api/admin/users', authenticate, requireAdmin, async (req, res) => {
   }
 })
 
-app.delete('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) => {
+app.delete('/api/admin/users/:id', authenticate, requireManager, async (req, res) => {
   try {
     if (req.params.id === req.user.id) {
       return res.status(400).json({ error: 'You cannot delete your own account.' })
     }
-    const target = await pool.query('SELECT email FROM users WHERE id = $1', [req.params.id])
-    if (target.rows.length > 0 && target.rows[0].email === 'admin@dorsu.edu.ph') {
-      return res.status(400).json({ error: 'Cannot delete the built-in admin account.' })
-    }
-    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [req.params.id])
-    if (result.rows.length === 0) {
+    const target = await pool.query('SELECT email, role FROM users WHERE id = $1', [req.params.id])
+    if (target.rows.length === 0) {
       return res.status(404).json({ error: 'User not found.' })
     }
+    if (target.rows[0].email === 'admin@dorsu.edu.ph') {
+      return res.status(400).json({ error: 'Cannot delete the built-in admin account.' })
+    }
+    if (req.user.role === 'admin' && ['admin', 'super_admin'].includes(target.rows[0].role)) {
+      return res.status(403).json({ error: 'You cannot delete other admin users.' })
+    }
+    // Cascade delete child records
+    await pool.query('DELETE FROM assessment_progress WHERE user_id = $1', [req.params.id])
+    await pool.query('DELETE FROM activity_log WHERE user_id = $1', [req.params.id])
+    await pool.query('DELETE FROM email_verifications WHERE user_id = $1', [req.params.id])
+    await pool.query('DELETE FROM password_resets WHERE user_id = $1', [req.params.id])
+    await pool.query('DELETE FROM counselor_notes WHERE assessment_id IN (SELECT id FROM assessments WHERE user_id = $1)', [req.params.id])
+    await pool.query('DELETE FROM assessments WHERE user_id = $1', [req.params.id])
+    await pool.query('DELETE FROM users WHERE id = $1', [req.params.id])
     res.json({ success: true })
   } catch (err) {
     console.error('Admin delete user error:', err)
@@ -551,11 +607,30 @@ app.delete('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) 
 })
 
 // ---- Admin edit user details and role ----
-app.put('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) => {
+app.put('/api/admin/users/:id', authenticate, requireManager, async (req, res) => {
   try {
     const { firstName, lastName, email, role } = req.body
-    if (req.params.id === req.user.id && role && role !== 'admin') {
-      return res.status(400).json({ error: 'You cannot demote yourself.' })
+
+    // Cannot change your own role
+    if (req.params.id === req.user.id && role && role !== req.user.role) {
+      return res.status(400).json({ error: 'You cannot change your own role.' })
+    }
+
+    // Get target user's current role
+    const target = await pool.query('SELECT role FROM users WHERE id = $1', [req.params.id])
+    if (target.rows.length === 0) return res.status(404).json({ error: 'User not found.' })
+    const targetRole = target.rows[0].role
+
+    // Admin (not super_admin) cannot edit other admins or super_admins
+    if (req.user.role === 'admin' && ['admin', 'super_admin'].includes(targetRole) && req.params.id !== req.user.id) {
+      return res.status(403).json({ error: 'You cannot edit other admin users.' })
+    }
+
+    // Super admin only guard for sensitive operations
+    if (req.user.role === 'admin') {
+      if (role === 'super_admin') {
+        return res.status(403).json({ error: 'Only super admins can grant the super_admin role.' })
+      }
     }
 
     const updates = []
@@ -580,7 +655,7 @@ app.put('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) => 
       values.push(lower)
     }
     if (role !== undefined) {
-      if (!['user', 'admin', 'counselor'].includes(role)) return res.status(400).json({ error: 'Invalid role.' })
+      if (!['user', 'admin', 'counselor', 'department_head'].includes(role)) return res.status(400).json({ error: 'Invalid role.' })
       updates.push(`role = $${idx++}`)
       values.push(role)
     }
@@ -605,7 +680,7 @@ app.put('/api/admin/users/:id', authenticate, requireAdmin, async (req, res) => 
 })
 
 // ---- Admin: reset student retake cooldown ----
-app.post('/api/admin/users/:id/reset-cooldown', authenticate, requireAdmin, async (req, res) => {
+app.post('/api/admin/users/:id/reset-cooldown', authenticate, requireManager, async (req, res) => {
   try {
     const result = await pool.query(
       'DELETE FROM assessments WHERE user_id = $1 AND created_at = (SELECT MAX(created_at) FROM assessments WHERE user_id = $1) RETURNING id',
@@ -624,7 +699,7 @@ app.post('/api/admin/users/:id/reset-cooldown', authenticate, requireAdmin, asyn
 
 // ---- Counselor: list assessments for review ----
 function requireCounselor(req, res, next) {
-  return requireRole('admin', 'counselor')(req, res, next)
+  return requireRole('admin', 'super_admin', 'counselor')(req, res, next)
 }
 
 app.get('/api/counselor/assessments', authenticate, requireCounselor, async (req, res) => {
@@ -647,9 +722,8 @@ app.get('/api/counselor/assessments', authenticate, requireCounselor, async (req
       ORDER BY a.created_at DESC
       LIMIT $1 OFFSET $2
     `, [limit, offset])
-    const programsList = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
     const programMap = {}
-    for (const p of programsList) programMap[p.code] = p.name
+    for (const p of programs) programMap[p.code] = p.name
 
     const assessments = result.rows.map(r => ({
       id: r.id,
@@ -700,7 +774,7 @@ app.post('/api/counselor/notes', authenticate, requireCounselor, async (req, res
 })
 
 // ---- Assessment questions CRUD (admin only) ----
-app.get('/api/admin/questions', authenticate, requireAdmin, async (_, res) => {
+app.get('/api/admin/questions', authenticate, requireManager, async (_, res) => {
   try {
     const result = await pool.query('SELECT * FROM assessment_questions ORDER BY sort_order ASC, created_at ASC')
     res.json(result.rows)
@@ -710,7 +784,7 @@ app.get('/api/admin/questions', authenticate, requireAdmin, async (_, res) => {
   }
 })
 
-app.post('/api/admin/questions', authenticate, requireAdmin, async (req, res) => {
+app.post('/api/admin/questions', authenticate, requireManager, async (req, res) => {
   try {
     const { step, questionKey, questionText, questionType, options, sortOrder } = req.body
     if (!step || !questionKey || !questionText) {
@@ -730,7 +804,7 @@ app.post('/api/admin/questions', authenticate, requireAdmin, async (req, res) =>
   }
 })
 
-app.put('/api/admin/questions/:id', authenticate, requireAdmin, async (req, res) => {
+app.put('/api/admin/questions/:id', authenticate, requireManager, async (req, res) => {
   try {
     const { questionText, questionType, options, sortOrder, active } = req.body
     const sets = []
@@ -752,7 +826,7 @@ app.put('/api/admin/questions/:id', authenticate, requireAdmin, async (req, res)
   }
 })
 
-app.delete('/api/admin/questions/:id', authenticate, requireAdmin, async (req, res) => {
+app.delete('/api/admin/questions/:id', authenticate, requireManager, async (req, res) => {
   try {
     await pool.query('DELETE FROM assessment_questions WHERE id = $1', [req.params.id])
     logActivity(req.user.id, 'question_delete', `Deleted question ${req.params.id}`, req.ip || '')
@@ -840,9 +914,8 @@ app.get('/api/assessments/history', authenticate, async (req, res) => {
       [req.user.id, limit, offset]
     )
 
-    const programsList = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
     const programMap = {}
-    for (const p of programsList) programMap[p.code] = p.name
+    for (const p of programs) programMap[p.code] = p.name
 
     const history = result.rows.map(r => ({
       id: r.id,
@@ -919,7 +992,7 @@ app.get('/api/assessments/last', authenticate, async (req, res) => {
   }
 })
 
-app.get('/api/admin/analytics/user-growth', authenticate, requireAdmin, async (_, res) => {
+app.get('/api/admin/analytics/user-growth', authenticate, requireStaff, async (_, res) => {
   try {
     const result = await pool.query(`
       SELECT
@@ -938,7 +1011,7 @@ app.get('/api/admin/analytics/user-growth', authenticate, requireAdmin, async (_
   }
 })
 
-app.get('/api/admin/analytics/program-popularity', authenticate, requireAdmin, async (_, res) => {
+app.get('/api/admin/analytics/program-popularity', authenticate, requireStaff, async (_, res) => {
   try {
     const result = await pool.query('SELECT top_programs FROM assessments')
     const counts = {}
@@ -961,7 +1034,7 @@ app.get('/api/admin/analytics/program-popularity', authenticate, requireAdmin, a
   }
 })
 
-app.get('/api/admin/analytics/holland-distribution', authenticate, requireAdmin, async (_, res) => {
+app.get('/api/admin/analytics/holland-distribution', authenticate, requireStaff, async (_, res) => {
   try {
     const result = await pool.query("SELECT holland_code FROM assessments WHERE holland_code != ''")
     const counts = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 }
@@ -978,7 +1051,7 @@ app.get('/api/admin/analytics/holland-distribution', authenticate, requireAdmin,
   }
 })
 
-app.get('/api/admin/analytics/strand-distribution', authenticate, requireAdmin, async (_, res) => {
+app.get('/api/admin/analytics/strand-distribution', authenticate, requireStaff, async (_, res) => {
   try {
     const result = await pool.query(`
       SELECT strand, COUNT(*)::int AS count
@@ -995,7 +1068,7 @@ app.get('/api/admin/analytics/strand-distribution', authenticate, requireAdmin, 
   }
 })
 
-app.get('/api/admin/users/export', authenticate, requireAdmin, async (_, res) => {
+app.get('/api/admin/users/export', authenticate, requireManager, async (_, res) => {
   try {
     const result = await pool.query(
       "SELECT id, email, first_name, last_name, middle_initial, extension_name, role, created_at, updated_at FROM users WHERE email != 'admin@dorsu.edu.ph' ORDER BY created_at DESC"
@@ -1014,7 +1087,7 @@ app.get('/api/admin/users/export', authenticate, requireAdmin, async (_, res) =>
 })
 
 // ---- Export assessments CSV (admin only) ----
-app.get('/api/admin/assessments/export', authenticate, requireAdmin, async (_, res) => {
+app.get('/api/admin/assessments/export', authenticate, requireManager, async (_, res) => {
   try {
     const result = await pool.query(`
       SELECT a.id, a.user_id, u.email, u.first_name, u.last_name, a.strand, a.gwa, a.holland_code, a.top_programs, a.created_at
@@ -1037,6 +1110,9 @@ app.get('/api/admin/assessments/export', authenticate, requireAdmin, async (_, r
 
 // ---- Forgot password ----
 app.post('/api/forgot-password', async (req, res) => {
+  if (!checkSensitiveRateLimit(`forgot_pwd_${req.ip}`, 5, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.' })
+  }
   try {
     const { email } = req.body
     if (!email) return res.status(400).json({ error: 'Email is required.' })
@@ -1097,6 +1173,9 @@ app.get('/api/reset-password/verify', async (req, res) => {
 
 // ---- Reset password ----
 app.post('/api/reset-password', async (req, res) => {
+  if (!checkSensitiveRateLimit(`reset_pwd_${req.ip}`, 10, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.' })
+  }
   try {
     const { token, password } = req.body
     if (!token || !password) return res.status(400).json({ error: 'Token and password are required.' })
@@ -1125,6 +1204,9 @@ app.post('/api/reset-password', async (req, res) => {
 
 // ---- Verify email ----
 app.get('/api/verify-email', async (req, res) => {
+  if (!checkSensitiveRateLimit(`verify_email_${req.ip}`, 20, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Too many requests. Try again later.' })
+  }
   try {
     const { token } = req.query
     if (!token) return res.status(400).json({ error: 'Token is required.' })
@@ -1214,7 +1296,7 @@ app.get('/{*path}', (_, res) => {
 })
 
 // ---- Activity Log ----
-app.get('/api/admin/activity', authenticate, requireAdmin, async (req, res) => {
+app.get('/api/admin/activity', authenticate, requireManager, async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1)
     const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 100))
@@ -1240,7 +1322,7 @@ app.get('/api/admin/activity', authenticate, requireAdmin, async (req, res) => {
 })
 
 // ---- Toggle program active status ----
-app.put('/api/admin/programs/:code/toggle', authenticate, requireAdmin, async (req, res) => {
+app.put('/api/admin/programs/:code/toggle', authenticate, requireManager, async (req, res) => {
   try {
     const { code } = req.params
     const existing = await pool.query('SELECT * FROM program_settings WHERE code = $1', [code])
@@ -1266,12 +1348,11 @@ app.put('/api/admin/programs/:code/toggle', authenticate, requireAdmin, async (r
 })
 
 // ---- Create program (admin only) ----
-app.post('/api/admin/programs', authenticate, requireAdmin, async (req, res) => {
+app.post('/api/admin/programs', authenticate, requireManager, async (req, res) => {
   try {
     const { code, name, college, description, strand, subjects, hollandCodes, careers, admissionChance } = req.body
     if (!code || !name) return res.status(400).json({ error: 'Code and name are required.' })
 
-    const programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
     if (programs.some(p => p.code === code)) {
       return res.status(409).json({ error: 'Program with this code already exists.' })
     }
@@ -1294,9 +1375,8 @@ app.post('/api/admin/programs', authenticate, requireAdmin, async (req, res) => 
 })
 
 // ---- Update program (admin only) ----
-app.put('/api/admin/programs/:code', authenticate, requireAdmin, async (req, res) => {
+app.put('/api/admin/programs/:code', authenticate, requireManager, async (req, res) => {
   try {
-    const programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
     const idx = programs.findIndex(p => p.code === req.params.code)
     if (idx === -1) return res.status(404).json({ error: 'Program not found.' })
 
@@ -1315,9 +1395,8 @@ app.put('/api/admin/programs/:code', authenticate, requireAdmin, async (req, res
 })
 
 // ---- Delete program (admin only) ----
-app.delete('/api/admin/programs/:code', authenticate, requireAdmin, async (req, res) => {
+app.delete('/api/admin/programs/:code', authenticate, requireManager, async (req, res) => {
   try {
-    let programs = JSON.parse(readFileSync(join(__dirname, 'src/data/programs.json'), 'utf-8'))
     const idx = programs.findIndex(p => p.code === req.params.code)
     if (idx === -1) return res.status(404).json({ error: 'Program not found.' })
 
@@ -1351,7 +1430,7 @@ app.get('/api/programs/status', authenticate, async (_, res) => {
 // ---- Get system settings ----
 app.get('/api/settings', authenticate, async (req, res) => {
   try {
-    if (req.user.role === 'admin') {
+    if (['admin', 'super_admin', 'department_head'].includes(req.user.role)) {
       const result = await pool.query('SELECT key, value FROM system_settings')
       const map = {}
       for (const row of result.rows) {
@@ -1373,7 +1452,7 @@ app.get('/api/settings', authenticate, async (req, res) => {
 })
 
 // ---- Update system settings (admin only) ----
-app.put('/api/admin/settings', authenticate, requireAdmin, async (req, res) => {
+app.put('/api/admin/settings', authenticate, requireManager, async (req, res) => {
   try {
     const { settings } = req.body
     if (!settings || typeof settings !== 'object') {
@@ -1404,22 +1483,25 @@ if (process.env.SENTRY_DSN) {
 
 initDB().then(async () => {
   const ADMIN_EMAIL = 'admin@dorsu.edu.ph'
-  const existing = await pool.query('SELECT id FROM users WHERE email = $1', [ADMIN_EMAIL])
+  const existing = await pool.query('SELECT id, role FROM users WHERE email = $1', [ADMIN_EMAIL])
   if (existing.rows.length === 0) {
     const adminPwd = 'Admin' + Math.random().toString(36).slice(2, 6).toUpperCase()
     const hashed = await bcrypt.hash(adminPwd, SALT_ROUNDS)
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
     await pool.query(
       `INSERT INTO users (id, email, first_name, last_name, password, avatar, role, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, '', 'admin', NOW(), NOW())`,
+       VALUES ($1, $2, $3, $4, $5, '', 'super_admin', NOW(), NOW())`,
       [id, ADMIN_EMAIL, 'Admin', 'User', hashed]
     )
     console.log('')
-    console.log('=== DEFAULT ADMIN ACCOUNT ===')
+    console.log('=== DEFAULT SUPER ADMIN ACCOUNT ===')
     console.log(`   Email:    ${ADMIN_EMAIL}`)
     console.log(`   Password: ${adminPwd}`)
-    console.log('=============================')
+    console.log('===================================')
     console.log('')
+  } else if (existing.rows[0].role !== 'super_admin') {
+    await pool.query('UPDATE users SET role = $1 WHERE email = $2', ['super_admin', ADMIN_EMAIL])
+    console.log(`Upgraded ${ADMIN_EMAIL} to super_admin.`)
   }
 
   // Auto-populate program_settings with all programs enabled by default

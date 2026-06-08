@@ -69,6 +69,7 @@ function AppContent() {
   const [showResumePrompt, setShowResumePrompt] = useState(false)
   const [emailVerified, setEmailVerified] = useState(true)
   const [smtpConfigured, setSmtpConfigured] = useState(false)
+  const [verifMsg, setVerifMsg] = useState('')
   const autoSaveRef = useRef(null)
 
   // Check email verification status
@@ -214,12 +215,15 @@ function AppContent() {
       <button
         onClick={async () => {
           try {
+            setVerifMsg('Sending...')
             const res = await fetch('/api/resend-verification', { method: 'POST', credentials: 'include' })
             const data = await res.json()
             if (data.alreadyVerified) setEmailVerified(true)
-            else alert('Verification email sent! Check your inbox.')
+            else setVerifMsg('Verification email sent! Check your inbox.')
+            setTimeout(() => setVerifMsg(''), 5000)
           } catch {
-            alert('Failed to send verification email.')
+            setVerifMsg('Failed to send verification email.')
+            setTimeout(() => setVerifMsg(''), 5000)
           }
         }}
         style={{
@@ -229,6 +233,7 @@ function AppContent() {
       >
         Resend verification email
       </button>
+      {verifMsg && <span style={{ marginLeft: 8, fontSize: 12, color: '#94a3b8' }}>{verifMsg}</span>}
     </div>
   ) : null
 
@@ -300,7 +305,7 @@ function AppContent() {
   } else if (showAdmin) {
     mainContent = <AdminPage settings={systemSettings} activePrograms={activePrograms} userRole={user?.role} />
   } else if (showLanding) {
-    mainContent = <LandingPage onGetStarted={handleGetStarted} />
+    mainContent = <LandingPage onGetStarted={handleGetStarted} user={user} />
   } else {
     mainContent = (
       <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)' }}>
@@ -385,7 +390,7 @@ function AppContent() {
         {mainContent}
       </div>
       <ChatWidget />
-      {user?.role !== 'admin' && showLanding && <OnboardingWalkthrough />}
+      {!['admin', 'super_admin', 'department_head', 'counselor'].includes(user?.role) && showLanding && <OnboardingWalkthrough />}
     </div>
   )
 }
