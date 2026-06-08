@@ -40,8 +40,8 @@ export default function CareerExplorer({ studentData }) {
             background: 'var(--input-bg)', color: 'var(--text-input)',
             fontSize: 13, outline: 'none', cursor: 'pointer', fontFamily: 'inherit', minWidth: 180,
           }}>
-            <option value="">All Faculties</option>
-            {faculties.map(f => <option key={f} value={f}>{f}</option>)}
+            <option value="" style={{ color: 'var(--text-primary)' }}>All Faculties</option>
+            {faculties.map(f => <option key={f} value={f} style={{ color: 'var(--text-primary)' }}>{f}</option>)}
           </select>
         </div>
 

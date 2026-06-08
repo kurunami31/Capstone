@@ -46,12 +46,12 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
               }}
           />
           <select value={faculty} onChange={e => setFaculty(e.target.value)} style={selectStyle}>
-            <option value="">All Faculties</option>
-            {faculties.map(f => <option key={f} value={f}>{f}</option>)}
+            <option value="" style={{ color: 'var(--text-primary)' }}>All Faculties</option>
+            {faculties.map(f => <option key={f} value={f} style={{ color: 'var(--text-primary)' }}>{f}</option>)}
           </select>
           <select value={strand} onChange={e => setStrand(e.target.value)} style={selectStyle}>
-            <option value="">All Strands</option>
-            {allStrands.map(s => <option key={s} value={s}>{s}</option>)}
+            <option value="" style={{ color: 'var(--text-primary)' }}>All Strands</option>
+            {allStrands.map(s => <option key={s} value={s} style={{ color: 'var(--text-primary)' }}>{s}</option>)}
           </select>
           {(search || faculty || strand) && (
             <button onClick={() => { setSearch(''); setFaculty(''); setStrand('') }} style={{

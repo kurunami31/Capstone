@@ -8,9 +8,10 @@ function codeColor(score) {
 }
 
 export default function ProgramDetailModal({ result, studentData, onClose }) {
-  const { program, breakdown, admission, totalScore } = result
+  const { program, breakdown = {}, admission = {}, totalScore } = result || {}
+  const hasScore = totalScore !== undefined && totalScore !== null
 
-  const explanations = useMemo(() => generateExplanations(result, studentData), [result, studentData])
+  const explanations = useMemo(() => hasScore ? generateExplanations(result, studentData) : [], [result, studentData, hasScore])
   const skillsGap = useMemo(() => calculateSkillsGap(studentData, program), [studentData, program])
 
   const metCount = skillsGap.filter(s => s.status === 'met').length
@@ -59,11 +60,19 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
               border: '1px solid rgba(52,211,153,0.25)',
             }}>{program.board_exam ? `Licensure: ${program.board_exam}` : 'Board Program'}</span>
           )}
-          <span style={{
-            fontSize: 11, padding: '3px 10px', borderRadius: 20,
-            backgroundColor: `${codeColor(totalScore)}15`, color: codeColor(totalScore),
-            border: `1px solid ${codeColor(totalScore)}25`,
-          }}>{totalScore}% Match</span>
+          {hasScore ? (
+            <span style={{
+              fontSize: 11, padding: '3px 10px', borderRadius: 20,
+              backgroundColor: `${codeColor(totalScore)}15`, color: codeColor(totalScore),
+              border: `1px solid ${codeColor(totalScore)}25`,
+            }}>{totalScore}% Match</span>
+          ) : (
+            <span style={{
+              fontSize: 11, padding: '3px 10px', borderRadius: 20,
+              backgroundColor: 'var(--row-bg)', color: 'var(--text-muted)',
+              border: '1px solid var(--track-bg)',
+            }}>Browse Mode</span>
+          )}
         </div>
 
         <section style={{ marginBottom: 20 }}>
@@ -91,44 +100,46 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
           </div>
         </section>
 
-        <section style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Score Breakdown</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {[
-              { label: 'Academic', score: breakdown.academic },
-              { label: 'SUAST', score: breakdown.suast },
-              { label: 'Personal Fit', score: breakdown.personalFit },
-              { label: 'Admission Chance', score: admission.label, isAdmission: true },
-            ].map(s => (
-              <div key={s.label} style={{
-                padding: '10px 14px', borderRadius: 10,
-                backgroundColor: 'var(--row-bg)',
-                border: '1px solid var(--track-bg)',
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{s.label}</div>
-                <div style={{
-                  fontSize: 20, fontWeight: 700,
-                  color: s.isAdmission ? admissionColor(s.score) : codeColor(s.score),
+        {hasScore && (
+          <section style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Score Breakdown</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {[
+                { label: 'Academic', score: breakdown.academic },
+                { label: 'SUAST', score: breakdown.suast },
+                { label: 'Personal Fit', score: breakdown.personalFit },
+                { label: 'Admission Chance', score: admission.label, isAdmission: true },
+              ].map(s => (
+                <div key={s.label} style={{
+                  padding: '10px 14px', borderRadius: 10,
+                  backgroundColor: 'var(--row-bg)',
+                  border: '1px solid var(--track-bg)',
+                  textAlign: 'center',
                 }}>
-                  {s.isAdmission ? s.score : `${s.score}%`}
-                </div>
-                {!s.isAdmission && (
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{s.label}</div>
                   <div style={{
-                    marginTop: 4, height: 3, borderRadius: 2,
-                    backgroundColor: 'var(--track-bg)', overflow: 'hidden',
+                    fontSize: 20, fontWeight: 700,
+                    color: s.isAdmission ? admissionColor(s.score) : codeColor(s.score),
                   }}>
-                    <div style={{
-                      width: `${s.score}%`, height: '100%', borderRadius: 2,
-                      backgroundColor: codeColor(s.score),
-                      transition: 'width 0.5s ease',
-                    }} />
+                    {s.isAdmission ? s.score : `${s.score}%`}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
+                  {!s.isAdmission && (
+                    <div style={{
+                      marginTop: 4, height: 3, borderRadius: 2,
+                      backgroundColor: 'var(--track-bg)', overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        width: `${s.score}%`, height: '100%', borderRadius: 2,
+                        backgroundColor: codeColor(s.score),
+                        transition: 'width 0.5s ease',
+                      }} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section style={{ marginBottom: 20 }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Weighted Subjects</h3>
@@ -228,14 +239,16 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
           </div>
         </section>
 
-        <section style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Why This Match?</h3>
-          <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {explanations.map((exp, i) => (
-              <li key={i} style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{exp}</li>
-            ))}
-          </ul>
-        </section>
+        {hasScore && explanations.length > 0 && (
+          <section style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Why This Match?</h3>
+            <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {explanations.map((exp, i) => (
+                <li key={i} style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{exp}</li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {program.career_clusters?.length > 0 && (
           <section style={{ marginBottom: 20 }}>
