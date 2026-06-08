@@ -1,6 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
 import programs from '../data/programs.json'
+import careersData from '../data/careers.json'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
+
+const careerLookup = Object.fromEntries(careersData.map(c => [c.name, c]))
 
 const facultyLogoMap = {
   'Faculty of Computing, Engineering, and Technology (FaCET)': '/logos/facet logo final.png',
@@ -96,6 +99,45 @@ export default function CareerExplorer({ studentData }) {
                   </svg>
                 </button>
                 {expanded === career && (
+                  <>
+                  {careerLookup[career] && (
+                    <div style={{ padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: 10, borderBottom: '1px solid var(--track-bg)' }}>
+                      <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>{careerLookup[career].description}</p>
+                      {careerLookup[career].what_they_do && (
+                        <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>{careerLookup[career].what_they_do}</p>
+                      )}
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                        {careerLookup[career].skills.map(s => (
+                          <span key={s} style={{
+                            fontSize: 11, padding: '3px 10px', borderRadius: 6,
+                            background: 'var(--accent-bg)', color: 'var(--accent-text)',
+                          }}>{s}</span>
+                        ))}
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                        {careerLookup[career].shs_strands.map(s => (
+                          <span key={s} style={{
+                            fontSize: 10, padding: '2px 8px', borderRadius: 4,
+                            background: 'rgba(251,191,36,0.1)', color: '#fbbf24',
+                          }}>{s}</span>
+                        ))}
+                        <span style={{
+                          fontSize: 11, padding: '3px 10px', borderRadius: 6,
+                          background: 'rgba(59,130,246,0.1)', color: '#60a5fa',
+                        }}>Holland: {careerLookup[career].holland_code}</span>
+                        {careerLookup[career].board_exam && (
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                            background: 'rgba(52,211,153,0.15)', color: '#34d399',
+                          }}>Board Exam Required</span>
+                        )}
+                        <span style={{
+                          fontSize: 11, padding: '3px 10px', borderRadius: 6,
+                          background: 'rgba(148,163,184,0.1)', color: 'var(--text-secondary)',
+                        }}>{careerLookup[career].salary_range}</span>
+                      </div>
+                    </div>
+                  )}
                   <div style={{ padding: '0 20px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {progs.map(p => (
                       <button
@@ -122,6 +164,7 @@ export default function CareerExplorer({ studentData }) {
                       </button>
                     ))}
                   </div>
+                  </>
                 )}
               </div>
             ))}

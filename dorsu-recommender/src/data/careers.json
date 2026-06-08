@@ -1,0 +1,732 @@
+[
+  {
+    "name": "Software Developer",
+    "description": "Designs, builds, and maintains software applications and systems.",
+    "what_they_do": "Write code, debug programs, develop web and mobile apps, collaborate with teams using modern frameworks.",
+    "skills": ["Programming", "Problem-solving", "Logical thinking", "Attention to detail"],
+    "shs_strands": ["STEM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱80,000/month"
+  },
+  {
+    "name": "Systems Analyst",
+    "description": "Analyzes and designs IT solutions to improve business processes and efficiency.",
+    "what_they_do": "Evaluate current systems, gather requirements, design solutions, and coordinate between users and developers.",
+    "skills": ["Systems thinking", "Communication", "Data analysis", "Project management"],
+    "shs_strands": ["STEM", "ABM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱30,000 – ₱70,000/month"
+  },
+  {
+    "name": "Data Analyst",
+    "description": "Collects, processes, and interprets data to help organizations make informed decisions.",
+    "what_they_do": "Clean and organize data, create reports and dashboards, identify trends and patterns.",
+    "skills": ["Data analysis", "Statistics", "Critical thinking", "Communication"],
+    "shs_strands": ["STEM", "ABM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱60,000/month"
+  },
+  {
+    "name": "IT Support Specialist",
+    "description": "Provides technical support and troubleshooting for computer systems and networks.",
+    "what_they_do": "Diagnose hardware and software issues, set up equipment, maintain network infrastructure.",
+    "skills": ["Technical troubleshooting", "Customer service", "Hardware knowledge", "Patience"],
+    "shs_strands": ["STEM", "TVL"],
+    "holland_code": "R",
+    "board_exam": false,
+    "salary_range": "₱18,000 – ₱40,000/month"
+  },
+  {
+    "name": "Network Administrator",
+    "description": "Manages and maintains an organization's computer networks and systems.",
+    "what_they_do": "Configure routers and switches, monitor network performance, implement security measures.",
+    "skills": ["Network configuration", "Security awareness", "Problem-solving", "System administration"],
+    "shs_strands": ["STEM", "TVL"],
+    "holland_code": "R",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱60,000/month"
+  },
+  {
+    "name": "Civil Engineer",
+    "description": "Designs, plans, and oversees construction of infrastructure projects like roads and buildings.",
+    "what_they_do": "Create structural designs, supervise construction sites, ensure safety compliance, prepare cost estimates.",
+    "skills": ["Structural analysis", "Project management", "Mathematics", "Attention to detail"],
+    "shs_strands": ["STEM"],
+    "holland_code": "R",
+    "board_exam": true,
+    "salary_range": "₱25,000 – ₱70,000/month"
+  },
+  {
+    "name": "Structural Engineer",
+    "description": "Specializes in designing load-bearing structures to ensure safety and stability.",
+    "what_they_do": "Analyze structural loads, design frameworks, inspect existing structures, prepare technical reports.",
+    "skills": ["Structural analysis", "Mathematics", "Design software", "Critical thinking"],
+    "shs_strands": ["STEM"],
+    "holland_code": "R",
+    "board_exam": true,
+    "salary_range": "₱30,000 – ₱80,000/month"
+  },
+  {
+    "name": "Construction Manager",
+    "description": "Oversees construction projects from planning to completion, managing budgets and teams.",
+    "what_they_do": "Coordinate contractors, monitor progress, manage budgets, ensure safety and quality standards.",
+    "skills": ["Leadership", "Project management", "Budgeting", "Communication"],
+    "shs_strands": ["STEM", "ABM"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱35,000 – ₱90,000/month"
+  },
+  {
+    "name": "Industrial Technician",
+    "description": "Installs, maintains, and repairs industrial equipment and machinery.",
+    "what_they_do": "Perform preventive maintenance, diagnose mechanical issues, repair equipment, read technical diagrams.",
+    "skills": ["Mechanical aptitude", "Troubleshooting", "Hands-on repair", "Safety practices"],
+    "shs_strands": ["TVL", "STEM"],
+    "holland_code": "R",
+    "board_exam": false,
+    "salary_range": "₱18,000 – ₱40,000/month"
+  },
+  {
+    "name": "Production Supervisor",
+    "description": "Oversees manufacturing operations and ensures production targets are met efficiently.",
+    "what_they_do": "Supervise production staff, monitor output quality, implement process improvements, manage schedules.",
+    "skills": ["Leadership", "Quality control", "Planning", "Communication"],
+    "shs_strands": ["STEM", "ABM", "TVL"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱50,000/month"
+  },
+  {
+    "name": "Quality Control Analyst",
+    "description": "Tests and inspects products to ensure they meet quality standards before distribution.",
+    "what_they_do": "Conduct product tests, document results, identify defects, recommend corrective actions.",
+    "skills": ["Attention to detail", "Analytical thinking", "Documentation", "Technical knowledge"],
+    "shs_strands": ["STEM", "TVL"],
+    "holland_code": "C",
+    "board_exam": false,
+    "salary_range": "₱18,000 – ₱35,000/month"
+  },
+  {
+    "name": "Quality Control Manager",
+    "description": "Leads quality assurance teams and develops quality standards for production processes.",
+    "what_they_do": "Design quality policies, oversee inspection teams, conduct audits, drive continuous improvement.",
+    "skills": ["Leadership", "Data analysis", "Process improvement", "Decision-making"],
+    "shs_strands": ["STEM", "ABM"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱30,000 – ₱70,000/month"
+  },
+  {
+    "name": "Business Manager",
+    "description": "Plans and directs business operations to achieve organizational goals and growth.",
+    "what_they_do": "Develop strategies, manage teams, oversee finances, analyze market trends, drive profitability.",
+    "skills": ["Leadership", "Strategic planning", "Financial analysis", "Communication"],
+    "shs_strands": ["ABM", "STEM"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱35,000 – ₱100,000/month"
+  },
+  {
+    "name": "Entrepreneur",
+    "description": "Starts and manages businesses, identifying opportunities and creating value in the market.",
+    "what_they_do": "Develop business ideas, secure funding, manage operations, build customer relationships, innovate products.",
+    "skills": ["Creativity", "Risk-taking", "Leadership", "Financial literacy"],
+    "shs_strands": ["ABM", "GAS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "Variable – depends on business success"
+  },
+  {
+    "name": "Marketing Specialist",
+    "description": "Develops and executes marketing campaigns to promote products and build brand awareness.",
+    "what_they_do": "Create marketing materials, manage social media, analyze campaign performance, conduct market research.",
+    "skills": ["Creativity", "Communication", "Data analysis", "Digital marketing"],
+    "shs_strands": ["ABM", "GAS", "HUMSS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱55,000/month"
+  },
+  {
+    "name": "Human Resource Specialist",
+    "description": "Manages recruitment, employee relations, benefits, and organizational development.",
+    "what_they_do": "Screen and interview candidates, handle employee concerns, manage payroll, develop training programs.",
+    "skills": ["Interpersonal skills", "Communication", "Organization", "Conflict resolution"],
+    "shs_strands": ["ABM", "HUMSS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱50,000/month"
+  },
+  {
+    "name": "Event Coordinator",
+    "description": "Plans and organizes events from conception to execution, managing all logistics and vendors.",
+    "what_they_do": "Coordinate with clients and vendors, manage budgets, arrange venues, oversee event setup and execution.",
+    "skills": ["Organization", "Communication", "Time management", "Creativity"],
+    "shs_strands": ["ABM", "GAS", "HUMSS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱18,000 – ₱45,000/month"
+  },
+  {
+    "name": "Hotel Manager",
+    "description": "Oversees daily hotel operations to ensure excellent guest experiences and profitable performance.",
+    "what_they_do": "Manage staff, handle guest complaints, monitor budgets, ensure cleanliness and safety standards.",
+    "skills": ["Customer service", "Leadership", "Financial management", "Problem-solving"],
+    "shs_strands": ["ABM", "GAS", "TVL"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱70,000/month"
+  },
+  {
+    "name": "Restaurant Manager",
+    "description": "Manages restaurant operations including staff, inventory, customer service, and profitability.",
+    "what_they_do": "Hire and train staff, manage food inventory, ensure food quality, handle customer feedback, control costs.",
+    "skills": ["Customer service", "Leadership", "Inventory management", "Financial literacy"],
+    "shs_strands": ["ABM", "TVL", "GAS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱50,000/month"
+  },
+  {
+    "name": "Agribusiness Manager",
+    "description": "Manages agricultural production and business operations from farm to market.",
+    "what_they_do": "Plan crop production, manage budgets, coordinate distribution, analyze market trends, supervise farm workers.",
+    "skills": ["Business planning", "Agricultural knowledge", "Leadership", "Financial analysis"],
+    "shs_strands": ["ABM", "STEM", "GAS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱55,000/month"
+  },
+  {
+    "name": "Farm Manager",
+    "description": "Oversees daily farm operations including crop production, livestock management, and farm staff.",
+    "what_they_do": "Plan planting and harvest schedules, manage farm equipment, monitor crop health, supervise workers.",
+    "skills": ["Agricultural knowledge", "Leadership", "Planning", "Physical stamina"],
+    "shs_strands": ["STEM", "GAS", "TVL"],
+    "holland_code": "R",
+    "board_exam": false,
+    "salary_range": "₱18,000 – ₱40,000/month"
+  },
+  {
+    "name": "Public Administrator",
+    "description": "Develops and implements government policies and programs for public service and community development.",
+    "what_they_do": "Analyze policy options, manage government projects, coordinate with stakeholders, prepare budget proposals.",
+    "skills": ["Policy analysis", "Leadership", "Communication", "Research"],
+    "shs_strands": ["HUMSS", "ABM", "GAS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱70,000/month"
+  },
+  {
+    "name": "Actuary",
+    "description": "Analyzes financial risks using mathematics and statistics to help insurance and finance companies.",
+    "what_they_do": "Calculate insurance premiums, assess financial risks, build statistical models, prepare reports.",
+    "skills": ["Advanced mathematics", "Statistics", "Financial analysis", "Problem-solving"],
+    "shs_strands": ["STEM", "ABM"],
+    "holland_code": "C",
+    "board_exam": true,
+    "salary_range": "₱40,000 – ₱120,000/month"
+  },
+  {
+    "name": "Statistician",
+    "description": "Applies statistical methods to collect, analyze, and interpret data across various fields.",
+    "what_they_do": "Design surveys and experiments, analyze data using software, present findings, advise on data-driven decisions.",
+    "skills": ["Statistics", "Data analysis", "Programming", "Critical thinking"],
+    "shs_strands": ["STEM", "ABM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱65,000/month"
+  },
+  {
+    "name": "Research Statistician",
+    "description": "Specializes in designing research studies and analyzing data for scientific and social research.",
+    "what_they_do": "Develop research methodologies, perform complex statistical analyses, interpret results, write research papers.",
+    "skills": ["Research design", "Advanced statistics", "Data analysis", "Scientific writing"],
+    "shs_strands": ["STEM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱60,000/month"
+  },
+  {
+    "name": "Biologist",
+    "description": "Studies living organisms and their environments to advance scientific knowledge and applications.",
+    "what_they_do": "Conduct lab and field research, analyze biological samples, document findings, contribute to conservation efforts.",
+    "skills": ["Scientific research", "Laboratory techniques", "Data analysis", "Critical thinking"],
+    "shs_strands": ["STEM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱55,000/month"
+  },
+  {
+    "name": "Environmental Scientist",
+    "description": "Studies the environment and develops solutions to environmental problems like pollution and conservation.",
+    "what_they_do": "Collect environmental samples, analyze data, conduct field assessments, recommend sustainability practices.",
+    "skills": ["Scientific research", "Data analysis", "Fieldwork", "Environmental awareness"],
+    "shs_strands": ["STEM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱55,000/month"
+  },
+  {
+    "name": "Agricultural Entrepreneur",
+    "description": "Builds and manages agricultural ventures combining farming knowledge with business innovation.",
+    "what_they_do": "Identify market opportunities, develop agri-business models, manage production, build supply chains.",
+    "skills": ["Business planning", "Agricultural knowledge", "Innovation", "Marketing"],
+    "shs_strands": ["ABM", "STEM", "GAS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "Variable – depends on venture success"
+  },
+  {
+    "name": "Agricultural Extension Officer",
+    "description": "Educates and supports farmers on modern agricultural practices and technologies.",
+    "what_they_do": "Conduct training sessions, demonstrate new farming techniques, provide technical advice, distribute resources.",
+    "skills": ["Teaching", "Agricultural knowledge", "Communication", "Community outreach"],
+    "shs_strands": ["STEM", "GAS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱45,000/month"
+  },
+  {
+    "name": "Agriculturist",
+    "description": "Applies scientific principles to crop production, soil management, and sustainable farming practices.",
+    "what_they_do": "Analyze soil and crop conditions, advise on pest control, recommend fertilizers, improve yield quality.",
+    "skills": ["Agricultural science", "Research", "Problem-solving", "Fieldwork"],
+    "shs_strands": ["STEM"],
+    "holland_code": "I",
+    "board_exam": true,
+    "salary_range": "₱22,000 – ₱50,000/month"
+  },
+  {
+    "name": "Conservation Officer",
+    "description": "Protects natural resources and enforces environmental laws in forests, parks, and protected areas.",
+    "what_they_do": "Patrol natural areas, enforce environmental regulations, conduct wildlife surveys, educate the public.",
+    "skills": ["Environmental knowledge", "Law enforcement", "Communication", "Physical fitness"],
+    "shs_strands": ["STEM", "GAS"],
+    "holland_code": "R",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱45,000/month"
+  },
+  {
+    "name": "Sustainability Consultant",
+    "description": "Advises organizations on sustainable practices to reduce environmental impact and improve efficiency.",
+    "what_they_do": "Conduct environmental audits, recommend green solutions, develop sustainability plans, track progress.",
+    "skills": ["Environmental knowledge", "Data analysis", "Communication", "Strategic thinking"],
+    "shs_strands": ["STEM", "ABM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱30,000 – ₱70,000/month"
+  },
+  {
+    "name": "Teacher",
+    "description": "Educates and inspires students across various subjects and grade levels in formal school settings.",
+    "what_they_do": "Plan lessons, deliver instruction, assess student progress, manage classrooms, guide student development.",
+    "skills": ["Communication", "Patience", "Classroom management", "Subject expertise"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "Early Childhood Teacher",
+    "description": "Teaches and nurtures young children aged 3–5 in preschool and early learning settings.",
+    "what_they_do": "Design age-appropriate activities, develop social skills, teach basic literacy and numeracy, ensure safety.",
+    "skills": ["Patience", "Creativity", "Child development knowledge", "Communication"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱16,000 – ₱30,000/month"
+  },
+  {
+    "name": "Elementary Teacher",
+    "description": "Teaches foundational subjects to elementary school students and supports their overall development.",
+    "what_they_do": "Teach core subjects, create engaging lessons, assess student learning, communicate with parents.",
+    "skills": ["Communication", "Patience", "Creativity", "Classroom management"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱35,000/month"
+  },
+  {
+    "name": "Preschool Teacher",
+    "description": "Provides early childhood education and care for children before they enter formal schooling.",
+    "what_they_do": "Plan play-based learning activities, teach basic skills, monitor child development, collaborate with parents.",
+    "skills": ["Patience", "Creativity", "Child development knowledge", "Nurturing attitude"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱16,000 – ₱28,000/month"
+  },
+  {
+    "name": "Preschool Administrator",
+    "description": "Manages preschool operations including curriculum, staff, finances, and parent relations.",
+    "what_they_do": "Oversee teachers, develop school policies, manage enrollment, ensure regulatory compliance, coordinate with parents.",
+    "skills": ["Leadership", "Organization", "Communication", "Financial management"],
+    "shs_strands": ["HUMSS", "ABM", "GAS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱45,000/month"
+  },
+  {
+    "name": "Math Teacher",
+    "description": "Teaches mathematics concepts and problem-solving skills to students in secondary education.",
+    "what_they_do": "Prepare math lessons, explain concepts, assign practice problems, assess understanding, provide remediation.",
+    "skills": ["Mathematics", "Communication", "Patience", "Analytical thinking"],
+    "shs_strands": ["STEM", "HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "Mathematics Teacher",
+    "description": "Specializes in teaching advanced mathematics at the secondary or tertiary education level.",
+    "what_they_do": "Teach algebra, geometry, calculus and statistics, develop curriculum materials, advise math clubs.",
+    "skills": ["Advanced mathematics", "Communication", "Curriculum development", "Mentoring"],
+    "shs_strands": ["STEM", "HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱45,000/month"
+  },
+  {
+    "name": "Science Teacher",
+    "description": "Teaches scientific concepts through lectures, demonstrations, and laboratory experiments.",
+    "what_they_do": "Develop science curricula, conduct lab experiments, explain theories, assess student learning, promote scientific inquiry.",
+    "skills": ["Scientific knowledge", "Communication", "Laboratory skills", "Patience"],
+    "shs_strands": ["STEM", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "English Teacher",
+    "description": "Teaches English language and literature, developing students' reading, writing, and communication skills.",
+    "what_they_do": "Plan literature and writing lessons, grade essays, teach grammar, facilitate discussions, promote literacy.",
+    "skills": ["Communication", "Writing", "Literary knowledge", "Patience"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "Filipino Teacher",
+    "description": "Teaches Filipino language and literature, promoting linguistic and cultural appreciation.",
+    "what_they_do": "Teach Filipino grammar and literature, develop instructional materials, assess language proficiency.",
+    "skills": ["Filipino language expertise", "Communication", "Literary knowledge", "Patience"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "PE Teacher",
+    "description": "Promotes physical fitness and healthy lifestyles through structured physical education programs.",
+    "what_they_do": "Lead sports and fitness activities, teach health concepts, organize athletic events, assess physical development.",
+    "skills": ["Physical fitness", "Communication", "Motivation", "Sports knowledge"],
+    "shs_strands": ["GAS", "HUMSS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "Technology Teacher",
+    "description": "Teaches technology and computer-related subjects, preparing students for the digital age.",
+    "what_they_do": "Teach computer literacy, programming basics, and digital skills, maintain lab equipment, develop tech curricula.",
+    "skills": ["Technical knowledge", "Communication", "Adaptability", "Patience"],
+    "shs_strands": ["STEM", "TVL", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱42,000/month"
+  },
+  {
+    "name": "Curriculum Developer",
+    "description": "Designs and improves educational curricula, learning materials, and assessment tools.",
+    "what_they_do": "Research educational standards, develop lesson frameworks, create learning materials, evaluate curriculum effectiveness.",
+    "skills": ["Research", "Writing", "Educational theory", "Analytical thinking"],
+    "shs_strands": ["HUMSS", "GAS", "STEM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱55,000/month"
+  },
+  {
+    "name": "Curriculum Specialist",
+    "description": "Provides expert guidance on curriculum design and instructional strategies for educational institutions.",
+    "what_they_do": "Evaluate current curricula, recommend improvements, train teachers, align programs with educational standards.",
+    "skills": ["Educational expertise", "Leadership", "Communication", "Data analysis"],
+    "shs_strands": ["HUMSS", "GAS", "STEM"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱60,000/month"
+  },
+  {
+    "name": "Special Education Teacher",
+    "description": "Teaches students with diverse learning needs, adapting instruction to individual abilities.",
+    "what_they_do": "Develop individualized education plans, use adaptive teaching methods, collaborate with therapists and parents.",
+    "skills": ["Patience", "Adaptability", "Empathy", "Communication"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "Special Education Assistant",
+    "description": "Supports special education teachers in implementing individualized learning plans for students.",
+    "what_they_do": "Assist with classroom activities, provide one-on-one support, help with behavior management, prepare materials.",
+    "skills": ["Patience", "Empathy", "Teamwork", "Adaptability"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱15,000 – ₱28,000/month"
+  },
+  {
+    "name": "Inclusion Specialist",
+    "description": "Ensures students with disabilities receive appropriate support to succeed in inclusive classrooms.",
+    "what_they_do": "Assess student needs, coordinate support services, train staff on inclusion practices, advocate for students.",
+    "skills": ["Advocacy", "Collaboration", "Problem-solving", "Empathy"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱45,000/month"
+  },
+  {
+    "name": "Tutor",
+    "description": "Provides individualized academic support to students outside the regular classroom setting.",
+    "what_they_do": "Assess student weaknesses, explain concepts one-on-one, provide practice exercises, track progress.",
+    "skills": ["Subject expertise", "Patience", "Communication", "Adaptability"],
+    "shs_strands": ["HUMSS", "GAS", "STEM"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱15,000 – ₱35,000/month"
+  },
+  {
+    "name": "Vocational Instructor",
+    "description": "Teaches practical skills and trades in vocational and technical education programs.",
+    "what_they_do": "Demonstrate hands-on skills, assess student competencies, maintain workshop equipment, develop training modules.",
+    "skills": ["Hands-on expertise", "Teaching", "Patience", "Industry knowledge"],
+    "shs_strands": ["TVL", "GAS"],
+    "holland_code": "R",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "Language Instructor",
+    "description": "Teaches foreign or second languages to students in schools, language centers, or corporate settings.",
+    "what_they_do": "Plan language lessons, teach speaking and writing skills, assess proficiency, develop learning materials.",
+    "skills": ["Language proficiency", "Communication", "Patience", "Cultural awareness"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱45,000/month"
+  },
+  {
+    "name": "Laboratory Instructor",
+    "description": "Guides students and researchers in conducting laboratory experiments safely and effectively.",
+    "what_they_do": "Prepare lab equipment and materials, demonstrate procedures, enforce safety protocols, assess lab reports.",
+    "skills": ["Laboratory techniques", "Safety knowledge", "Communication", "Organization"],
+    "shs_strands": ["STEM"],
+    "holland_code": "R",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱40,000/month"
+  },
+  {
+    "name": "Clinical Instructor",
+    "description": "Supervises and trains nursing and health science students in clinical practice settings.",
+    "what_they_do": "Demonstrate clinical procedures, supervise student practice, evaluate clinical competencies, provide feedback.",
+    "skills": ["Clinical expertise", "Teaching", "Communication", "Patience"],
+    "shs_strands": ["STEM", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱25,000 – ₱55,000/month"
+  },
+  {
+    "name": "Registered Nurse",
+    "description": "Provides patient care, health education, and medical support in hospitals and healthcare settings.",
+    "what_they_do": "Administer medications, monitor vital signs, assist doctors, educate patients, maintain medical records.",
+    "skills": ["Clinical skills", "Compassion", "Critical thinking", "Communication"],
+    "shs_strands": ["STEM", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱22,000 – ₱50,000/month"
+  },
+  {
+    "name": "Public Health Nurse",
+    "description": "Promotes community health through disease prevention, health education, and public health programs.",
+    "what_they_do": "Conduct immunization drives, perform health screenings, educate communities, track disease outbreaks.",
+    "skills": ["Community health knowledge", "Communication", "Organization", "Compassion"],
+    "shs_strands": ["STEM", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱22,000 – ₱48,000/month"
+  },
+  {
+    "name": "Behavior Therapist",
+    "description": "Helps individuals with behavioral challenges develop positive behaviors and coping strategies.",
+    "what_they_do": "Assess behavior patterns, develop intervention plans, conduct therapy sessions, track progress, train caregivers.",
+    "skills": ["Empathy", "Patience", "Observation", "Communication"],
+    "shs_strands": ["HUMSS", "GAS", "STEM"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱45,000/month"
+  },
+  {
+    "name": "Psychologist",
+    "description": "Studies mental processes and behavior, providing assessment, therapy, and research services.",
+    "what_they_do": "Conduct psychological assessments, provide counseling, design intervention programs, conduct research.",
+    "skills": ["Active listening", "Empathy", "Analytical thinking", "Research"],
+    "shs_strands": ["HUMSS", "GAS", "STEM"],
+    "holland_code": "I",
+    "board_exam": true,
+    "salary_range": "₱25,000 – ₱65,000/month"
+  },
+  {
+    "name": "Guidance Counselor",
+    "description": "Helps students navigate academic, career, and personal challenges through counseling and guidance programs.",
+    "what_they_do": "Conduct individual and group counseling, administer career assessments, guide students in course selection.",
+    "skills": ["Active listening", "Empathy", "Communication", "Problem-solving"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": true,
+    "salary_range": "₱22,000 – ₱48,000/month"
+  },
+  {
+    "name": "Child Development Specialist",
+    "description": "Supports the developmental needs of children from infancy through adolescence.",
+    "what_they_do": "Assess developmental milestones, design intervention programs, counsel parents, collaborate with educators.",
+    "skills": ["Child development knowledge", "Patience", "Communication", "Observation"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱42,000/month"
+  },
+  {
+    "name": "Criminologist",
+    "description": "Studies crime patterns, criminal behavior, and the criminal justice system to inform policy and prevention.",
+    "what_they_do": "Analyze crime data, study criminal behavior, advise law enforcement, contribute to crime prevention programs.",
+    "skills": ["Analytical thinking", "Research", "Critical thinking", "Communication"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "I",
+    "board_exam": true,
+    "salary_range": "₱22,000 – ₱50,000/month"
+  },
+  {
+    "name": "Forensic Investigator",
+    "description": "Collects and analyzes physical evidence from crime scenes to support criminal investigations.",
+    "what_they_do": "Process crime scenes, collect evidence, conduct lab analysis, prepare reports, testify in court.",
+    "skills": ["Attention to detail", "Scientific knowledge", "Critical thinking", "Integrity"],
+    "shs_strands": ["STEM", "HUMSS"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱55,000/month"
+  },
+  {
+    "name": "Law Enforcement Officer",
+    "description": "Maintains public safety by enforcing laws, responding to emergencies, and preventing crime.",
+    "what_they_do": "Patrol communities, respond to incidents, investigate crimes, make arrests, testify in court.",
+    "skills": ["Physical fitness", "Integrity", "Communication", "Quick decision-making"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "R",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱55,000/month"
+  },
+  {
+    "name": "Lawyer (after law school)",
+    "description": "Provides legal advice, represents clients in court, and advocates for justice and legal rights.",
+    "what_they_do": "Research legal cases, draft legal documents, argue in court, advise clients, negotiate settlements.",
+    "skills": ["Critical thinking", "Argumentation", "Research", "Communication"],
+    "shs_strands": ["HUMSS", "ABM", "GAS"],
+    "holland_code": "E",
+    "board_exam": true,
+    "salary_range": "₱35,000 – ₱120,000/month"
+  },
+  {
+    "name": "Legislative Assistant",
+    "description": "Supports legislators in research, policy analysis, and administrative tasks for effective lawmaking.",
+    "what_they_do": "Research policy issues, draft bills and speeches, coordinate with stakeholders, manage schedules.",
+    "skills": ["Research", "Writing", "Policy knowledge", "Organization"],
+    "shs_strands": ["HUMSS", "ABM", "GAS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱50,000/month"
+  },
+  {
+    "name": "Policy Analyst",
+    "description": "Researches and evaluates public policies to recommend improvements for social and economic issues.",
+    "what_they_do": "Analyze policy impacts, conduct research, write policy briefs, consult stakeholders, propose recommendations.",
+    "skills": ["Analytical thinking", "Research", "Writing", "Critical thinking"],
+    "shs_strands": ["HUMSS", "ABM", "GAS"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱25,000 – ₱60,000/month"
+  },
+  {
+    "name": "Development Communicator",
+    "description": "Uses communication strategies to promote social change, community development, and public awareness.",
+    "what_they_do": "Create advocacy campaigns, produce educational materials, engage communities, evaluate program impact.",
+    "skills": ["Communication", "Creativity", "Community engagement", "Writing"],
+    "shs_strands": ["HUMSS", "GAS"],
+    "holland_code": "A",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱45,000/month"
+  },
+  {
+    "name": "Media Specialist",
+    "description": "Creates and manages media content across platforms including print, digital, broadcast, and social media.",
+    "what_they_do": "Write articles, produce multimedia content, manage social media accounts, coordinate media campaigns.",
+    "skills": ["Writing", "Creativity", "Technical media skills", "Communication"],
+    "shs_strands": ["HUMSS", "GAS", "ABM"],
+    "holland_code": "A",
+    "board_exam": false,
+    "salary_range": "₱20,000 – ₱50,000/month"
+  },
+  {
+    "name": "Community Relations Officer",
+    "description": "Builds and maintains positive relationships between organizations and their surrounding communities.",
+    "what_they_do": "Organize community events, address public concerns, manage outreach programs, represent the organization.",
+    "skills": ["Communication", "Interpersonal skills", "Event planning", "Problem-solving"],
+    "shs_strands": ["HUMSS", "ABM", "GAS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱50,000/month"
+  },
+  {
+    "name": "Researcher",
+    "description": "Conducts systematic investigations to discover new knowledge or solve practical problems.",
+    "what_they_do": "Design research studies, collect and analyze data, write papers, present findings, apply for grants.",
+    "skills": ["Critical thinking", "Data analysis", "Writing", "Curiosity"],
+    "shs_strands": ["STEM", "HUMSS", "GAS"],
+    "holland_code": "I",
+    "board_exam": false,
+    "salary_range": "₱22,000 – ₱55,000/month"
+  },
+  {
+    "name": "Sports Program Coordinator",
+    "description": "Organizes and manages sports programs, events, and athletic activities for schools or communities.",
+    "what_they_do": "Plan sports events, coordinate teams, manage facilities, promote athletic participation, ensure safety.",
+    "skills": ["Organization", "Sports knowledge", "Leadership", "Communication"],
+    "shs_strands": ["GAS", "HUMSS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱18,000 – ₱40,000/month"
+  },
+  {
+    "name": "Coach",
+    "description": "Trains and guides athletes to improve performance, develop skills, and achieve competitive goals.",
+    "what_they_do": "Design training programs, teach techniques, analyze performance, motivate athletes, plan game strategies.",
+    "skills": ["Sports expertise", "Motivation", "Communication", "Leadership"],
+    "shs_strands": ["GAS", "HUMSS"],
+    "holland_code": "E",
+    "board_exam": false,
+    "salary_range": "₱18,000 – ₱45,000/month"
+  },
+  {
+    "name": "Livelihood Educator",
+    "description": "Teaches practical livelihood skills to help communities achieve economic self-sufficiency.",
+    "what_they_do": "Conduct skills training, develop livelihood programs, mentor participants, evaluate program outcomes.",
+    "skills": ["Teaching", "Practical skills", "Community engagement", "Patience"],
+    "shs_strands": ["TVL", "GAS", "HUMSS"],
+    "holland_code": "S",
+    "board_exam": false,
+    "salary_range": "₱18,000 – ₱38,000/month"
+  }
+]
