@@ -5,6 +5,15 @@ import ProgramDetailModal from './ProgramDetailModal.jsx'
 const faculties = [...new Set(programs.map(p => p.faculty))].sort()
 const allStrands = [...new Set(programs.flatMap(p => [...(p.compatible_strands || []), ...(p.alternative_strands || [])]))].filter(s => ['STEM', 'ABM', 'HUMSS', 'GAS', 'TVL'].includes(s)).sort()
 
+const facultyLogoMap = {
+  'Faculty of Computing, Engineering, and Technology': '/logos/facet logo final.png',
+  'Teacher Education': '/logos/FTED.jpg',
+  'Criminal Justice Education': '/logos/FCJE.jpg',
+  'Nursing and Allied Health Sciences': '/logos/FNAHS.jpg',
+  'Agriculture and Life Sciences': '/logos/FALS.jpg',
+  'Business and Management': '/logos/FBM.jpg',
+}
+
 export default function ProgramBrowser({ activePrograms, studentData, systemSettings }) {
   const [search, setSearch] = useState('')
   const [faculty, setFaculty] = useState('')
@@ -128,7 +137,12 @@ function ProgramCard({ program: p, active, onClick }) {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', marginBottom: 2 }}>{p.name}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{p.faculty}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {facultyLogoMap[p.faculty] && (
+              <img src={facultyLogoMap[p.faculty]} alt="" style={{ width: 16, height: 16, borderRadius: 3, objectFit: 'cover' }} />
+            )}
+            {p.faculty}
+          </div>
         </div>
         {p.is_board_program && (
           <span style={{

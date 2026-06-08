@@ -1,6 +1,15 @@
 import { useMemo } from 'react'
 import { generateExplanations, calculateSkillsGap } from '../engine/explanations.js'
 
+const facultyLogoMap = {
+  'Faculty of Computing, Engineering, and Technology': '/logos/facet logo final.png',
+  'Teacher Education': '/logos/FTED.jpg',
+  'Criminal Justice Education': '/logos/FCJE.jpg',
+  'Nursing and Allied Health Sciences': '/logos/FNAHS.jpg',
+  'Agriculture and Life Sciences': '/logos/FALS.jpg',
+  'Business and Management': '/logos/FBM.jpg',
+}
+
 function codeColor(score) {
   if (score >= 80) return '#34d399'
   if (score >= 60) return '#fbbf24'
@@ -33,7 +42,12 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
           <div>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>{program.name}</h2>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{program.faculty}</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {facultyLogoMap[program.faculty] && (
+                <img src={facultyLogoMap[program.faculty]} alt="" style={{ width: 18, height: 18, borderRadius: 3, objectFit: 'cover' }} />
+              )}
+              {program.faculty}
+            </div>
           </div>
           <button onClick={onClose} style={{
             background: 'none', border: 'none', color: 'var(--text-secondary)',

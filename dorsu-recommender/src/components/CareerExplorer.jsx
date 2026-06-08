@@ -2,6 +2,15 @@ import { useState, useMemo } from 'react'
 import programs from '../data/programs.json'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
 
+const facultyLogoMap = {
+  'Faculty of Computing, Engineering, and Technology': '/logos/facet logo final.png',
+  'Teacher Education': '/logos/FTED.jpg',
+  'Criminal Justice Education': '/logos/FCJE.jpg',
+  'Nursing and Allied Health Sciences': '/logos/FNAHS.jpg',
+  'Agriculture and Life Sciences': '/logos/FALS.jpg',
+  'Business and Management': '/logos/FBM.jpg',
+}
+
 const faculties = [...new Set(programs.map(p => p.faculty))].sort()
 
 export default function CareerExplorer({ studentData }) {
@@ -95,7 +104,12 @@ export default function CareerExplorer({ studentData }) {
                         onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-bg)'; e.currentTarget.style.borderColor = 'var(--accent-bg)' }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'var(--row-bg)'; e.currentTarget.style.borderColor = 'var(--track-bg)' }}
                       >
-                        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-input)' }}>{p.name}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {facultyLogoMap[p.faculty] && (
+                            <img src={facultyLogoMap[p.faculty]} alt="" style={{ width: 14, height: 14, borderRadius: 3, objectFit: 'cover' }} />
+                          )}
+                          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-input)' }}>{p.name}</span>
+                        </div>
                         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.faculty}</span>
                       </button>
                     ))}

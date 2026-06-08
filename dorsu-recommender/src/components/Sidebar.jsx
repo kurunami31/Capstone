@@ -141,15 +141,9 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
         transition: 'left 0.3s ease, width 0.3s ease',
       }}>
           <div style={{ padding: isMobile ? '16px 12px 12px' : (open ? '20px 16px 16px' : '12px 10px'), borderBottom: '1px solid var(--input-bg)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 10, flexShrink: 0,
-              background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/>
-              </svg>
-            </div>
+            <img src="/logo.png" alt="DOrSU" style={{
+              width: 44, height: 44, borderRadius: 10, flexShrink: 0, objectFit: 'cover',
+            }} />
             <div style={{ opacity: isMobile || open ? 1 : 0, transition: 'opacity 0.15s', overflow: 'hidden', whiteSpace: 'nowrap', width: isMobile || open ? 'auto' : 0 }}>
               <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', lineHeight: 1.2, whiteSpace: 'nowrap' }}>DOrSU</div>
               <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.2, whiteSpace: 'nowrap' }}>Recommender</div>
