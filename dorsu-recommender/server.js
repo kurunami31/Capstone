@@ -546,10 +546,10 @@ app.get('/api/admin/users', authenticate, requireManager, async (req, res) => {
 
     // Admin (not super_admin) cannot see other admin or super_admin accounts
     if (req.user.role === 'admin') {
-      conditions.push(`id != $${paramIdx}`)
+      conditions.push(`users.id != $${paramIdx}`)
       params.push(req.user.id)
       paramIdx++
-      conditions.push(`role NOT IN ('admin', 'super_admin')`)
+      conditions.push(`users.role NOT IN ('admin', 'super_admin')`)
     }
 
     let whereClause = 'WHERE ' + conditions.join(' AND ')
