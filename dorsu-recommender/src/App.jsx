@@ -16,6 +16,10 @@ import ProfilePage from './components/ProfilePage.jsx'
 import FAQPage from './components/FAQPage.jsx'
 import AdminPage from './components/AdminPage.jsx'
 import HistoryPage from './components/HistoryPage.jsx'
+import ProgramsPage from './components/ProgramsPage.jsx'
+import SettingsPage from './components/SettingsPage.jsx'
+import QuestionsManager from './components/QuestionsManager.jsx'
+import CounselorDashboard from './components/CounselorDashboard.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
 import OnboardingWalkthrough from './components/OnboardingWalkthrough.jsx'
 import SkeletonLoader, { SkeletonCard } from './components/SkeletonLoader.jsx'
@@ -58,6 +62,10 @@ function AppContent() {
   const [showHistory, setShowHistory] = useState(false)
   const [showFAQ, setShowFAQ] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
+  const [showPrograms, setShowPrograms] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showQuestions, setShowQuestions] = useState(false)
+  const [showReview, setShowReview] = useState(false)
   const [step, setStep] = useState(0)
   const [studentData, setStudentData] = useState({
     name: '', school: '', strand: '',
@@ -157,7 +165,7 @@ function AppContent() {
     if (savedProgress && savedProgress.step > 0) {
       setShowResumePrompt(true)
     } else {
-      setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setStep(0)
+      setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setStep(0)
     }
   }
   const handleResume = () => {
@@ -169,18 +177,22 @@ function AppContent() {
   const handleNewAssessment = () => {
     setSavedProgress(null)
     setShowResumePrompt(false)
-    setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setStep(0)
+    setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setStep(0)
     fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(err => console.error('Failed to delete saved progress on new assessment', err))
   }
-  const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false) }
+  const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
   const handleBackFromProfile = () => setShowProfile(false)
-  const handleShowHistory = () => { setShowHistory(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false) }
+  const handleShowHistory = () => { setShowHistory(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
   const handleBackFromHistory = () => setShowHistory(false)
-  const handleShowFAQ = () => { setShowFAQ(true); setShowLanding(false); setShowProfile(false); setShowAdmin(false); setShowHistory(false) }
+  const handleShowFAQ = () => { setShowFAQ(true); setShowLanding(false); setShowProfile(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
   const handleBackFromFAQ = () => setShowFAQ(false)
-  const handleShowAdmin = () => { setShowAdmin(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowHistory(false) }
+  const handleShowAdmin = () => { setShowAdmin(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
   const handleBackFromAdmin = () => setShowAdmin(false)
-  const handleGoHome = () => { setShowLanding(true); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false) }
+  const handleShowPrograms = () => { setShowPrograms(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
+  const handleShowSettings = () => { setShowSettings(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowQuestions(false); setShowReview(false) }
+  const handleShowQuestions = () => { setShowQuestions(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowReview(false) }
+  const handleShowReview = () => { setShowReview(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false) }
+  const handleGoHome = () => { setShowLanding(true); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false) }
 
   if (loading) {
     return (
@@ -240,6 +252,10 @@ function AppContent() {
   let activePage = 'home'
   if (showProfile) activePage = 'profile'
   else if (showHistory) activePage = 'history'
+  else if (showPrograms) activePage = 'programs'
+  else if (showSettings) activePage = 'settings'
+  else if (showQuestions) activePage = 'questions'
+  else if (showReview) activePage = 'review'
   else if (showFAQ) activePage = 'faq'
   else if (showAdmin) activePage = 'admin'
   else if (!showLanding) activePage = 'assessment'
@@ -300,10 +316,32 @@ function AppContent() {
     mainContent = <ProfilePage />
   } else if (showHistory) {
     mainContent = <HistoryPage />
+  } else if (showPrograms) {
+    mainContent = <ProgramsPage activePrograms={activePrograms} />
+  } else if (showSettings) {
+    mainContent = <SettingsPage settings={systemSettings} />
+  } else if (showQuestions) {
+    mainContent = (
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)', padding: '24px 20px 60px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 16px' }}>Questions</h1>
+          <QuestionsManager />
+        </div>
+      </div>
+    )
+  } else if (showReview) {
+    mainContent = (
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)', padding: '24px 20px 60px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 16px' }}>Review</h1>
+          <CounselorDashboard />
+        </div>
+      </div>
+    )
   } else if (showFAQ) {
     mainContent = <FAQPage />
   } else if (showAdmin) {
-    mainContent = <AdminPage settings={systemSettings} activePrograms={activePrograms} userRole={user?.role} />
+    mainContent = <AdminPage userRole={user?.role} />
   } else if (showLanding) {
     mainContent = <LandingPage onGetStarted={handleGetStarted} user={user} />
   } else {
@@ -379,6 +417,10 @@ function AppContent() {
         onAssessment={handleGetStarted}
         onProfile={handleShowProfile}
         onHistory={handleShowHistory}
+        onPrograms={handleShowPrograms}
+        onSettings={handleShowSettings}
+        onQuestions={handleShowQuestions}
+        onReview={handleShowReview}
         onFAQ={handleShowFAQ}
         onAdmin={handleShowAdmin}
         onLogout={logout}

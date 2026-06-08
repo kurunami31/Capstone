@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react'
-import programs from '../data/programs.json'
-import CounselorDashboard from './CounselorDashboard.jsx'
-import QuestionsManager from './QuestionsManager.jsx'
 import SkeletonLoader from './SkeletonLoader.jsx'
 
 const CARD = {
@@ -127,8 +124,8 @@ function PieChart({ data, labelKey, valueKey, colors }) {
   )
 }
 
-export default function AdminPage({ settings = {}, activePrograms = null, userRole = 'admin' }) {
-  const [activeTab, setActiveTab] = useState(['admin', 'super_admin'].includes(userRole) ? 'dashboard' : 'review')
+export default function AdminPage({ userRole = 'admin' }) {
+  const [activeTab, setActiveTab] = useState('dashboard')
   const [stats, setStats] = useState(null)
   const [analytics, setAnalytics] = useState({ userGrowth: [], programPopularity: [], hollandDistribution: [], strandDistribution: [] })
   const [users, setUsers] = useState([])
@@ -139,25 +136,11 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
   const [loading, setLoading] = useState(true)
   const [expandedRow, setExpandedRow] = useState(null)
   const [activityLog, setActivityLog] = useState([])
-  const [localActivePrograms, setLocalActivePrograms] = useState({})
-  const [localSettings, setLocalSettings] = useState({})
   const [editUserModal, setEditUserModal] = useState(null)
   const [editUserData, setEditUserData] = useState({})
   const [editUserError, setEditUserError] = useState('')
-  const [programModal, setProgramModal] = useState(null)
-  const [programForm, setProgramForm] = useState({ code: '', name: '', college: '', description: '' })
-  const [programError, setProgramError] = useState('')
   const [activityPage, setActivityPage] = useState(1)
   const [activityTotal, setActivityTotal] = useState(0)
-  const [editingProgram, setEditingProgram] = useState(null)
-
-  useEffect(() => {
-    setLocalActivePrograms(activePrograms || {})
-  }, [activePrograms])
-
-  useEffect(() => {
-    setLocalSettings(settings)
-  }, [settings])
 
   async function fetchStats() {
     try {
@@ -218,18 +201,10 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
     } catch {}
   }
 
-  async function fetchProgramStatus() {
-    try {
-      const res = await fetch('/api/programs/status', { credentials: 'include' })
-      if (res.ok) setLocalActivePrograms(await res.json())
-    } catch {}
-  }
-
   useEffect(() => {
     fetchStats()
     fetchUsers(1, '')
     fetchAnalytics()
-    fetchProgramStatus()
     fetchActivityLog()
   }, [])
 
@@ -262,6 +237,8 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
   }
 
   const totalAssessments = analytics.programPopularity.reduce((a, p) => a + p.count, 0)
+  const isManager = ['admin', 'super_admin'].includes(userRole)
+  const tabs = isManager ? ['dashboard', 'users', 'activity'] : ['dashboard']
 
   return (
     <div style={{
@@ -273,10 +250,7 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Admin Panel</h1>
           <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3, flexWrap: 'wrap' }}>
-            {(['admin', 'super_admin'].includes(userRole)
-              ? ['dashboard', 'users', 'activity', 'programs', 'settings', 'questions', 'review']
-              : ['review']
-            ).map(tab => (
+            {tabs.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
                 padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
                 fontSize: 13, fontWeight: 600, textTransform: 'capitalize',
@@ -433,8 +407,8 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
                             <span style={{
                               display: 'inline-block', padding: '2px 8px', borderRadius: 10,
                               fontSize: 11, fontWeight: 600,
-                              backgroundColor: u.role === 'admin' ? 'rgba(6,182,212,0.15)' : 'rgba(59,130,246,0.15)',
-                              color: u.role === 'admin' ? '#22d3ee' : '#60a5fa',
+                              backgroundColor: u.role === 'admin' || u.role === 'super_admin' ? 'rgba(6,182,212,0.15)' : 'rgba(59,130,246,0.15)',
+                              color: u.role === 'admin' || u.role === 'super_admin' ? '#22d3ee' : '#60a5fa',
                             }}>
                               {u.role}
                             </span>
@@ -488,7 +462,7 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
                                   <span style={{ color: '#e2e8f0' }}>{u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '-'}</span>
                                 </div>
                               </div>
-                              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                              <div style={{ marginTop: 12, display: 'flex', gap: 8, padding: '0 24px 16px 48px' }}>
                                 <button onClick={async () => {
                                   try {
                                     const res = await fetch(`/api/admin/users/${u.id}/reset-cooldown`, { method: 'POST', credentials: 'include' })
@@ -570,6 +544,7 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
                   style={{ ...INPUT, cursor: 'pointer' }}>
                   <option value="user">User</option>
                   <option value="counselor">Counselor</option>
+                  <option value="department_head">Department Head</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
@@ -690,257 +665,6 @@ export default function AdminPage({ settings = {}, activePrograms = null, userRo
               </>
             )}
           </div>
-        )}
-
-        {activeTab === 'programs' && (
-          <div style={{ ...CARD, padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Program Management</h2>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span style={{ fontSize: 12, color: '#64748b' }}>Toggle programs on/off for recommendations</span>
-                <button onClick={() => {
-                  setProgramForm({ code: '', name: '', college: '', description: '' })
-                  setProgramModal('create')
-                }} style={{
-                  background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
-                  color: '#4ade80', padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                }}>
-                  + Add Program
-                </button>
-                <button onClick={() => window.open('/api/admin/assessments/export', '_blank')} style={{
-                  ...BTN_SECONDARY, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Export Assessments
-                </button>
-              </div>
-            </div>
-            <div style={{ display: 'grid', gap: 8 }}>
-              {programs.map(prog => {
-                const active = localActivePrograms[prog.code] !== false
-                return (
-                  <div key={prog.code} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '10px 14px', borderRadius: 10,
-                    background: active ? 'rgba(34,197,94,0.06)' : 'rgba(248,113,113,0.06)',
-                    border: `1px solid ${active ? 'rgba(34,197,94,0.15)' : 'rgba(248,113,113,0.15)'}`,
-                  }}>
-                    <div>
-                      <div style={{ color: '#e2e8f0', fontSize: 14, fontWeight: 600 }}>{prog.name}</div>
-                      <div style={{ color: '#64748b', fontSize: 11 }}>{prog.code} — {prog.college}</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button
-                        onClick={async () => {
-                          try {
-                            const res = await fetch(`/api/admin/programs/${prog.code}/toggle`, { method: 'PUT', credentials: 'include' })
-                            if (res.ok) {
-                              const data = await res.json()
-                              setLocalActivePrograms(prev => ({ ...prev, [data.code]: data.active }))
-                              fetchActivityLog(1)
-                            }
-                          } catch {}
-                        }}
-                        style={{
-                          padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                          fontSize: 12, fontWeight: 600,
-                          background: active ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
-                          color: active ? '#f87171' : '#4ade80',
-                        }}
-                      >
-                        {active ? 'Disable' : 'Enable'}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setProgramForm({ code: prog.code, name: prog.name, college: prog.college, description: prog.description || '' })
-                          setEditingProgram(prog.code)
-                          setProgramModal('edit')
-                        }}
-                        style={{
-                          padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(59,130,246,0.3)',
-                          background: 'rgba(59,130,246,0.1)', color: '#60a5fa', fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`Delete program "${prog.name}"? This cannot be undone.`)) return
-                          try {
-                            const res = await fetch(`/api/admin/programs/${prog.code}`, { method: 'DELETE', credentials: 'include' })
-                            if (res.ok) {
-                              fetchProgramStatus()
-                              fetchActivityLog(1)
-                            }
-                          } catch {}
-                        }}
-                        style={{
-                          padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(248,113,113,0.3)',
-                          background: 'rgba(248,113,113,0.1)', color: '#f87171', fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {programModal && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
-          }}>
-            <div style={{
-              background: '#1e293b', borderRadius: 16, padding: 28, maxWidth: 450, width: '100%',
-              border: '1px solid rgba(255,255,255,0.08)',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            }}>
-              <h3 style={{ color: '#f1f5f9', fontSize: 16, fontWeight: 700, margin: '0 0 16px' }}>
-                {programModal === 'create' ? 'Add Program' : 'Edit Program'}
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <input value={programForm.code} onChange={e => setProgramForm(p => ({ ...p, code: e.target.value }))}
-                  placeholder="Program Code (e.g. BSIT)" style={INPUT} disabled={programModal === 'edit'} />
-                <input value={programForm.name} onChange={e => setProgramForm(p => ({ ...p, name: e.target.value }))}
-                  placeholder="Program Name" style={INPUT} />
-                <input value={programForm.college} onChange={e => setProgramForm(p => ({ ...p, college: e.target.value }))}
-                  placeholder="College" style={INPUT} />
-                <textarea value={programForm.description} onChange={e => setProgramForm(p => ({ ...p, description: e.target.value }))}
-                  placeholder="Description (optional)" rows={3} style={{ ...INPUT, resize: 'vertical' }} />
-              </div>
-              {programError && (
-                <div style={{ color: '#f87171', fontSize: 12, marginTop: 8 }}>{programError}</div>
-              )}
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
-                <button onClick={() => { setProgramModal(null); setProgramError('') }} style={{
-                  ...BTN_SECONDARY, padding: '8px 16px', fontSize: 13,
-                }}>Cancel</button>
-                <button onClick={async () => {
-                  try {
-                    if (!programForm.code || !programForm.name) {
-                      setProgramError('Code and name are required.')
-                      return
-                    }
-                    const url = programModal === 'create' ? '/api/admin/programs' : `/api/admin/programs/${editingProgram}`
-                    const method = programModal === 'create' ? 'POST' : 'PUT'
-                    const res = await fetch(url, {
-                      method, credentials: 'include',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(programForm),
-                    })
-                    if (!res.ok) {
-                      const data = await res.json()
-                      throw new Error(data.error || 'Save failed')
-                    }
-                    setProgramModal(null)
-                    setProgramError('')
-                    fetchProgramStatus()
-                    fetchActivityLog(1)
-                  } catch (e) {
-                    setProgramError(e.message)
-                  }
-                }} style={{
-                  background: '#2563eb', border: 'none', color: '#fff',
-                  padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                }}>
-                  {programModal === 'create' ? 'Create' : 'Save'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div style={{ ...CARD, padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Scoring Weights</h2>
-              <span style={{ fontSize: 12, color: '#64748b' }}>Adjust how recommendation scores are calculated</span>
-            </div>
-            {(() => {
-              const weightFields = [
-                { key: 'academic_weight', label: 'Academic Weight', defaultVal: 0.45, step: 0.05, min: 0, max: 1 },
-                { key: 'suast_weight', label: 'SUAST Weight', defaultVal: 0.30, step: 0.05, min: 0, max: 1 },
-                { key: 'personal_weight', label: 'Personal Fit Weight', defaultVal: 0.25, step: 0.05, min: 0, max: 1 },
-              ]
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {weightFields.map(field => (
-                    <div key={field.key}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <label style={{ color: '#94a3b8', fontSize: 13 }}>{field.label}</label>
-                        <span style={{ color: '#60a5fa', fontSize: 13, fontWeight: 600 }}>
-                          {parseFloat(localSettings[field.key]) || field.defaultVal}
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min={field.min}
-                        max={field.max}
-                        step={field.step}
-                        value={parseFloat(localSettings[field.key]) || field.defaultVal}
-                        onChange={e => setLocalSettings(prev => ({ ...prev, [field.key]: e.target.value }))}
-                        style={{ width: '100%', accentColor: '#3b82f6' }}
-                      />
-                    </div>
-                  ))}
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
-                    <button
-                      onClick={async () => {
-                        const res = await fetch('/api/admin/settings', {
-                          method: 'PUT', credentials: 'include',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ settings: localSettings }),
-                        })
-                        if (res.ok) {
-                          fetchActivityLog()
-                        }
-                      }}
-                      style={{
-                        background: '#3b82f6', border: 'none', color: '#fff',
-                        padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                      }}
-                    >
-                      Save Weights
-                    </button>
-                    <button
-                      onClick={async () => {
-                        const defaults = { academic_weight: '0.45', suast_weight: '0.30', personal_weight: '0.25' }
-                        setLocalSettings(defaults)
-                        const res = await fetch('/api/admin/settings', {
-                          method: 'PUT', credentials: 'include',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ settings: defaults }),
-                        })
-                        if (res.ok) {
-                          fetchActivityLog()
-                        }
-                      }}
-                      style={{
-                        ...BTN_SECONDARY, padding: '8px 20px', fontSize: 13,
-                      }}
-                    >
-                      Reset Defaults
-                    </button>
-                  </div>
-                </div>
-              )
-            })()}
-          </div>
-        )}
-
-        {activeTab === 'questions' && (
-          <QuestionsManager />
-        )}
-
-        {activeTab === 'review' && (
-          <CounselorDashboard />
         )}
       </div>
     </div>
