@@ -1,5 +1,21 @@
 import { useState, useEffect } from 'react'
 
+function SunIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  )
+}
+
+function MoonIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  )
+}
+
 function HamburgerIcon({ open }) {
   const bar = {
     position: 'absolute', left: 2, right: 2, height: 2,
@@ -15,10 +31,16 @@ function HamburgerIcon({ open }) {
   )
 }
 
-export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onHistory, onPrograms, onSettings, onQuestions, onReview, onFAQ, onAdmin, onNotifications, onLogout, open, onToggle, isMobile }) {
+export default function Sidebar({ user, activePage, onHome, onAssessment, onProfile, onHistory, onPrograms, onSettings, onQuestions, onReview, onFAQ, onAdmin, onNotifications, onCareerExplorer, onLogout, open, onToggle, isMobile }) {
   const staffRoles = ['admin', 'super_admin', 'department_head', 'counselor']
   const isStaff = staffRoles.includes(user?.role)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') !== 'light')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    localStorage.setItem('theme', dark ? 'dark' : 'light')
+  }, [dark])
 
   useEffect(() => {
     const fetchCount = () => {
@@ -39,6 +61,8 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
   if (!isStaff) {
     navItems.push({ id: 'profile', label: 'Profile', icon: 'user', action: onProfile })
     navItems.push({ id: 'history', label: 'History', icon: 'clock', action: onHistory })
+    navItems.push({ id: 'programs', label: 'Programs', icon: 'book', action: onPrograms })
+    navItems.push({ id: 'careers', label: 'Careers', icon: 'briefcase', action: onCareerExplorer })
   }
 
   if (isStaff) {
@@ -65,6 +89,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
     shield: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
     logOut: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
     bell: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+    briefcase: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>,
   }
 
   const barStyle = {
@@ -87,7 +112,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
           onClick={onToggle}
           style={{
             position: 'fixed', inset: 0, zIndex: 99,
-            background: 'rgba(0,0,0,0.5)',
+            background: 'var(--overlay-bg, rgba(0,0,0,0.5))',
             animation: 'fadeIn 0.2s ease-out both',
           }}
         />
@@ -108,8 +133,8 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
         position: isMobile ? 'fixed' : 'fixed', left: isMobile ? (open ? 0 : -sidebarWidth) : 0, top: 0, bottom: 0,
         width: sidebarWidth,
         overflow: 'hidden',
-        backgroundColor: '#0b1222',
-        borderRight: '1px solid rgba(255,255,255,0.05)',
+        backgroundColor: 'var(--sidebar-bg, #0b1222)',
+        borderRight: '1px solid var(--sidebar-border, rgba(255,255,255,0.05))',
         display: 'flex', flexDirection: 'column',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         zIndex: 100,
@@ -126,7 +151,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               </svg>
             </div>
             <div style={{ opacity: isMobile || open ? 1 : 0, transition: 'opacity 0.15s', overflow: 'hidden', whiteSpace: 'nowrap', width: isMobile || open ? 'auto' : 0 }}>
-              <div style={{ fontSize: 17, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2, whiteSpace: 'nowrap' }}>DOrSU</div>
+              <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', lineHeight: 1.2, whiteSpace: 'nowrap' }}>DOrSU</div>
               <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.2, whiteSpace: 'nowrap' }}>Recommender</div>
             </div>
             <button onClick={onToggle} style={{
@@ -148,7 +173,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
                 ...barStyle,
                 padding: isMobile ? '16px 16px' : (open ? '14px 16px' : '16px 0'),
                 width: isMobile ? '100%' : (open ? '100%' : 44),
-                color: activePage === item.id ? '#60a5fa' : '#94a3b8',
+                color: activePage === item.id ? '#60a5fa' : 'var(--text-muted, #94a3b8)',
                 fontWeight: activePage === item.id ? 600 : 400,
                 background: activePage === item.id ? 'rgba(59,130,246,0.15)' : 'transparent',
                 borderRadius: isMobile ? 8 : (open ? 8 : 6),
@@ -193,7 +218,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
             )}
             {(isMobile || open) && (
               <div style={{ flex: 1, overflow: 'hidden' }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary, #e2e8f0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user?.firstName || ''} {user?.lastName || ''}
                 </div>
                 {user?.role && user?.role !== 'user' && (
@@ -209,6 +234,23 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               </div>
             )}
           </div>
+          <button
+            onClick={() => setDark(!dark)}
+            style={{
+              ...barStyle,
+              padding: isMobile ? '14px 14px' : (open ? '12px 16px' : '14px 0'),
+              width: isMobile ? '100%' : (open ? '100%' : 44),
+              color: '#64748b',
+              borderRadius: isMobile ? 8 : (open ? 8 : 6),
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#e2e8f0' }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#64748b' }}
+          >
+            <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {dark ? <SunIcon /> : <MoonIcon />}
+            </span>
+            {(isMobile || open) && (dark ? 'Light Mode' : 'Dark Mode')}
+          </button>
           <button
             onClick={() => { onLogout(); if (isMobile) onToggle() }}
             style={{

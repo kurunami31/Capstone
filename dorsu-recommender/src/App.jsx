@@ -22,6 +22,8 @@ import ProgramsPage from './components/ProgramsPage.jsx'
 import SettingsPage from './components/SettingsPage.jsx'
 import QuestionsManager from './components/QuestionsManager.jsx'
 import CounselorDashboard from './components/CounselorDashboard.jsx'
+import ProgramBrowser from './components/ProgramBrowser.jsx'
+import CareerExplorer from './components/CareerExplorer.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
 import OnboardingWalkthrough from './components/OnboardingWalkthrough.jsx'
 import SkeletonLoader, { SkeletonCard } from './components/SkeletonLoader.jsx'
@@ -70,6 +72,8 @@ function AppContent() {
   const [showSettings, setShowSettings] = useState(false)
   const [showQuestions, setShowQuestions] = useState(false)
   const [showReview, setShowReview] = useState(false)
+  const [showProgramBrowser, setShowProgramBrowser] = useState(false)
+  const [showCareerExplorer, setShowCareerExplorer] = useState(false)
   const [step, setStep] = useState(0)
   const [studentData, setStudentData] = useState({
     name: '', school: '', strand: '',
@@ -220,21 +224,23 @@ function AppContent() {
   const handleShowSettings = () => { setShowSettings(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false) }
   const handleShowQuestions = () => { setShowQuestions(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false) }
   const handleShowReview = () => { setShowReview(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowDashboard(false); setShowNotifications(false) }
-  const handleShowNotifications = () => { setShowNotifications(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false) }
+  const handleShowNotifications = () => { setShowNotifications(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowProgramBrowser(false); setShowCareerExplorer(false) }
+  const handleShowProgramBrowser = () => { setShowProgramBrowser(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowCareerExplorer(false) }
+  const handleShowCareerExplorer = () => { setShowCareerExplorer(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowProgramBrowser(false) }
   const handleGoHome = () => {
     if (isStaff) {
       setShowLanding(true); setShowDashboard(false)
     } else {
       setShowDashboard(true); setShowLanding(false)
     }
-    setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowNotifications(false)
+    setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowNotifications(false); setShowProgramBrowser(false); setShowCareerExplorer(false)
   }
 
   if (loading) {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)',
+        background: 'linear-gradient(135deg, var(--gradient-start, #0f172a) 0%, var(--gradient-mid, #1e3a5f) 50%, var(--gradient-end, #0f172a) 100%)',
         color: '#94a3b8', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fontSize: 15,
       }}>
@@ -289,7 +295,9 @@ function AppContent() {
   if (showNotifications) activePage = 'notifications'
   else if (showProfile) activePage = 'profile'
   else if (showHistory) activePage = 'history'
-  else if (showPrograms) activePage = 'programs'
+  else if (showProgramBrowser) activePage = 'programs'
+  else if (showCareerExplorer) activePage = 'careers'
+  else if (showPrograms) activePage = 'programs-mgmt'
   else if (showSettings) activePage = 'settings'
   else if (showQuestions) activePage = 'questions'
   else if (showReview) activePage = 'review'
@@ -361,24 +369,28 @@ function AppContent() {
     mainContent = <ProfilePage />
   } else if (showHistory) {
     mainContent = <HistoryPage />
+  } else if (showProgramBrowser) {
+    mainContent = <ProgramBrowser activePrograms={activePrograms} studentData={studentData} systemSettings={systemSettings} />
+  } else if (showCareerExplorer) {
+    mainContent = <CareerExplorer studentData={studentData} />
   } else if (showPrograms) {
     mainContent = <ProgramsPage activePrograms={activePrograms} />
   } else if (showSettings) {
     mainContent = <SettingsPage settings={systemSettings} />
   } else if (showQuestions) {
     mainContent = (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)', padding: '24px 20px 60px' }}>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, var(--gradient-start, #0f172a) 0%, var(--gradient-mid, #1e3a5f) 50%, var(--gradient-end, #0f172a) 100%)', padding: '24px 20px 60px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 16px' }}>Questions</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', margin: '0 0 16px' }}>Questions</h1>
           <QuestionsManager />
         </div>
       </div>
     )
   } else if (showReview) {
     mainContent = (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)', padding: '24px 20px 60px' }}>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, var(--gradient-start, #0f172a) 0%, var(--gradient-mid, #1e3a5f) 50%, var(--gradient-end, #0f172a) 100%)', padding: '24px 20px 60px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', margin: '0 0 16px' }}>Review</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', margin: '0 0 16px' }}>Review</h1>
           <CounselorDashboard />
         </div>
       </div>
@@ -393,17 +405,19 @@ function AppContent() {
     mainContent = <LandingPage onGetStarted={handleGetStarted} user={user} />
   } else {
     mainContent = (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)' }}>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, var(--gradient-start, #0f172a) 0%, var(--gradient-mid, #1e3a5f) 50%, var(--gradient-end, #0f172a) 100%)' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 16px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
           {renderAssessmentProgress()}
           <div className="card-padding-mobile" style={{
-            backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 32,
-            border: '1px solid rgba(255,255,255,0.06)', marginTop: currentStep !== 'results' ? 4 : 0, marginBottom: 40,
+            backgroundColor: 'var(--bg-card, rgba(255,255,255,0.04))', borderRadius: 16, padding: 32,
+            border: '1px solid var(--border-color, rgba(255,255,255,0.06))', marginTop: currentStep !== 'results' ? 4 : 0, marginBottom: 40,
             backdropFilter: 'blur(8px)',
           }}>
             {currentStep === 'results' ? (
               <Results
                 studentData={studentData} results={results}
+                systemSettings={systemSettings}
+                activePrograms={activePrograms}
                 onRestart={() => {
                   setStudentData({ name: '', school: '', strand: '', grades: {}, strandSpecificGrades: {}, gwa: 0, suastTiers: {}, hollandAnswers: {}, hollandScores: [], interests: {}, skills: {} })
                   setStep(0)
@@ -429,11 +443,11 @@ function AppContent() {
           padding: 24,
         }}>
           <div style={{
-            backgroundColor: '#1e293b', borderRadius: 20, padding: 32, maxWidth: 400, width: '100%',
-            border: '1px solid rgba(255,255,255,0.08)',
+              backgroundColor: 'var(--modal-bg, #1e293b)', borderRadius: 20, padding: 32, maxWidth: 400, width: '100%',
+            border: '1px solid var(--card-border, rgba(255,255,255,0.08))',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           }}>
-            <h3 style={{ color: '#f1f5f9', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>
+            <h3 style={{ color: 'var(--text-primary, #f1f5f9)', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>
               Resume where you left off?
             </h3>
             <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}>
@@ -465,12 +479,13 @@ function AppContent() {
         onProfile={handleShowProfile}
         onHistory={handleShowHistory}
         onNotifications={handleShowNotifications}
-        onPrograms={handleShowPrograms}
+        onPrograms={isStaff ? handleShowPrograms : handleShowProgramBrowser}
         onSettings={handleShowSettings}
         onQuestions={handleShowQuestions}
         onReview={handleShowReview}
         onFAQ={handleShowFAQ}
         onAdmin={handleShowAdmin}
+        onCareerExplorer={handleShowCareerExplorer}
         onLogout={logout}
         open={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
