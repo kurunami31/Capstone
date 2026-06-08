@@ -1068,6 +1068,55 @@ app.delete('/api/assessment/progress', authenticate, async (req, res) => {
   }
 })
 
+// ---- Favorites ----
+app.get('/api/favorites', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT program_code, created_at FROM user_favorites WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.user.id]
+    )
+    const programMap = {}
+    for (const p of programs) programMap[p.code] = p.name
+    res.json(result.rows.map(r => ({
+      programCode: r.program_code,
+      programName: programMap[r.program_code] || r.program_code,
+      createdAt: r.created_at,
+    })))
+  } catch (err) {
+    console.error('Get favorites error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.post('/api/favorites', authenticate, async (req, res) => {
+  try {
+    const { programCode } = req.body
+    if (!programCode) return res.status(400).json({ error: 'Program code is required.' })
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+    await pool.query(
+      'INSERT INTO user_favorites (id, user_id, program_code, created_at) VALUES ($1, $2, $3, NOW()) ON CONFLICT (user_id, program_code) DO NOTHING',
+      [id, req.user.id, programCode]
+    )
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Add favorite error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.delete('/api/favorites/:programCode', authenticate, async (req, res) => {
+  try {
+    await pool.query(
+      'DELETE FROM user_favorites WHERE user_id = $1 AND program_code = $2',
+      [req.user.id, req.params.programCode]
+    )
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Remove favorite error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
 // ---- Check last assessment (for retake cooldown) ----
 app.get('/api/assessments/last', authenticate, async (req, res) => {
   try {

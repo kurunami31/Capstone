@@ -165,6 +165,16 @@ async function initDB() {
   await pool.query('CREATE INDEX IF NOT EXISTS idx_counselor_notes_assessment_id ON counselor_notes(assessment_id)').catch(() => {})
   await pool.query(`ALTER TABLE assessments ADD COLUMN IF NOT EXISTS full_data JSONB`).catch(() => {})
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_favorites (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      program_code TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(user_id, program_code)
+    )
+  `)
+
   console.log('Database initialized.')
 }
 

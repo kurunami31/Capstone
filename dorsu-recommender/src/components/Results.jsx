@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import generatePDF from './Report.jsx'
 import ComparisonView from './ComparisonView.jsx'
 
@@ -14,9 +14,51 @@ function admissionColor(level) {
   return '#f87171'
 }
 
+function HeartIcon({ filled }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? '#ef4444' : 'none'} stroke={filled ? '#ef4444' : '#64748b'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+  )
+}
+
 export default function Results({ studentData, results, onRestart }) {
   const [selected, setSelected] = useState([])
   const [showCompare, setShowCompare] = useState(false)
+  const [favorites, setFavorites] = useState(new Set())
+  const [favLoading, setFavLoading] = useState(new Set())
+
+  useEffect(() => {
+    fetch('/api/favorites', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => setFavorites(new Set(data.map(f => f.programCode))))
+      .catch(() => {})
+  }, [])
+
+  const toggleFavorite = async (programCode) => {
+    setFavLoading(prev => new Set(prev).add(programCode))
+    const wasFav = favorites.has(programCode)
+    setFavorites(prev => {
+      const next = new Set(prev)
+      wasFav ? next.delete(programCode) : next.add(programCode)
+      return next
+    })
+    try {
+      if (wasFav) {
+        await fetch(`/api/favorites/${encodeURIComponent(programCode)}`, { method: 'DELETE', credentials: 'include' })
+      } else {
+        await fetch('/api/favorites', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ programCode }) })
+      }
+    } catch {
+      setFavorites(prev => {
+        const next = new Set(prev)
+        wasFav ? next.add(programCode) : next.delete(programCode)
+        return next
+      })
+    } finally {
+      setFavLoading(prev => { const n = new Set(prev); n.delete(programCode); return n })
+    }
+  }
 
   const toggleSelect = (code) => {
     setSelected(prev =>
@@ -79,6 +121,21 @@ export default function Results({ studentData, results, onRestart }) {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button
+                  onClick={() => toggleFavorite(r.program.code)}
+                  disabled={favLoading.has(r.program.code)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: 4, display: 'flex', alignItems: 'center',
+                    opacity: favLoading.has(r.program.code) ? 0.4 : 1,
+                    transition: 'transform 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                  title={favorites.has(r.program.code) ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  <HeartIcon filled={favorites.has(r.program.code)} />
+                </button>
                 <label style={{
                   display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
                   fontSize: 11, color: selected.includes(r.program.code) ? '#818cf8' : '#64748b',

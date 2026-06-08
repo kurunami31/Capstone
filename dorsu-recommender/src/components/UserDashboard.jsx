@@ -3,12 +3,17 @@ import { useState, useEffect } from 'react'
 export default function UserDashboard({ onStartAssessment, onViewHistory }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [favorites, setFavorites] = useState([])
 
   useEffect(() => {
     fetch('/api/user/summary', { credentials: 'include' })
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
+    fetch('/api/favorites', { credentials: 'include' })
+      .then(r => r.json())
+      .then(f => setFavorites(f || []))
+      .catch(() => {})
   }, [])
 
   const daysSinceLast = data?.lastAssessment
@@ -197,6 +202,32 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                     fontWeight: i === 0 ? 600 : 400,
                   }}>
                     {i === 0 && '★ '}{p.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {favorites.length > 0 && (
+            <div className="card-padding-mobile" style={{
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 20, padding: 28,
+              backdropFilter: 'blur(12px)',
+            }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#f1f5f9', margin: '0 0 16px' }}>
+                Saved Programs
+              </h2>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {favorites.map(f => (
+                  <span key={f.programCode} style={{
+                    padding: '6px 14px', borderRadius: 20, fontSize: 13,
+                    backgroundColor: 'rgba(239,68,68,0.1)',
+                    color: '#f87171',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                    fontWeight: 500,
+                  }}>
+                    {f.programName}
                   </span>
                 ))}
               </div>
