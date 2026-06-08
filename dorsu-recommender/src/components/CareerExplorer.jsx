@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import programs from '../data/programs.json'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
-import CustomSelect from './CustomSelect.jsx'
 
 const faculties = [...new Set(programs.map(p => p.faculty))].sort()
 
@@ -36,11 +35,14 @@ export default function CareerExplorer({ studentData }) {
         </p>
 
         <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-          <CustomSelect
-            value={faculty} onChange={setFaculty}
-            options={faculties.map(f => ({ value: f, label: f }))}
-            placeholder="All Faculties" minWidth={180}
-          />
+          <select value={faculty} onChange={e => setFaculty(e.target.value)} style={{
+            padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)',
+            background: 'var(--input-bg)', color: 'var(--text-input)',
+            fontSize: 13, outline: 'none', cursor: 'pointer', fontFamily: 'inherit', minWidth: 180,
+          }}>
+            <option value="" style={{ color: '#1e293b' }}>All Faculties</option>
+            {faculties.map(f => <option key={f} value={f} style={{ color: '#1e293b' }}>{f}</option>)}
+          </select>
         </div>
 
         {filtered.length === 0 ? (
