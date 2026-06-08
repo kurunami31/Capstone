@@ -588,6 +588,7 @@ app.get('/api/admin/users', authenticate, requireManager, async (req, res) => {
       })),
       total: parseInt(countResult.rows[0].count),
       page, limit,
+      _debug: { countQuery, countParams, userRole: req.user.role, userId: req.user.id },
     })
   } catch (err) {
     console.error('Admin users error:', err)

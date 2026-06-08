@@ -141,6 +141,7 @@ export default function AdminPage({ userRole = 'admin' }) {
   const [editUserError, setEditUserError] = useState('')
   const [activityPage, setActivityPage] = useState(1)
   const [activityTotal, setActivityTotal] = useState(0)
+  const [debugInfo, setDebugInfo] = useState(null)
 
   async function fetchStats() {
     try {
@@ -164,6 +165,7 @@ export default function AdminPage({ userRole = 'admin' }) {
       setUsers(data.users)
       setTotal(data.total)
       setPage(data.page)
+      if (data._debug) { setDebugInfo(data._debug); console.log('Admin users debug:', data._debug) }
     } catch (e) {
       setError(e.message)
     } finally {
@@ -338,6 +340,11 @@ export default function AdminPage({ userRole = 'admin' }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <h2 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>Users</h2>
                 <span style={{ fontSize: 12, color: '#64748b' }}>{total} total</span>
+                {debugInfo && (
+                  <span style={{ fontSize: 10, color: '#475569', marginLeft: 8 }}>
+                    role:{debugInfo.userRole} id:{debugInfo.userId?.slice(0,8)} q:{debugInfo.countQuery?.slice(0,120)} p:{JSON.stringify(debugInfo.countParams)}
+                  </span>
+                )}
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
