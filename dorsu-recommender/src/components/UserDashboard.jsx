@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import AchievementBadges from './AchievementBadges.jsx'
+import GlossaryTooltip from './GlossaryTooltip.jsx'
 import careerTips from '../data/career-tips.json'
 import QuickQuiz from './QuickQuiz.jsx'
 
@@ -172,7 +173,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                       <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                     </svg>
                     <span style={{ color: '#fbbf24', fontSize: 14, fontWeight: 600 }}>
-                      Cooldown: {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
+                      Cooldown: {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining<GlossaryTooltip term="Cooldown" />
                     </span>
                   </div>
                   <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: '8px 0 0', lineHeight: 1.4 }}>

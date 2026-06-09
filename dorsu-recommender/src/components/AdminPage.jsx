@@ -127,7 +127,10 @@ function PieChart({ data, labelKey, valueKey, colors }) {
 export default function AdminPage({ userRole = 'admin' }) {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [stats, setStats] = useState(null)
-  const [analytics, setAnalytics] = useState({ userGrowth: [], programPopularity: [], hollandDistribution: [], strandDistribution: [] })
+  const [analytics, setAnalytics] = useState({ userGrowth: [], programPopularity: [], hollandDistribution: [], strandDistribution: [], completionRate: [] })
+  const [summaryKPI, setSummaryKPI] = useState(null)
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [users, setUsers] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -173,12 +176,16 @@ export default function AdminPage({ userRole = 'admin' }) {
     }
   }
 
-  async function fetchAnalytics() {
+  async function fetchAnalytics(fDate, tDate) {
+    const from = fDate || dateFrom
+    const to = tDate || dateTo
+    const p = from || to ? `?${from ? `from=${from}` : ''}${from && to ? '&' : ''}${to ? `to=${to}` : ''}` : ''
     const endpoints = [
-      { key: 'userGrowth', url: '/api/admin/analytics/user-growth' },
+      { key: 'userGrowth', url: `/api/admin/analytics/user-growth${p}` },
       { key: 'programPopularity', url: '/api/admin/analytics/program-popularity' },
       { key: 'hollandDistribution', url: '/api/admin/analytics/holland-distribution' },
       { key: 'strandDistribution', url: '/api/admin/analytics/strand-distribution' },
+      { key: 'completionRate', url: `/api/admin/analytics/completion-rate${p}` },
     ]
     const results = {}
     for (const ep of endpoints) {
@@ -188,6 +195,29 @@ export default function AdminPage({ userRole = 'admin' }) {
       } catch (e) { console.error('Analytics fetch error:', e) }
     }
     setAnalytics(prev => ({ ...prev, ...results }))
+  }
+
+  async function fetchSummaryKPI() {
+    try {
+      const res = await fetch('/api/admin/analytics/summary', { credentials: 'include' })
+      if (res.ok) setSummaryKPI(await res.json())
+    } catch (e) { console.error('Summary KPI fetch error:', e) }
+  }
+
+  function exportCSV(data, filename, columns) {
+    const header = columns.map(c => c.label).join(',')
+    const rows = data.map(row => columns.map(c => row[c.key] ?? '').join(','))
+    const csv = [header, ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleDateFilter() {
+    fetchAnalytics(dateFrom, dateTo)
   }
 
   async function fetchActivityLog(p) {
@@ -207,6 +237,7 @@ export default function AdminPage({ userRole = 'admin' }) {
     fetchStats()
     fetchUsers(1, '')
     fetchAnalytics()
+    fetchSummaryKPI()
     fetchActivityLog()
   }, [])
 
@@ -279,6 +310,20 @@ export default function AdminPage({ userRole = 'admin' }) {
 
         {activeTab === 'dashboard' && (
           <>
+            {summaryKPI && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 16 }}>
+                {[
+                  { label: 'Active Users (This Month)', value: summaryKPI.activeUsers ?? 0, color: '#3b82f6' },
+                  { label: 'Assessments Today', value: summaryKPI.assessmentsToday ?? 0, color: '#22c55e' },
+                  { label: 'New This Week', value: summaryKPI.newThisWeek ?? 0, color: '#f97316' },
+                ].map(s => (
+                  <div key={s.label} style={{ ...CARD, padding: '14px 18px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: s.color }}>{s.value}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 24 }}>
               {[
                 { label: 'Total Users', value: stats?.totalUsers ?? '-', color: '#3b82f6' },
@@ -292,9 +337,40 @@ export default function AdminPage({ userRole = 'admin' }) {
               ))}
             </div>
 
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>From (Month)</div>
+                <input type="month" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                  style={{ ...INPUT, width: 160 }} />
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>To (Month)</div>
+                <input type="month" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                  style={{ ...INPUT, width: 160 }} />
+              </div>
+              <button onClick={handleDateFilter} style={{
+                background: '#2563eb', border: 'none', color: '#fff',
+                padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', marginBottom: 0,
+              }}>Apply Filter</button>
+              {(dateFrom || dateTo) && (
+                <button onClick={() => { setDateFrom(''); setDateTo(''); fetchAnalytics('', '') }} style={{
+                  ...BTN_SECONDARY, fontSize: 12, padding: '8px 14px', marginBottom: 0,
+                }}>Clear</button>
+              )}
+            </div>
+
             <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <div style={{ ...CARD, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>User Growth (Monthly)</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>User Growth (Monthly)</h3>
+                  <button onClick={() => exportCSV(analytics.userGrowth, 'user-growth.csv', [{ key: 'month', label: 'Month' }, { key: 'count', label: 'Users' }])} style={{
+                    background: 'none', border: '1px solid var(--border-strong)', borderRadius: 6, padding: '4px 8px',
+                    color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV
+                  </button>
+                </div>
                 {analytics.userGrowth.length > 0 ? (
                   <VerticalBarChart
                     data={analytics.userGrowth.map(d => ({ ...d, month: new Date(d.month).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) }))}
@@ -305,7 +381,16 @@ export default function AdminPage({ userRole = 'admin' }) {
                 )}
               </div>
               <div style={{ ...CARD, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>Program Popularity</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Program Popularity</h3>
+                  <button onClick={() => exportCSV(analytics.programPopularity, 'program-popularity.csv', [{ key: 'program', label: 'Program' }, { key: 'count', label: 'Students' }])} style={{
+                    background: 'none', border: '1px solid var(--border-strong)', borderRadius: 6, padding: '4px 8px',
+                    color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV
+                  </button>
+                </div>
                 {analytics.programPopularity.length > 0 ? (
                   <BarChart data={analytics.programPopularity} labelKey="program" valueKey="count" color={COLORS} />
                 ) : (
@@ -316,15 +401,41 @@ export default function AdminPage({ userRole = 'admin' }) {
 
             <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div style={{ ...CARD, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>Holland Code Distribution</h3>
-                {analytics.hollandDistribution.length > 0 && analytics.hollandDistribution.some(d => d.count > 0) ? (
-                  <PieChart data={analytics.hollandDistribution} labelKey="code" valueKey="count" colors={['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#f97316', '#a855f7']} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Completion Rate</h3>
+                  <button onClick={() => exportCSV(analytics.completionRate, 'completion-rate.csv', [{ key: 'month', label: 'Month' }, { key: 'rate', label: 'Rate (%)' }, { key: 'started', label: 'Started' }, { key: 'completed', label: 'Completed' }])} style={{
+                    background: 'none', border: '1px solid var(--border-strong)', borderRadius: 6, padding: '4px 8px',
+                    color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV
+                  </button>
+                </div>
+                {analytics.completionRate.length > 0 ? (
+                  <VerticalBarChart
+                    data={analytics.completionRate.map(d => ({ ...d, month: new Date(d.month + '-01').toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) }))}
+                    labelKey="month" valueKey="rate" color="#22c55e"
+                  />
                 ) : (
                   <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>No data yet</div>
                 )}
+                {analytics.completionRate.length > 0 && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)', textAlign: 'center' }}>
+                    Shows completion rate (%) per month
+                  </div>
+                )}
               </div>
               <div style={{ ...CARD, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>Strand Distribution</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Strand Distribution</h3>
+                  <button onClick={() => exportCSV(analytics.strandDistribution, 'strand-distribution.csv', [{ key: 'strand', label: 'Strand' }, { key: 'count', label: 'Students' }])} style={{
+                    background: 'none', border: '1px solid var(--border-strong)', borderRadius: 6, padding: '4px 8px',
+                    color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV
+                  </button>
+                </div>
                 {analytics.strandDistribution.length > 0 ? (
                   <BarChart data={analytics.strandDistribution} labelKey="strand" valueKey="count" color={COLORS} />
                 ) : (

@@ -1,0 +1,44 @@
+[
+  {
+    "term": "SUAST",
+    "definition": "Scholastic University Aptitude and Skills Test — an entrance exam that measures your general ability, numerical and verbal aptitude, spatial and perceptual skills, and manual dexterity.",
+    "tagalog": "SUAST — pagsusulit sa kakayahang pang-akademiko na sumusukat sa iyong pangkalahatang kakayahan, numerikal at verbal na aptitude, spatial at perceptual na kasanayan, at manual dexterity.",
+    "cebuano": "SUAST — eksamin sa abilidad sa pag-eskwela nga mosukod sa imong kinatibuk-ang abilidad, numerical ug verbal nga aptitude, spatial ug perceptual nga kahanas, ug manual dexterity."
+  },
+  {
+    "term": "Holland Code",
+    "definition": "A personality type based on John Holland's theory that people fit into 6 categories: Realistic (Doers), Investigative (Thinkers), Artistic (Creators), Social (Helpers), Enterprising (Persuaders), and Conventional (Organizers). Your top 3 letters form your code.",
+    "tagalog": "Holland Code — uri ng personalidad batay sa teorya ni John Holland na nahahati sa 6 na kategorya: Realistic (Gumagawa), Investigative (Nag-iisip), Artistic (Malikhain), Social (Tumutulong), Enterprising (Nanghihikayat), at Conventional (Nag-aayos). Ang iyong nangungunang 3 letra ay bumubuo ng iyong code.",
+    "cebuano": "Holland Code — matang sa personalidad base sa teorya ni John Holland nga nabahin sa 6 ka kategoriya: Realistic (Mga Magbubuhat), Investigative (Mga Maghunahuna), Artistic (Mga Mamugnaon), Social (Mga Motabang), Enterprising (Mga Modani), ug Conventional (Mga Mag-ayos). Ang imong top 3 ka letra mao ang imong code."
+  },
+  {
+    "term": "RIASEC",
+    "definition": "The six Holland personality dimensions: Realistic, Investigative, Artistic, Social, Enterprising, Conventional.",
+    "tagalog": "RIASEC — anim na dimensyon ng personalidad ayon kay Holland: Realistic, Investigative, Artistic, Social, Enterprising, Conventional.",
+    "cebuano": "RIASEC — unom ka dimensyon sa personalidad ni Holland: Realistic, Investigative, Artistic, Social, Enterprising, Conventional."
+  },
+  {
+    "term": "GWA",
+    "definition": "General Weighted Average — the average of your grades across all subjects, usually on a 0-100 scale.",
+    "tagalog": "GWA — General Weighted Average o ang karaniwan ng iyong mga marka sa lahat ng asignatura, karaniwang 0-100 ang saklaw.",
+    "cebuano": "GWA — General Weighted Average o ang kasagaran sa imong mga grado sa tanang subject, kasagaran 0-100 ang sakop."
+  },
+  {
+    "term": "Strand",
+    "definition": "Your Senior High School track or specialization (STEM, ABM, HUMSS, GAS, TVL, SPORTS, ARTS). This affects which college programs you can apply to.",
+    "tagalog": "Strand — iyong track o espesyalisasyon sa Senior High School (STEM, ABM, HUMSS, GAS, TVL, SPORTS, ARTS). Ito ay nakakaapekto sa kung anong mga programang pang-kolehiyo ang iyong maaaring applyan.",
+    "cebuano": "Strand — imong track o espesyalisasyon sa Senior High School (STEM, ABM, HUMSS, GAS, TVL, SPORTS, ARTS). Kini makaapekto sa unsang mga programang pang-kolehiyo ang imong ma-applyan."
+  },
+  {
+    "term": "Cooldown",
+    "definition": "The waiting period before you can take the assessment again. Currently set to 120 days (one semester) to ensure thoughtful decision-making.",
+    "tagalog": "Cooldown — panahon ng paghihintay bago ka muling makakuha ng assessment. Kasalukuyang nakatakda sa 120 araw (isang semestre) upang masiguro ang maingat na pagpapasya.",
+    "cebuano": "Cooldown — panahon sa paghulat sa dili ka pa makakuha pag-usab sa assessment. Karon nakatakda sa 120 ka adlaw (usa ka semestre) aron masiguro ang maampingong pagdesisyon."
+  },
+  {
+    "term": "Career Cluster",
+    "definition": "A group of related careers that share common skills, interests, or industries. Your assessment matches you to programs based on your preferred clusters.",
+    "tagalog": "Career Cluster — grupo ng magkakaugnay na karera na may parehong kasanayan, interes, o industriya. Itinutugma ng iyong assessment ang mga programa batay sa iyong gustong cluster.",
+    "cebuano": "Career Cluster — grupo sa magkadugtong nga mga karera nga adunay parehas nga kahanas, interes, o industriya. Ang imong assessment motugma kanimo sa mga programa base sa imong gusto nga cluster."
+  }
+]

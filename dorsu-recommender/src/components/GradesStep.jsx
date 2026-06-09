@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import GlossaryTooltip from './GlossaryTooltip.jsx'
 
 const CORE = ['math', 'science', 'english', 'filipino']
 const STRAND_SPECIFIC = {
@@ -71,7 +72,7 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
           border: '1px solid rgba(5,150,105,0.2)', borderRadius: 8,
           marginBottom: 24, color: '#6ee7b7', fontSize: 14,
         }}>
-          <strong>GWA: {gwa}</strong> / 100
+          <strong>GWA: {gwa}</strong> / 100<GlossaryTooltip term="GWA" />
         </div>
       )}
 

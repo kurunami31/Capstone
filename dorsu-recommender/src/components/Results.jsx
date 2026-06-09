@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import GlossaryTooltip from './GlossaryTooltip.jsx'
 import programs from '../data/programs.json'
 import generatePDF from './Report.jsx'
 import ComparisonView from './ComparisonView.jsx'
@@ -116,7 +117,7 @@ export default function Results({ studentData, results, systemSettings, activePr
         <div>
           <h2 style={{ fontSize: 24, margin: 0, color: 'var(--text-primary)' }}>Your Top Program Matches</h2>
           <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: 14 }}>
-            {studentData.name} | {studentData.school} | {studentData.strand} Strand | GWA: {studentData.gwa}
+            {studentData.name} | {studentData.school} | {studentData.strand} Strand | GWA: {studentData.gwa}<GlossaryTooltip term="GWA" />
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -215,7 +216,7 @@ export default function Results({ studentData, results, systemSettings, activePr
               </div>
               <div style={{ flex: 1, minWidth: 60 }}>
                 <div style={statBox}>
-                  <span style={statLabel}>SUAST</span>
+                  <span style={statLabel}>SUAST<GlossaryTooltip term="SUAST" /></span>
                   <span style={{ ...statValue, color: codeColor(r.breakdown.suast) }}>{r.breakdown.suast}%</span>
                 </div>
               </div>

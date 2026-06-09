@@ -1,118 +1,123 @@
 import { useState, useEffect } from 'react'
+import { Joyride } from 'react-joyride'
 
-const STORAGE_KEY = 'dorsu_onboarding_done'
-const STEPS = [
-  {
-    title: 'Welcome to the Recommender',
-    body: 'This system helps you find the best college programs at DOrSU based on your unique strengths and interests.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-text)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Complete the Assessment',
-    body: 'Go through 7 steps: your profile, strand, grades, aptitude test, personality quiz, interests, and skills. The whole process takes about 15–20 minutes.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Get Your Results',
-    body: 'After completing the assessment, you\'ll receive a ranked list of recommended programs with match scores and admission chances. You can also download a PDF report.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-      </svg>
-    ),
-  },
-]
+const STORAGE_KEY = 'dorsu_onboarding_v2'
 
-export default function OnboardingWalkthrough() {
-  const [step, setStep] = useState(0)
-  const [visible, setVisible] = useState(false)
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 480)
+export default function OnboardingWalkthrough({ isStaff = false }) {
+  const [run, setRun] = useState(false)
 
   useEffect(() => {
     const done = localStorage.getItem(STORAGE_KEY)
-    if (!done) setVisible(true)
-    const mq = window.matchMedia('(max-width: 480px)')
-    const handler = (e) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
+    if (!done) {
+      const t = setTimeout(() => setRun(true), 600)
+      return () => clearTimeout(t)
+    }
   }, [])
 
-  const dismiss = () => {
+  const done = () => {
     localStorage.setItem(STORAGE_KEY, '1')
-    setVisible(false)
+    setRun(false)
   }
 
-  if (!visible) return null
+  const studentSteps = [
+    {
+      target: 'body',
+      placement: 'center',
+      title: 'Welcome to DOrSU Recommender!',
+      content: 'This system helps you find the best college programs at Davao Oriental State University based on your unique strengths, grades, and interests.',
+      disableBeacon: true,
+    },
+    {
+      target: '.hero-cta',
+      title: 'Start Your Assessment',
+      content: 'Click the "Get Started" button to begin your 7-step assessment. It takes about 15\u201320 minutes to complete.',
+      disableBeacon: true,
+    },
+    {
+      target: '.step-card',
+      title: 'How the Assessment Works',
+      content: 'The assessment covers your SHS strand, grades, aptitude exam (SUAST), personality type, career interests, and skills. Each step builds a complete picture of you.',
+      disableBeacon: true,
+    },
+    {
+      target: 'body',
+      placement: 'center',
+      title: "You're All Set!",
+      content: 'After the assessment, you will get a ranked list of recommended programs. Use the sidebar to browse programs, explore careers, and view your history anytime.',
+      disableBeacon: true,
+    },
+  ]
 
-  const s = STEPS[step]
+  const staffSteps = [
+    {
+      target: 'body',
+      placement: 'center',
+      title: 'Welcome to the Admin Panel!',
+      content: 'You have access to manage programs, review student assessments, configure system settings, and view analytics.',
+      disableBeacon: true,
+    },
+    {
+      target: 'body',
+      placement: 'center',
+      title: 'Sidebar Navigation',
+      content: 'Use the sidebar to manage programs, customize assessment questions, review student assessments, and access the admin dashboard for user management and analytics.',
+      disableBeacon: true,
+    },
+  ]
+
+  const steps = isStaff ? staffSteps : studentSteps
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9998,
-      backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: isMobile ? 16 : 24,
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    }}>
-      <div style={{
-        backgroundColor: 'var(--modal-bg)', borderRadius: 20, padding: isMobile ? 20 : 32, maxWidth: 380, width: '100%',
-        border: '1px solid var(--card-border)',
-        textAlign: 'center',
-      }}>
-        <div style={{ marginBottom: 12 }}>{s.icon}</div>
-        <h3 style={{ color: 'var(--text-primary)', fontSize: isMobile ? 16 : 18, fontWeight: 700, margin: '0 0 8px' }}>{s.title}</h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: isMobile ? 13 : 14, margin: '0 0 20px', lineHeight: 1.6 }}>{s.body}</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 }}>
-          {STEPS.map((_, i) => (
-            <div key={i} style={{
-              width: 8, height: 8, borderRadius: '50%',
-              backgroundColor: i === step ? '#3b82f6' : 'rgba(255,255,255,0.15)',
-              transition: 'background-color 0.2s',
-            }} />
-          ))}
-        </div>
-        <div style={{
-          display: 'flex', gap: 8,
-          flexDirection: isMobile ? 'column-reverse' : 'row',
-          justifyContent: isMobile ? 'stretch' : 'flex-end',
-        }}>
-          <button onClick={dismiss} style={{
-            padding: isMobile ? '10px 16px' : '8px 16px',
-            borderRadius: 10, border: '1px solid var(--border-strong)',
-            backgroundColor: 'transparent', color: 'var(--text-secondary)',
-            fontSize: 13, fontWeight: 600, cursor: 'pointer',
-          }}>
-            Skip Tour
-          </button>
-          {step < STEPS.length - 1 ? (
-            <button onClick={() => setStep(step + 1)} style={{
-              padding: isMobile ? '10px 16px' : '8px 20px',
-              borderRadius: 10, border: 'none',
-              backgroundColor: '#2563eb', color: '#fff',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer',
-            }}>
-              Next
-            </button>
-          ) : (
-            <button onClick={dismiss} style={{
-              padding: isMobile ? '10px 16px' : '8px 20px',
-              borderRadius: 10, border: 'none',
-              backgroundColor: '#2563eb', color: '#fff',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer',
-            }}>
-              Got it!
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+    <Joyride
+      steps={steps}
+      run={run}
+      continuous
+      showProgress
+      showSkipButton
+      disableOverlayClose
+      spotlightClicks
+      styles={{
+        options: {
+          primaryColor: '#2563eb',
+          textColor: '#e2e8f0',
+          backgroundColor: '#1e293b',
+          arrowColor: '#1e293b',
+          overlayColor: 'rgba(0,0,0,0.6)',
+        },
+        tooltipContainer: {
+          textAlign: 'left',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        },
+        buttonNext: {
+          backgroundColor: '#2563eb',
+          color: '#fff',
+          fontWeight: 600,
+          fontSize: 13,
+          borderRadius: 8,
+        },
+        buttonBack: {
+          color: '#94a3b8',
+          fontWeight: 600,
+          fontSize: 13,
+        },
+        buttonSkip: {
+          color: '#64748b',
+          fontWeight: 600,
+          fontSize: 13,
+        },
+      }}
+      locale={{
+        back: 'Back',
+        close: 'Close',
+        last: 'Got it!',
+        next: 'Next',
+        skip: 'Skip Tour',
+      }}
+      callback={(data) => {
+        if (data.status === 'finished' || data.status === 'skipped') {
+          done()
+        }
+      }}
+    />
   )
 }

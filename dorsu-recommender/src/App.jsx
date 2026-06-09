@@ -495,7 +495,7 @@ function AppContent() {
         {mainContent}
       </div>
       <ChatWidget />
-      {!['admin', 'super_admin', 'department_head', 'counselor'].includes(user?.role) && showLanding && <OnboardingWalkthrough />}
+      {showLanding && <OnboardingWalkthrough isStaff={['admin', 'super_admin', 'department_head', 'counselor'].includes(user?.role)} />}
     </div>
   )
 }

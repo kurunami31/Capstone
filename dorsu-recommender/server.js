@@ -1434,6 +1434,8 @@ app.get('/api/admin/analytics/user-growth', authenticate, requireStaff, async (r
     if (req.user.role === 'admin') {
       baseCondition += " AND role NOT IN ('admin', 'super_admin')"
     }
+    if (req.query.from) baseCondition += ` AND created_at >= '${req.query.from}'`
+    if (req.query.to) baseCondition += ` AND created_at <= '${req.query.to}'`
     const result = await pool.query(`
       SELECT
         DATE_TRUNC('month', created_at) AS month,
@@ -1504,6 +1506,69 @@ app.get('/api/admin/analytics/strand-distribution', authenticate, requireStaff, 
     res.json(result.rows.map(r => ({ strand: r.strand, count: r.count, percentage: Math.round(r.count / total * 100) })))
   } catch (err) {
     console.error('Strand distribution error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.get('/api/admin/analytics/completion-rate', authenticate, requireStaff, async (req, res) => {
+  try {
+    let dateFilter = ''
+    if (req.query.from) dateFilter += ` AND created_at >= '${req.query.from}'`
+    if (req.query.to) dateFilter += ` AND created_at <= '${req.query.to}'`
+    const result = await pool.query(`
+      SELECT
+        DATE_TRUNC('month', created_at) AS month,
+        COUNT(*)::int AS total,
+        SUM(CASE WHEN full_data IS NOT NULL AND full_data != '{}' THEN 1 ELSE 0 END)::int AS completed
+      FROM assessments
+      WHERE 1=1 ${dateFilter}
+      GROUP BY month
+      ORDER BY month ASC
+      LIMIT 12
+    `)
+    res.json(result.rows.map(r => ({
+      month: r.month,
+      total: r.total,
+      completed: r.completed,
+      rate: r.total > 0 ? Math.round(r.completed / r.total * 100) : 0,
+    })))
+  } catch (err) {
+    console.error('Completion rate error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.get('/api/admin/analytics/summary', authenticate, requireStaff, async (req, res) => {
+  try {
+    const now = new Date()
+    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+
+    let roleFilter = "email != 'admin@dorsu.edu.ph'"
+    if (req.user.role === 'admin') {
+      roleFilter += " AND role NOT IN ('admin', 'super_admin')"
+    }
+
+    const activeUsers = await pool.query(
+      `SELECT COUNT(*)::int AS count FROM users WHERE ${roleFilter} AND created_at >= $1`,
+      [firstOfMonth]
+    )
+    const assessmentsToday = await pool.query(
+      'SELECT COUNT(*)::int AS count FROM assessments WHERE created_at >= $1',
+      [todayStart]
+    )
+    const newThisWeek = await pool.query(
+      `SELECT COUNT(*)::int AS count FROM users WHERE ${roleFilter} AND created_at >= $1`,
+      [startOfWeek]
+    )
+    res.json({
+      activeUsers: activeUsers.rows[0].count,
+      assessmentsToday: assessmentsToday.rows[0].count,
+      newThisWeek: newThisWeek.rows[0].count,
+    })
+  } catch (err) {
+    console.error('Summary analytics error:', err)
     res.status(500).json({ error: 'Server error.' })
   }
 })

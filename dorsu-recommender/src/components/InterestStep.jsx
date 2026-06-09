@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import GlossaryTooltip from './GlossaryTooltip.jsx'
 
 const iconSvg = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--text-secondary)', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }
 
@@ -54,7 +55,7 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>Career Interests</h2>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>Career Interests<GlossaryTooltip term="Career Cluster" /></h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 20, fontSize: 14 }}>
         Rate your interest in each career field from 1 (Not Interested) to 5 (Extremely Interested).
       </p>

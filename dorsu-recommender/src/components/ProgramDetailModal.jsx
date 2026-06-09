@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import GlossaryTooltip from './GlossaryTooltip.jsx'
 import { generateExplanations, calculateSkillsGap } from '../engine/explanations.js'
 
 const facultyLogoMap = {
@@ -181,7 +182,7 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
 
         {program.holland_codes?.length > 0 && (
           <section style={{ marginBottom: 20 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Holland Code Alignment</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Holland Code Alignment<GlossaryTooltip term="Holland Code" /></h3>
             <div style={{ display: 'flex', gap: 8 }}>
               {program.holland_codes.map((h, i) => {
                 const code = h[0]
@@ -266,7 +267,7 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
 
         {program.career_clusters?.length > 0 && (
           <section style={{ marginBottom: 20 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Career Clusters</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Career Clusters<GlossaryTooltip term="Career Cluster" /></h3>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {program.career_clusters.map(c => (
                 <span key={c} style={{

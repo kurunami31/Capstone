@@ -15,6 +15,8 @@ const TIERS = [
   { value: 'not_taken', label: "Not taken / Don't know" },
 ]
 
+import GlossaryTooltip from './GlossaryTooltip.jsx'
+
 export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
   const tiers = data.suastTiers || {}
 
@@ -30,7 +32,7 @@ export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>SUAST Exam Tiers</h2>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>SUAST Exam Tiers<GlossaryTooltip term="SUAST" /></h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 4, fontSize: 14 }}>
         Estimate your performance on the DOrSU State University Aptitude and Scholarship Test (SUAST).
       </p>
