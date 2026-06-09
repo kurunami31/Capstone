@@ -87,12 +87,12 @@ function generateToken(user) {
   }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY })
 }
 
-function setTokenCookie(res, token) {
+function setTokenCookie(res, token, longLived = false) {
   res.cookie('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 60 * 60 * 1000,
+    maxAge: longLived ? 30 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000,
   })
 }
 
@@ -240,7 +240,7 @@ app.post('/api/login', async (req, res) => {
     const { password: _, ...safe } = row
     const user = mapUser(row)
     const token = generateToken(user)
-    setTokenCookie(res, token)
+    setTokenCookie(res, token, req.body.rememberMe)
     logActivity(row.id, 'login', `User logged in: ${row.email}`, req.ip || '')
     res.json({ user })
   } catch (err) {

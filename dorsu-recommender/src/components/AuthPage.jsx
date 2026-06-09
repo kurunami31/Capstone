@@ -13,6 +13,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [showPwd, setShowPwd] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [forgotSent, setForgotSent] = useState(false)
@@ -61,7 +62,7 @@ export default function AuthPage() {
     setSubmitting(true)
     try {
       if (mode === 'login') {
-        await login(email, password)
+        await login(email, password, rememberMe)
       } else if (mode === 'register') {
         await register({ firstName, lastName, middleInitial, extensionName, email, password })
       } else if (mode === 'forgot') {
@@ -259,6 +260,25 @@ export default function AuthPage() {
                     )}
                   </button>
                 </div>
+              </div>
+            )}
+
+            {mode === 'login' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+                <input
+                  id="rememberMe"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={e => setRememberMe(e.target.checked)}
+                  style={{
+                    width: 16, height: 16, cursor: 'pointer', accentColor: '#3b82f6', margin: 0,
+                  }}
+                />
+                <label htmlFor="rememberMe" style={{
+                  fontSize: 13, color: 'var(--text-secondary, #94a3b8)', cursor: 'pointer', userSelect: 'none',
+                }}>
+                  Remember me
+                </label>
               </div>
             )}
 

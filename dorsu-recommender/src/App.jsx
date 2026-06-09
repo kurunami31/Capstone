@@ -26,6 +26,7 @@ import QuestionsManager from './components/QuestionsManager.jsx'
 import CounselorDashboard from './components/CounselorDashboard.jsx'
 import ProgramBrowser from './components/ProgramBrowser.jsx'
 import CareerExplorer from './components/CareerExplorer.jsx'
+import DevelopersPage from './components/DevelopersPage.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
 import OnboardingWalkthrough from './components/OnboardingWalkthrough.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
@@ -79,6 +80,7 @@ function AppContent() {
   const [showReview, setShowReview] = useState(false)
   const [showProgramBrowser, setShowProgramBrowser] = useState(false)
   const [showCareerExplorer, setShowCareerExplorer] = useState(false)
+  const [showDevelopers, setShowDevelopers] = useState(false)
   const [step, setStep] = useState(0)
   const [studentData, setStudentData] = useState({
     name: '', school: '', strand: '',
@@ -232,13 +234,14 @@ function AppContent() {
   const handleShowNotifications = () => { setShowNotifications(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowProgramBrowser(false); setShowCareerExplorer(false) }
   const handleShowProgramBrowser = () => { setShowProgramBrowser(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowCareerExplorer(false) }
   const handleShowCareerExplorer = () => { setShowCareerExplorer(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowProgramBrowser(false) }
+  const handleShowDevelopers = () => { setShowDevelopers(true); setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowProgramBrowser(false); setShowCareerExplorer(false) }
   const handleGoHome = () => {
     if (isStaff) {
       setShowLanding(true); setShowDashboard(false)
     } else {
       setShowDashboard(true); setShowLanding(false)
     }
-    setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowNotifications(false); setShowProgramBrowser(false); setShowCareerExplorer(false)
+    setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowNotifications(false); setShowProgramBrowser(false); setShowCareerExplorer(false); setShowDevelopers(false)
   }
 
   if (loading) {
@@ -309,6 +312,7 @@ function AppContent() {
   else if (showFAQ) activePage = 'faq'
   else if (showAdmin) activePage = 'admin'
   else if (showDashboard) activePage = 'home'
+  else if (showDevelopers) activePage = 'developers'
   else if (!showLanding) activePage = 'assessment'
 
   const renderAssessmentProgress = () => {
@@ -378,6 +382,8 @@ function AppContent() {
     mainContent = <ProgramBrowser activePrograms={activePrograms} studentData={studentData} systemSettings={systemSettings} />
   } else if (showCareerExplorer) {
     mainContent = <CareerExplorer studentData={studentData} />
+  } else if (showDevelopers) {
+    mainContent = <DevelopersPage />
   } else if (showPrograms) {
     mainContent = <ProgramsPage activePrograms={activePrograms} />
   } else if (showSettings) {
@@ -491,6 +497,7 @@ function AppContent() {
         onFAQ={handleShowFAQ}
         onAdmin={handleShowAdmin}
         onCareerExplorer={handleShowCareerExplorer}
+        onDevelopers={handleShowDevelopers}
         onLogout={logout}
         open={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
