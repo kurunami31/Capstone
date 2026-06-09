@@ -173,6 +173,7 @@
     ],
     "career_paths": [
       "Data Analyst",
+      "Math Teacher",
       "Teacher",
       "Statistician",
       "Actuary"
@@ -235,7 +236,8 @@
     "career_paths": [
       "Industrial Technician",
       "Production Supervisor",
-      "Quality Control Manager"
+      "Quality Control Manager",
+      "Quality Control Analyst"
     ],
     "is_board_program": false
   },
@@ -294,7 +296,8 @@
     "career_paths": [
       "English Teacher",
       "Curriculum Developer",
-      "Language Instructor"
+      "Language Instructor",
+      "Tutor"
     ],
     "is_board_program": true,
     "board_exam": "Licensure Exam for Teachers (LET)"
@@ -415,7 +418,8 @@
     "career_paths": [
       "Elementary Teacher",
       "Preschool Teacher",
-      "Special Education Assistant"
+      "Special Education Assistant",
+      "Tutor"
     ],
     "is_board_program": true,
     "board_exam": "Licensure Exam for Teachers (LET)"
@@ -597,7 +601,8 @@
     "career_paths": [
       "Agriculturist",
       "Farm Manager",
-      "Agricultural Extension Officer"
+      "Agricultural Extension Officer",
+      "Agricultural Entrepreneur"
     ],
     "is_board_program": true,
     "board_exam": "Agriculturists Licensure Exam"
@@ -658,7 +663,8 @@
     "career_paths": [
       "Environmental Scientist",
       "Conservation Officer",
-      "Sustainability Consultant"
+      "Sustainability Consultant",
+      "Researcher"
     ],
     "is_board_program": false
   },
@@ -780,7 +786,8 @@
     "career_paths": [
       "Psychologist",
       "Guidance Counselor",
-      "Human Resource Specialist"
+      "Human Resource Specialist",
+      "Researcher"
     ],
     "is_board_program": false
   },
@@ -839,7 +846,8 @@
     "career_paths": [
       "Business Manager",
       "Entrepreneur",
-      "Marketing Specialist"
+      "Marketing Specialist",
+      "Human Resource Specialist"
     ],
     "is_board_program": false
   },
@@ -958,7 +966,8 @@
     "career_paths": [
       "Biologist",
       "Researcher",
-      "Quality Control Analyst"
+      "Quality Control Analyst",
+      "Environmental Scientist"
     ],
     "is_board_program": false
   },
@@ -1018,7 +1027,8 @@
     "career_paths": [
       "PE Teacher",
       "Coach",
-      "Sports Program Coordinator"
+      "Sports Program Coordinator",
+      "Tutor"
     ],
     "is_board_program": true,
     "board_exam": "Licensure Exam for Teachers (LET)"
@@ -1139,7 +1149,8 @@
     "career_paths": [
       "Science Teacher",
       "Laboratory Instructor",
-      "Curriculum Developer"
+      "Curriculum Developer",
+      "Tutor"
     ],
     "is_board_program": true,
     "board_exam": "Licensure Exam for Teachers (LET)"
@@ -1200,7 +1211,8 @@
     "career_paths": [
       "Research Statistician",
       "Data Analyst",
-      "Mathematics Teacher"
+      "Mathematics Teacher",
+      "Math Teacher"
     ],
     "is_board_program": false
   },
@@ -1259,7 +1271,8 @@
     "career_paths": [
       "Agribusiness Manager",
       "Farm Manager",
-      "Agricultural Entrepreneur"
+      "Agricultural Entrepreneur",
+      "Marketing Specialist"
     ],
     "is_board_program": false
   },
@@ -1318,7 +1331,9 @@
     "career_paths": [
       "Early Childhood Teacher",
       "Preschool Administrator",
-      "Child Development Specialist"
+      "Child Development Specialist",
+      "Tutor",
+      "Preschool Teacher"
     ],
     "is_board_program": true
   },
@@ -1378,7 +1393,8 @@
     "career_paths": [
       "Special Education Teacher",
       "Inclusion Specialist",
-      "Behavior Therapist"
+      "Behavior Therapist",
+      "Tutor"
     ],
     "is_board_program": true
   },
@@ -1437,7 +1453,8 @@
     "career_paths": [
       "Filipino Teacher",
       "Language Instructor",
-      "Curriculum Developer"
+      "Curriculum Developer",
+      "Tutor"
     ],
     "is_board_program": true
   },
@@ -1497,7 +1514,9 @@
     "career_paths": [
       "Technology Teacher",
       "Livelihood Educator",
-      "Vocational Instructor"
+      "Vocational Instructor",
+      "Tutor",
+      "Curriculum Developer"
     ],
     "is_board_program": true
   }
