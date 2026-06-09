@@ -130,7 +130,7 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
           fontSize: 18,
           fontWeight: 700,
         },
-        buttonNext: {
+        buttonPrimary: {
           backgroundColor: '#3b82f6',
           color: '#fff',
           fontWeight: 600,
