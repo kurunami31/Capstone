@@ -359,7 +359,7 @@ export default function AdminPage({ userRole = 'admin' }) {
               )}
             </div>
 
-            <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, marginBottom: 16 }}>
               <div style={{ ...CARD, padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>User Growth (Monthly)</h3>
@@ -399,7 +399,7 @@ export default function AdminPage({ userRole = 'admin' }) {
               </div>
             </div>
 
-            <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
               <div style={{ ...CARD, padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Completion Rate</h3>
@@ -548,7 +548,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                               <div className="r-grid-2" style={{
                                 padding: '16px 24px 16px 48px',
                                 background: 'rgba(255,255,255,0.02)',
-                                fontSize: 13, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8,
+                                fontSize: 13, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8,
                               }}>
                                 <div>
                                   <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>First Name</span>

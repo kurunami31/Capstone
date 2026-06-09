@@ -1,4 +1,5 @@
 import React from 'react'
+import useMobile from '../hooks/useMobile.js'
 
 function codeColor(score) {
   if (score >= 80) return '#34d399'
@@ -13,6 +14,9 @@ function admissionColor(level) {
 }
 
 export default function ComparisonView({ results, onClose }) {
+  const isMobile = useMobile()
+  const labelWidth = isMobile ? 90 : 140
+  const cellFont = isMobile ? 11 : 13
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9997,
@@ -35,11 +39,12 @@ export default function ComparisonView({ results, onClose }) {
           </button>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `140px repeat(${results.length}, 1fr)`,
-          gap: 0, fontSize: 13,
-        }}>
+        <div style={{ overflowX: 'auto', margin: '0 -8px', padding: '0 8px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: `${labelWidth}px repeat(${results.length}, 1fr)`,
+            gap: 0, fontSize: cellFont, minWidth: results.length > 2 ? 500 : 'auto',
+          }}>
           {/* Header row */}
           <div /> {/* empty corner */}
           {results.map((r, i) => (
@@ -178,6 +183,7 @@ export default function ComparisonView({ results, onClose }) {
               )}
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>

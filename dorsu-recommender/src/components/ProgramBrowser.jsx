@@ -88,7 +88,7 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
             <p style={{ fontSize: 15, margin: 0 }}>No programs match your filters.</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
             {currentPrograms.map(p => (
               <ProgramCard
                 key={p.code}

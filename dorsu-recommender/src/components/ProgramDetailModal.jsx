@@ -118,7 +118,7 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
         {hasScore && (
           <section style={{ marginBottom: 20 }}>
             <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>Score Breakdown</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
               {[
                 { label: 'Academic', score: breakdown.academic },
                 { label: 'SUAST', score: breakdown.suast },

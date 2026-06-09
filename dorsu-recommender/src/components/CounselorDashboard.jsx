@@ -100,7 +100,7 @@ export default function CounselorDashboard() {
 
                 {expandedId === a.id && (
                   <div style={{ padding: '0 16px 16px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, marginBottom: 12 }}>
                       <div>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>GWA</div>
                         <div style={{ color: 'var(--text-input)', fontSize: 13 }}>{a.gwa || 'N/A'}</div>

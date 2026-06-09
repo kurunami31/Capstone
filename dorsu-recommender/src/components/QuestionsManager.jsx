@@ -105,7 +105,7 @@ export default function QuestionsManager() {
           marginBottom: 16, padding: 16, borderRadius: 10,
           background: 'var(--row-bg)', border: '1px solid var(--card-border)',
         }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, marginBottom: 10 }}>
             <div>
               <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: 11, marginBottom: 3 }}>Step</label>
               <select value={form.step} onChange={e => setForm(f => ({ ...f, step: e.target.value }))} style={{ ...INPUT, width: '100%' }}>
