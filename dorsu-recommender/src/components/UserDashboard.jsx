@@ -63,7 +63,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
         </h1>
 
         <div style={{ display: 'grid', gap: 16, marginBottom: 20 }}>
-          <div className="card-padding-mobile" style={{
+          <div className="card-padding-mobile dashboard-profile-card" style={{
             backgroundColor: 'var(--card-bg)',
             border: '1px solid var(--card-border)',
             borderRadius: 20, padding: 28,
@@ -139,7 +139,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                 <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '0 0 16px', lineHeight: 1.5 }}>
                   You haven't taken an assessment yet. Take your first assessment to discover which programs match your profile.
                 </p>
-                <button onClick={onStartAssessment} style={{
+                <button className="dashboard-start-btn" onClick={onStartAssessment} style={{
                   padding: '12px 24px', fontSize: 15, fontWeight: 700,
                   backgroundColor: '#2563eb', color: '#fff', border: 'none',
                   borderRadius: 10, cursor: 'pointer',
@@ -152,7 +152,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                 <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '0 0 16px', lineHeight: 1.5 }}>
                   Your cooldown period has ended. You may take another assessment to get updated recommendations.
                 </p>
-                <button onClick={onStartAssessment} style={{
+                <button className="dashboard-start-btn" onClick={onStartAssessment} style={{
                   padding: '12px 24px', fontSize: 15, fontWeight: 700,
                   backgroundColor: '#2563eb', color: '#fff', border: 'none',
                   borderRadius: 10, cursor: 'pointer',
