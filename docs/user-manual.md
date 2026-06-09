@@ -1,4 +1,4 @@
-# User Manual
+﻿# User Manual
 
 ## Student Guide
 
@@ -50,7 +50,7 @@ The assessment has **7 steps**:
 
 After completing all 7 steps, you'll see a ranked list of recommended programs:
 
-- **Overall Match Score** (0–100): Composite score based on all three dimensions.
+- **Overall Match Score** (0100): Composite score based on all three dimensions.
 - **Breakdown**:
   - **Academic**: How well your strand and GWA match program requirements.
   - **SUAST**: How your exam tier aligns with program expectations.
@@ -175,3 +175,5 @@ Configure the scoring algorithm weights:
 ## Tour (Onboarding)
 
 First-time users see an interactive tour highlighting key features. The tour also re-appears when major updates are released (version check). Staff see a separate tour highlighting admin features.
+
+

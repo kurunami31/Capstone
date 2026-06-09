@@ -1,4 +1,4 @@
-# API Documentation
+﻿# API Documentation
 
 All API routes are prefixed with `/api`. Authentication is via httpOnly cookie (`token`). The server runs on port 3000 by default.
 
@@ -25,8 +25,8 @@ Authenticate and receive a session cookie.
 ```json
 { "email": "string", "password": "string", "rememberMe": "boolean" }
 ```
-- `rememberMe: true` → cookie lasts 30 days
-- `rememberMe: false` → cookie lasts 1 hour
+- `rememberMe: true`  cookie lasts 30 days
+- `rememberMe: false`  cookie lasts 1 hour
 
 **Response** `200`: `{ "user": { ... } }`
 
@@ -167,7 +167,7 @@ Add a note to an assessment.
 
 ---
 
-## Admin — Dashboard
+## Admin  Dashboard
 
 ### GET /api/admin/stats
 Quick stats. **Response**: `{ totalUsers, totalAssessments, assessmentsToday, activeUsers }`
@@ -190,7 +190,7 @@ Reset assessment cooldown for a user.
 
 ---
 
-## Admin — Analytics
+## Admin  Analytics
 
 ### GET /api/admin/analytics/user-growth?from=&to=
 Monthly user registrations in a date range.
@@ -212,7 +212,7 @@ Aggregated KPIs (total users, assessments this month, new this week, assessments
 
 ---
 
-## Admin — Export
+## Admin  Export
 
 ### GET /api/admin/users/export?from=&to=
 Download user data as CSV.
@@ -320,3 +320,6 @@ Check if SMTP is configured for email sending.
 
 ### GET /api/health
 Server health check. **Response**: `{ "status": "ok", "timestamp": ... }`
+
+
+

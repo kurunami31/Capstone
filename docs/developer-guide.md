@@ -1,24 +1,24 @@
-# Developer Guide
+﻿# Developer Guide
 
 ## Project Structure
 
 ```
 dorsu-recommender/
-├── public/                  # Static files
-│   ├── developers/          # Developer profile photos
-│   └── logos/               # College logo images
-├── scripts/
-│   └── backup.mjs           # Database backup script
-├── src/
-│   ├── components/          # React components
-│   ├── context/             # React contexts
-│   ├── data/                # Static data files
-│   ├── engine/              # Scoring algorithms
-│   ├── hooks/               # Custom React hooks
-│   └── i18n/                # Translation files
-├── db.js                    # Database connection + schema
-├── server.js                # Express server
-└── vite.config.js           # Vite build configuration
+ +-- public/                  # Static files
+ |    +-- developers/          # Developer profile photos
+ |    +-- logos/               # College logo images
+ +-- scripts/
+ |    +-- backup.mjs           # Database backup script
+ +-- src/
+ |    +-- components/          # React components
+ |    +-- context/             # React contexts
+ |    +-- data/                # Static data files
+ |    +-- engine/              # Scoring algorithms
+ |    +-- hooks/               # Custom React hooks
+ |    +-- i18n/                # Translation files
+ +-- db.js                    # Database connection + schema
+ +-- server.js                # Express server
+ +-- vite.config.js           # Vite build configuration
 ```
 
 ## How to Add a New Assessment Step
@@ -153,3 +153,5 @@ npm run backup
 ```
 
 This runs `scripts/backup.mjs` which exports the database to a SQL file.
+
+

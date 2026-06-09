@@ -1,4 +1,4 @@
-# Installation Guide
+﻿# Installation Guide
 
 ## Prerequisites
 
@@ -38,16 +38,16 @@ JWT_SECRET=your-random-secret-here
 # Session
 TOKEN_EXPIRY=24h
 
-# SMTP (optional — for email verification & password reset)
+# SMTP (optional  for email verification & password reset)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 
-# Google Gemini API Key (optional — for AI chat assistant)
+# Google Gemini API Key (optional  for AI chat assistant)
 GEMINI_API_KEY=your-gemini-api-key
 
-# Sentry DSN (optional — for error tracking)
+# Sentry DSN (optional  for error tracking)
 SENTRY_DSN=your-sentry-dsn
 ```
 
@@ -70,7 +70,7 @@ CREATE DATABASE dorsu_recommender;
 \q
 ```
 
-The database tables are created automatically when the server starts for the first time (`db.js` → `initDB()`).
+The database tables are created automatically when the server starts for the first time (`db.js`  `initDB()`).
 
 ## Step 5: Load Program Data
 
@@ -124,3 +124,6 @@ Additional admin emails can be configured in `server.js` by adding to the `ADMIN
 | Login returns 401 | Verify email/password. New registrations need email verification if SMTP is configured. |
 | `npm start` fails | Ensure you ran `npm install` first and Node.js version is 18+. |
 | Email features not working | SMTP is optional. Skip `.env` SMTP fields if not needed. |
+
+
+

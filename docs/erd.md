@@ -1,4 +1,4 @@
-# Entity Relationship Diagram (ERD)
+﻿# Entity Relationship Diagram (ERD)
 
 ## Database Schema
 
@@ -157,7 +157,7 @@ erDiagram
 
 ### users
 Stores all user accounts. Roles control feature access:
-- **user**: Standard student — can take assessments, view results, browse programs
+- **user**: Standard student  can take assessments, view results, browse programs
 - **counselor**: Can review student assessments and add notes
 - **department_head**: Same as counselor + can manage programs and questions
 - **admin**: Full access except cannot modify other admins
@@ -187,3 +187,6 @@ Weight configuration for the scoring algorithm. Default values:
 
 ### activity_log
 Audit trail for security and analytics. Logs logins, logouts, assessment completions, and admin actions.
+
+
+
