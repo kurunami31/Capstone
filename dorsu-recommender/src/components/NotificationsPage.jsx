@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import SkeletonLoader, { SkeletonCard } from './SkeletonLoader.jsx'
 
 export default function NotificationsPage({ onBack }) {
   const [notifications, setNotifications] = useState([])
@@ -44,7 +45,11 @@ export default function NotificationsPage({ onBack }) {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)', fontSize: 14 }}>Loading...</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <SkeletonCard lines={1} />
+            <SkeletonCard lines={2} />
+            <SkeletonCard lines={1} />
+          </div>
         ) : notifications.length === 0 ? (
           <div style={{
             backgroundColor: 'var(--card-bg)', borderRadius: 16, padding: 40,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import AchievementBadges from './AchievementBadges.jsx'
 import GlossaryTooltip from './GlossaryTooltip.jsx'
+import SkeletonLoader, { SkeletonCard } from './SkeletonLoader.jsx'
 import careerTips from '../data/career-tips.json'
 import QuickQuiz from './QuickQuiz.jsx'
 
@@ -44,9 +45,13 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #0f172a 0%, var(--table-header) 50%, #0f172a 100%)',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading dashboard...</p>
+        <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <SkeletonLoader height={28} width="30%" style={{ marginBottom: 12 }} />
+          <SkeletonCard lines={4} />
+          <SkeletonCard lines={2} />
+          <SkeletonCard lines={1} />
+        </div>
       </div>
     )
   }

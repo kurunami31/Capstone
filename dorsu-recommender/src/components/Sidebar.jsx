@@ -148,7 +148,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', lineHeight: 1.2, whiteSpace: 'nowrap' }}>DOrSU</div>
               <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.2, whiteSpace: 'nowrap' }}>Recommender</div>
             </div>
-            <button onClick={onToggle} style={{
+        <button onClick={onToggle} aria-label="Open sidebar menu" style={{
               width: 28, height: 28, flexShrink: 0, marginLeft: 'auto',
               background: 'var(--track-bg)', border: 'none', borderRadius: 6,
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -230,6 +230,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
           </div>
           <button
             onClick={() => setDark(!dark)}
+            aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
             style={{
               ...barStyle,
               padding: isMobile ? '14px 14px' : (open ? '12px 16px' : '14px 0'),
@@ -247,6 +248,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
           </button>
           <button
             onClick={() => { onLogout(); if (isMobile) onToggle() }}
+            aria-label="Log out"
             style={{
               ...barStyle,
               padding: isMobile ? '14px 14px' : (open ? '12px 16px' : '14px 0'),

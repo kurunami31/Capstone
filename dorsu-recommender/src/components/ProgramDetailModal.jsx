@@ -50,7 +50,7 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
               {program.faculty}
             </div>
           </div>
-          <button onClick={onClose} style={{
+          <button onClick={onClose} aria-label="Close program details" style={{
             background: 'none', border: 'none', color: 'var(--text-secondary)',
             cursor: 'pointer', padding: '4px', display: 'flex', flexShrink: 0,
           }}>
