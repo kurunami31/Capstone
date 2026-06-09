@@ -43,3 +43,6 @@ coverage/
 /Christopher.jpg
 /Kenth.jpg
 /Maria.jpg
+
+# Generated documentation
+/*.docx
