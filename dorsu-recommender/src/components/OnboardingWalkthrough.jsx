@@ -104,49 +104,78 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
       run={run}
       continuous
       showProgress
-      showSkipButton
-      disableOverlayClose
-      spotlightClicks
+      options={{
+        buttons: ['back', 'close', 'primary', 'skip'],
+      }}
       styles={{
         options: {
           primaryColor: '#3b82f6',
           textColor: '#e2e8f0',
           backgroundColor: '#1e293b',
-          arrowColor: '#1e293b',
-          overlayColor: 'rgba(0,0,0,0.6)',
+          arrowColor: '#64748b',
+          overlayColor: 'rgba(0,0,0,0.75)',
           zIndex: 10000,
+          width: 400,
+        },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          color: '#e2e8f0',
+          borderRadius: 16,
+          padding: 24,
+          fontSize: 15,
+          lineHeight: 1.6,
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         },
         tooltipContainer: {
           textAlign: 'left',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          color: '#e2e8f0',
         },
         tooltipContent: {
           color: '#cbd5e1',
           fontSize: 14,
-          lineHeight: 1.5,
+          lineHeight: 1.6,
+          paddingTop: 12,
+          paddingBottom: 16,
         },
         tooltipTitle: {
           color: '#f8fafc',
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: 700,
+          margin: 0,
+          paddingBottom: 4,
         },
         buttonPrimary: {
           backgroundColor: '#3b82f6',
-          color: '#fff',
+          color: '#ffffff',
           fontWeight: 600,
-          fontSize: 13,
+          fontSize: 14,
           borderRadius: 8,
           border: 'none',
+          padding: '8px 18px',
+          cursor: 'pointer',
         },
         buttonBack: {
           color: '#94a3b8',
           fontWeight: 600,
           fontSize: 13,
+          cursor: 'pointer',
         },
         buttonSkip: {
           color: '#64748b',
           fontWeight: 600,
           fontSize: 13,
+          cursor: 'pointer',
+        },
+        buttonClose: {
+          color: '#64748b',
+        },
+        overlay: {
+          backgroundColor: 'rgba(0,0,0,0.75)',
+        },
+        floater: {
+          filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.4))',
         },
       }}
       locale={{
