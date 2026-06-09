@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import GlossaryTooltip from './GlossaryTooltip.jsx'
 import hollandQuestions from '../data/holland.json'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 const scaleLabels = ['Strongly\nDisagree', 'Disagree', 'Neutral', 'Agree', 'Strongly\nAgree']
 
 export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
+  const { t } = useTranslation()
   const [answers, setAnswers] = useState(data.hollandAnswers || {})
   const [step, setStep] = useState(0)
 
@@ -60,10 +62,9 @@ export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>Career Personality Assessment<GlossaryTooltip term="Holland Code" /></h2>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>{t('holland.title')}<GlossaryTooltip term="Holland Code" /></h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 16, fontSize: 14 }}>
-        Rate how much each statement describes you. There are no right or wrong answers.
-        This test measures your <strong style={{ color: 'var(--text-primary)' }}>RIASEC</strong><GlossaryTooltip term="RIASEC" /> personality dimensions.
+        {t('holland.description')}
       </p>
 
       <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 20 }}>

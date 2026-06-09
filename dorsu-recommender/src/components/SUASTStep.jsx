@@ -16,8 +16,10 @@ const TIERS = [
 ]
 
 import GlossaryTooltip from './GlossaryTooltip.jsx'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
+  const { t } = useTranslation()
   const tiers = data.suastTiers || {}
 
   const update = (key, val) => {
@@ -32,7 +34,7 @@ export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>SUAST Exam Tiers<GlossaryTooltip term="SUAST" /></h2>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>{t('suast.title')}<GlossaryTooltip term="SUAST" /></h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 4, fontSize: 14 }}>
         Estimate your performance on the DOrSU State University Aptitude and Scholarship Test (SUAST).
       </p>

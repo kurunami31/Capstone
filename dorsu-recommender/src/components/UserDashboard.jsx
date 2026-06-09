@@ -4,8 +4,10 @@ import GlossaryTooltip from './GlossaryTooltip.jsx'
 import SkeletonLoader, { SkeletonCard } from './SkeletonLoader.jsx'
 import careerTips from '../data/career-tips.json'
 import QuickQuiz from './QuickQuiz.jsx'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 export default function UserDashboard({ onStartAssessment, onViewHistory }) {
+  const { t } = useTranslation()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState([])
@@ -64,7 +66,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px' }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 28px' }}>
-          Dashboard
+          {t('dashboard.title')}
         </h1>
 
         <div style={{ display: 'grid', gap: 16, marginBottom: 20 }}>
@@ -108,7 +110,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent-text)' }}>{data?.assessmentCount || 0}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Assessments</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('dashboard.assessments')}</div>
               </div>
               <div style={{
                 flex: 1, minWidth: 140, padding: 16, borderRadius: 12,
@@ -117,7 +119,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: 24, fontWeight: 700, color: '#fbbf24' }}>{daysSinceLast !== null ? `${daysSinceLast}d` : '--'}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Days Since Last</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('dashboard.daysSince')}</div>
               </div>
             </div>
           </div>
@@ -142,27 +144,27 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
             {!data?.lastAssessment ? (
               <div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '0 0 16px', lineHeight: 1.5 }}>
-                  You haven't taken an assessment yet. Take your first assessment to discover which programs match your profile.
+                  {t('dashboard.noAssessment')}
                 </p>
                 <button className="dashboard-start-btn" onClick={onStartAssessment} style={{
                   padding: '12px 24px', fontSize: 15, fontWeight: 700,
                   backgroundColor: '#2563eb', color: '#fff', border: 'none',
                   borderRadius: 10, cursor: 'pointer',
                 }}>
-                  Start Assessment
+                  {t('assessment.start')}
                 </button>
               </div>
             ) : canTakeAssessment ? (
               <div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '0 0 16px', lineHeight: 1.5 }}>
-                  Your cooldown period has ended. You may take another assessment to get updated recommendations.
+                  {t('dashboard.retakeAvailable')}
                 </p>
                 <button className="dashboard-start-btn" onClick={onStartAssessment} style={{
                   padding: '12px 24px', fontSize: 15, fontWeight: 700,
                   backgroundColor: '#2563eb', color: '#fff', border: 'none',
                   borderRadius: 10, cursor: 'pointer',
                 }}>
-                  Retake Assessment
+                  {t('assessment.retake')}
                 </button>
               </div>
             ) : (
@@ -178,7 +180,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                       <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                     </svg>
                     <span style={{ color: '#fbbf24', fontSize: 14, fontWeight: 600 }}>
-                      Cooldown: {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining<GlossaryTooltip term="Cooldown" />
+                      {t('dashboard.cooldown', { days: daysLeft })}<GlossaryTooltip term="Cooldown" />
                     </span>
                   </div>
                   <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: '8px 0 0', lineHeight: 1.4 }}>
@@ -192,7 +194,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                   border: '1px solid rgba(255,255,255,0.15)',
                   borderRadius: 10, cursor: 'pointer',
                 }}>
-                  View History
+                  {t('dashboard.viewHistory')}
                 </button>
               </div>
             )}
@@ -206,7 +208,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
               backdropFilter: 'blur(12px)',
             }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
-                Top Programs from Last Assessment
+                {t('dashboard.topPrograms')}
               </h2>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {data.lastAssessment.topPrograms.map((p, i) => (
@@ -239,7 +241,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
               </svg>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-                Today's Career Tip
+                {t('dashboard.todaysTip')}
               </h2>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0, lineHeight: 1.5 }}>
@@ -255,7 +257,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
               backdropFilter: 'blur(12px)',
             }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
-                Saved Programs
+                {t('dashboard.savedPrograms')}
               </h2>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {favorites.map(f => (
@@ -284,7 +286,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
                 {consistency.stability}%
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-                Assessment Consistency ({consistency.assessmentCount} assessments)
+                {t('dashboard.consistency', { count: consistency.assessmentCount })}
               </div>
               <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '8px 0 0', lineHeight: 1.4 }}>
                 {consistency.stability >= 80 ? 'Your interests and preferences are very stable.' :
@@ -302,7 +304,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
             border: '1px solid rgba(139,92,246,0.3)', borderRadius: 10, cursor: 'pointer',
             width: '100%', textAlign: 'center',
           }}>
-            Quick Personality Quiz
+            {t('dashboard.quickQuiz')}
           </button>
         </div>
       </div>

@@ -1,24 +1,26 @@
 import { useState } from 'react'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 export default function Welcome({ onStart, onBack }) {
   const [school, setSchool] = useState('')
+  const { t } = useTranslation()
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 4, color: 'var(--text-primary)' }}>Welcome!</h2>
+      <h2 style={{ fontSize: 22, marginBottom: 4, color: 'var(--text-primary)' }}>{t('welcome.title')}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontSize: 14 }}>
-        Enter your school to begin the assessment.
+        {t('welcome.description')}
       </p>
 
       <div style={{ maxWidth: 400, margin: '0 auto' }}>
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: 13, color: 'var(--label-color)' }}>
-            School (optional)
+            {t('welcome.school')}
           </label>
           <input
             value={school}
             onChange={e => setSchool(e.target.value)}
-            placeholder="Your SHS school name"
+            placeholder={t('welcome.schoolPlaceholder')}
             style={{
               width: '100%', padding: '11px 14px', borderRadius: 8, fontSize: 14,
               backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)',
@@ -36,7 +38,7 @@ export default function Welcome({ onStart, onBack }) {
             transition: 'all 0.2s',
           }}
         >
-          Start Assessment
+          {t('assessment.start')}
         </button>
 
         {onBack && (
@@ -49,7 +51,7 @@ export default function Welcome({ onStart, onBack }) {
               marginTop: 8,
             }}
           >
-            Cancel
+            {t('assessment.cancel')}
           </button>
         )}
       </div>

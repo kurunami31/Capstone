@@ -9,12 +9,14 @@ const STRANDS = [
 ]
 
 import GlossaryTooltip from './GlossaryTooltip.jsx'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 export default function StrandStep({ data, onUpdate, onNext, onBack }) {
+  const { t } = useTranslation()
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>SHS Strand<GlossaryTooltip term="Strand" /></h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>Select the SHS strand you are currently enrolled in or completed.</p>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>{t('strand.title')}<GlossaryTooltip term="Strand" /></h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>{t('strand.select')}</p>
       <div style={{ display: 'grid', gap: 10 }}>
         {STRANDS.map(s => (
           <label

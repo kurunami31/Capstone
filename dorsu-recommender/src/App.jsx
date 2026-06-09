@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext.jsx'
+import { LanguageProvider } from './context/LanguageContext.jsx'
+import { useTranslation } from './hooks/useTranslation.js'
 import AuthPage from './components/AuthPage.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import LandingPage from './components/LandingPage.jsx'
@@ -26,6 +28,7 @@ import ProgramBrowser from './components/ProgramBrowser.jsx'
 import CareerExplorer from './components/CareerExplorer.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
 import OnboardingWalkthrough from './components/OnboardingWalkthrough.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import SkeletonLoader, { SkeletonCard } from './components/SkeletonLoader.jsx'
 import { calculateRecommendations } from './engine/scoring.js'
 import { calculateHollandCode } from './engine/holland.js'
@@ -42,6 +45,8 @@ const STEP_LABELS = [
 
 function AppContent() {
   const { user, loading, logout } = useAuth()
+  const { t } = useTranslation()
+  const STEP_LABEL_KEYS = ['welcome.title', 'strand.title', 'grades.title', 'suast.title', 'holland.title', 'interest.title', 'skills.title', 'results.title']
   const [systemSettings, setSystemSettings] = useState({})
   const [activePrograms, setActivePrograms] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -314,9 +319,9 @@ function AppContent() {
       <div style={{ padding: '20px 0 12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>
-            Step {step} of {totalSteps}
+            {t('assessment.step', { current: step, total: totalSteps })}
           </span>
-          <span style={{ fontSize: 12, color: '#64748b' }}>{pct}% complete</span>
+          <span style={{ fontSize: 12, color: '#64748b' }}>{t('assessment.complete', { pct })}</span>
         </div>
         {autoSaveStatus && (
           <div style={{ textAlign: 'right', fontSize: 11, color: '#64748b', marginBottom: 4 }}>
@@ -333,13 +338,13 @@ function AppContent() {
           ))}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-          {STEP_LABELS.slice(0, -1).map((l, i) => (
-            <span key={l} style={{
+          {STEP_LABEL_KEYS.slice(0, -1).map((key, i) => (
+            <span key={key} style={{
               flex: 1, textAlign: 'center',
               color: i === step ? '#60a5fa' : i < step ? '#3b82f6' : '#64748b',
               fontWeight: i === step ? 700 : i < step ? 600 : 400,
             }}>
-              {i === step ? `▸ ${l}` : l}
+              {i === step ? `▸ ${t(key)}` : t(key)}
             </span>
           ))}
         </div>
@@ -448,7 +453,7 @@ function AppContent() {
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           }}>
             <h3 style={{ color: 'var(--text-primary, #f1f5f9)', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>
-              Resume where you left off?
+              {t('common.confirm')}
             </h3>
             <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}>
               You have an incomplete assessment from your last session. Would you like to continue where you stopped?
@@ -458,13 +463,13 @@ function AppContent() {
                 padding: '10px 20px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
                 backgroundColor: 'transparent', color: '#94a3b8', fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}>
-                Start Over
+                {t('results.startOver')}
               </button>
               <button onClick={handleResume} style={{
                 padding: '10px 20px', borderRadius: 10, border: 'none',
                 backgroundColor: '#2563eb', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}>
-                Resume
+                {t('common.resume')}
               </button>
             </div>
           </div>
@@ -492,7 +497,9 @@ function AppContent() {
         isMobile={isMobile}
       />
       <div style={{ flex: 1, marginLeft: !isMobile && sidebarOpen ? 220 : 0, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', transition: 'margin-left 0.3s ease', minWidth: 0 }}>
-        {mainContent}
+        <ErrorBoundary key={activePage}>
+          {mainContent}
+        </ErrorBoundary>
       </div>
       <ChatWidget />
       <OnboardingWalkthrough isStaff={user ? ['admin', 'super_admin', 'department_head', 'counselor'].includes(user.role) : false} isLanding={showLanding} />
@@ -503,7 +510,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
     </AuthProvider>
   )
 }

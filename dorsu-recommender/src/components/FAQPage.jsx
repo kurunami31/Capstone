@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 const faqs = [
   {
@@ -44,6 +45,7 @@ const faqs = [
 ]
 
 export default function FAQPage() {
+  const { t } = useTranslation()
   const [openIdx, setOpenIdx] = useState(null)
 
   return (
@@ -53,7 +55,7 @@ export default function FAQPage() {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 28px' }}>Frequently Asked Questions</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 28px' }}>{t('nav.faq')}</h1>
 
         <div style={{
           backgroundColor: 'var(--card-bg)',

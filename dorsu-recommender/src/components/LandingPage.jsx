@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './LandingPage.css'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 const COOLDOWN_DAYS = 120
 
@@ -9,6 +10,7 @@ function daysUntil(date) {
 }
 
 export default function LandingPage({ onGetStarted, user }) {
+  const { t } = useTranslation()
   const [lastAssessment, setLastAssessment] = useState(null)
   const [loadingStatus, setLoadingStatus] = useState(true)
 
@@ -101,7 +103,7 @@ export default function LandingPage({ onGetStarted, user }) {
               letterSpacing: '0.01em', opacity: loadingStatus ? 0.5 : 1,
             }}
           >
-            {loadingStatus ? 'Checking...' : 'Get Started'}
+            {loadingStatus ? 'Checking...' : t('welcome.start')}
           </button>
         )}
         <div style={{ height: 120 }} />

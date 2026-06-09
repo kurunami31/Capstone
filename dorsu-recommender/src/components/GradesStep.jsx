@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import GlossaryTooltip from './GlossaryTooltip.jsx'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 const CORE = ['math', 'science', 'english', 'filipino']
 const STRAND_SPECIFIC = {
@@ -13,6 +14,7 @@ const STRAND_SPECIFIC = {
 }
 
 export default function GradesStep({ data, onUpdate, onNext, onBack }) {
+  const { t } = useTranslation()
   const strand = data.strand || 'GAS'
   const strandSubs = STRAND_SPECIFIC[strand] || STRAND_SPECIFIC.GAS
   const [grades, setGrades] = useState(data.grades || {})
@@ -46,9 +48,9 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>SHS Grades</h2>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>{t('grades.title')}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontSize: 14 }}>
-        Enter your final grades for Grade 11 and Grade 12 (or current).
+        {t('grades.enterGrades')}
       </p>
 
       <h3 style={{ fontSize: 16, marginBottom: 12, color: 'var(--label-color)' }}>Core Subjects</h3>
@@ -72,7 +74,7 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
           border: '1px solid rgba(5,150,105,0.2)', borderRadius: 8,
           marginBottom: 24, color: '#6ee7b7', fontSize: 14,
         }}>
-          <strong>GWA: {gwa}</strong> / 100<GlossaryTooltip term="GWA" />
+          <strong>{t('grades.gwa')}: {gwa}</strong> / 100<GlossaryTooltip term="GWA" />
         </div>
       )}
 

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useLanguage } from '../context/LanguageContext.jsx'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 function SunIcon() {
   return (
@@ -36,6 +38,8 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
   const isStaff = staffRoles.includes(user?.role)
   const [unreadCount, setUnreadCount] = useState(0)
   const [dark, setDark] = useState(() => localStorage.getItem('theme') !== 'light')
+  const { locale, changeLocale } = useLanguage()
+  const { t } = useTranslation()
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
@@ -55,27 +59,27 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
   }, [])
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: 'home', action: onHome },
+    { id: 'home', label: t('nav.dashboard'), icon: 'home', action: onHome },
   ]
 
   if (!isStaff) {
-    navItems.push({ id: 'profile', label: 'Profile', icon: 'user', action: onProfile })
-    navItems.push({ id: 'history', label: 'History', icon: 'clock', action: onHistory })
-    navItems.push({ id: 'programs', label: 'Programs', icon: 'book', action: onPrograms })
-    navItems.push({ id: 'careers', label: 'Careers', icon: 'briefcase', action: onCareerExplorer })
+    navItems.push({ id: 'profile', label: t('nav.profile'), icon: 'user', action: onProfile })
+    navItems.push({ id: 'history', label: t('nav.history'), icon: 'clock', action: onHistory })
+    navItems.push({ id: 'programs', label: t('nav.programs'), icon: 'book', action: onPrograms })
+    navItems.push({ id: 'careers', label: t('nav.careerExplorer'), icon: 'briefcase', action: onCareerExplorer })
   }
 
   if (isStaff) {
-    navItems.push({ id: 'programs', label: 'Programs', icon: 'book', action: onPrograms })
-    navItems.push({ id: 'settings', label: 'Settings', icon: 'sliders', action: onSettings })
-    navItems.push({ id: 'questions', label: 'Questions', icon: 'helpCircle', action: onQuestions })
-    navItems.push({ id: 'review', label: 'Review', icon: 'checkCircle', action: onReview })
-    navItems.push({ id: 'admin', label: 'Admin', icon: 'shield', action: onAdmin })
+    navItems.push({ id: 'programs', label: t('nav.programs'), icon: 'book', action: onPrograms })
+    navItems.push({ id: 'settings', label: t('nav.settings'), icon: 'sliders', action: onSettings })
+    navItems.push({ id: 'questions', label: t('nav.faq'), icon: 'helpCircle', action: onQuestions })
+    navItems.push({ id: 'review', label: t('nav.activity'), icon: 'checkCircle', action: onReview })
+    navItems.push({ id: 'admin', label: t('nav.admin'), icon: 'shield', action: onAdmin })
   } else {
-    navItems.push({ id: 'faq', label: 'FAQ', icon: 'helpCircle', action: onFAQ })
+    navItems.push({ id: 'faq', label: t('nav.faq'), icon: 'helpCircle', action: onFAQ })
   }
 
-  navItems.push({ id: 'notifications', label: 'Notifications', icon: 'bell', action: onNotifications })
+  navItems.push({ id: 'notifications', label: t('nav.notifications'), icon: 'bell', action: onNotifications })
 
   const icons = {
     home: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
@@ -148,7 +152,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
               <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', lineHeight: 1.2, whiteSpace: 'nowrap' }}>DOrSU</div>
               <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.2, whiteSpace: 'nowrap' }}>Recommender</div>
             </div>
-        <button onClick={onToggle} aria-label="Open sidebar menu" style={{
+            <button onClick={onToggle} aria-label={open ? t('common.dismiss') : t('nav.dashboard')} style={{
               width: 28, height: 28, flexShrink: 0, marginLeft: 'auto',
               background: 'var(--track-bg)', border: 'none', borderRadius: 6,
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -244,8 +248,31 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
             <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {dark ? <SunIcon /> : <MoonIcon />}
             </span>
-            {(isMobile || open) && (dark ? 'Light Mode' : 'Dark Mode')}
+            {(isMobile || open) && (dark ? t('theme.light') : t('theme.dark'))}
           </button>
+          {(isMobile || open) && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              padding: isMobile ? '8px 14px' : '6px 16px',
+            }}>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', marginRight: 4, whiteSpace: 'nowrap' }}>Lang:</span>
+              {['en', 'tl', 'ceb'].map(l => (
+                <button
+                  key={l}
+                  onClick={() => changeLocale(l)}
+                  style={{
+                    padding: '2px 8px', borderRadius: 4, border: 'none',
+                    fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                    background: locale === l ? 'var(--accent-bg, #1e40af)' : 'transparent',
+                    color: locale === l ? 'var(--accent-text, #60a5fa)' : 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          )}
           <button
             onClick={() => { onLogout(); if (isMobile) onToggle() }}
             aria-label="Log out"
@@ -260,7 +287,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)' }}
           >
             <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icons.logOut}</span>
-            {(isMobile || open) && 'Sign Out'}
+            {(isMobile || open) && t('nav.logout')}
           </button>
         </div>
       </div>

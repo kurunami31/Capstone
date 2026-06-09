@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import SkeletonLoader from './SkeletonLoader.jsx'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 const CARD = {
   backgroundColor: 'var(--card-bg)',
@@ -125,6 +126,7 @@ function PieChart({ data, labelKey, valueKey, colors }) {
 }
 
 export default function AdminPage({ userRole = 'admin' }) {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [stats, setStats] = useState(null)
   const [analytics, setAnalytics] = useState({ userGrowth: [], programPopularity: [], hollandDistribution: [], strandDistribution: [], completionRate: [] })
@@ -285,7 +287,7 @@ export default function AdminPage({ userRole = 'admin' }) {
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px 60px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Admin Panel</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{t('admin.title')}</h1>
           <div style={{ display: 'flex', gap: 4, background: 'var(--card-bg)', borderRadius: 10, padding: 3, flexWrap: 'wrap' }}>
             {tabs.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
@@ -295,7 +297,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                 color: activeTab === tab ? 'var(--accent-text)' : 'var(--text-muted)',
                 transition: 'all 0.2s',
               }}>
-                {tab}
+                {tab === 'dashboard' ? t('admin.dashboard') : tab === 'users' ? t('admin.users') : tab === 'activity' ? t('nav.activity') : tab}
               </button>
             ))}
           </div>
@@ -313,9 +315,9 @@ export default function AdminPage({ userRole = 'admin' }) {
             {summaryKPI && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 16 }}>
                 {[
-                  { label: 'Active Users (This Month)', value: summaryKPI.activeUsers ?? 0, color: '#3b82f6' },
-                  { label: 'Assessments Today', value: summaryKPI.assessmentsToday ?? 0, color: '#22c55e' },
-                  { label: 'New This Week', value: summaryKPI.newThisWeek ?? 0, color: '#f97316' },
+                  { label: t('admin.activeUsers'), value: summaryKPI.activeUsers ?? 0, color: '#3b82f6' },
+                  { label: t('admin.assessmentsToday'), value: summaryKPI.assessmentsToday ?? 0, color: '#22c55e' },
+                  { label: t('admin.newThisWeek'), value: summaryKPI.newThisWeek ?? 0, color: '#f97316' },
                 ].map(s => (
                   <div key={s.label} style={{ ...CARD, padding: '14px 18px', textAlign: 'center' }}>
                     <div style={{ fontSize: 24, fontWeight: 700, color: s.color }}>{s.value}</div>
@@ -326,9 +328,9 @@ export default function AdminPage({ userRole = 'admin' }) {
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 24 }}>
               {[
-                { label: 'Total Users', value: stats?.totalUsers ?? '-', color: '#3b82f6' },
-                { label: 'Assessments', value: totalAssessments || '-', color: '#22c55e' },
-                { label: 'Admins', value: stats?.adminCount ?? '-', color: '#06b6d4' },
+                { label: t('admin.totalUsers'), value: stats?.totalUsers ?? '-', color: '#3b82f6' },
+                { label: t('admin.assessments'), value: totalAssessments || '-', color: '#22c55e' },
+                { label: t('admin.admins'), value: stats?.adminCount ?? '-', color: '#06b6d4' },
               ].map(s => (
                 <div key={s.label} style={{ ...CARD, padding: '18px 20px', textAlign: 'center' }}>
                   <div style={{ fontSize: 28, fontWeight: 700, color: s.color }}>{s.value}</div>
@@ -339,19 +341,19 @@ export default function AdminPage({ userRole = 'admin' }) {
 
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
               <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>From (Month)</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('admin.dateFrom')}</div>
                 <input type="month" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
                   style={{ ...INPUT, width: 160 }} />
               </div>
               <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>To (Month)</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('admin.dateTo')}</div>
                 <input type="month" value={dateTo} onChange={e => setDateTo(e.target.value)}
                   style={{ ...INPUT, width: 160 }} />
               </div>
               <button onClick={handleDateFilter} style={{
                 background: '#2563eb', border: 'none', color: '#fff',
                 padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', marginBottom: 0,
-              }}>Apply Filter</button>
+              }}>{t('common.apply')}</button>
               {(dateFrom || dateTo) && (
                 <button onClick={() => { setDateFrom(''); setDateTo(''); fetchAnalytics('', '') }} style={{
                   ...BTN_SECONDARY, fontSize: 12, padding: '8px 14px', marginBottom: 0,
@@ -362,7 +364,7 @@ export default function AdminPage({ userRole = 'admin' }) {
             <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, marginBottom: 16 }}>
               <div style={{ ...CARD, padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>User Growth (Monthly)</h3>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{t('admin.userGrowth')}</h3>
                   <button onClick={() => exportCSV(analytics.userGrowth, 'user-growth.csv', [{ key: 'month', label: 'Month' }, { key: 'count', label: 'Users' }])} style={{
                     background: 'none', border: '1px solid var(--border-strong)', borderRadius: 6, padding: '4px 8px',
                     color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
@@ -377,12 +379,12 @@ export default function AdminPage({ userRole = 'admin' }) {
                     labelKey="month" valueKey="count" color="#3b82f6"
                   />
                 ) : (
-                  <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>No data yet</div>
+                  <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>{t('common.noData')}</div>
                 )}
               </div>
               <div style={{ ...CARD, padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Program Popularity</h3>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{t('admin.programPopularity')}</h3>
                   <button onClick={() => exportCSV(analytics.programPopularity, 'program-popularity.csv', [{ key: 'program', label: 'Program' }, { key: 'count', label: 'Students' }])} style={{
                     background: 'none', border: '1px solid var(--border-strong)', borderRadius: 6, padding: '4px 8px',
                     color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
@@ -394,7 +396,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                 {analytics.programPopularity.length > 0 ? (
                   <BarChart data={analytics.programPopularity} labelKey="program" valueKey="count" color={COLORS} />
                 ) : (
-                  <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>No data yet</div>
+                  <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>{t('common.noData')}</div>
                 )}
               </div>
             </div>
@@ -402,7 +404,7 @@ export default function AdminPage({ userRole = 'admin' }) {
             <div className="r-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
               <div style={{ ...CARD, padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Completion Rate</h3>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{t('admin.completionRate')}</h3>
                   <button onClick={() => exportCSV(analytics.completionRate, 'completion-rate.csv', [{ key: 'month', label: 'Month' }, { key: 'rate', label: 'Rate (%)' }, { key: 'started', label: 'Started' }, { key: 'completed', label: 'Completed' }])} style={{
                     background: 'none', border: '1px solid var(--border-strong)', borderRadius: 6, padding: '4px 8px',
                     color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
@@ -417,7 +419,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                     labelKey="month" valueKey="rate" color="#22c55e"
                   />
                 ) : (
-                  <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>No data yet</div>
+                  <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>{t('common.noData')}</div>
                 )}
                 {analytics.completionRate.length > 0 && (
                   <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)', textAlign: 'center' }}>
@@ -427,7 +429,7 @@ export default function AdminPage({ userRole = 'admin' }) {
               </div>
               <div style={{ ...CARD, padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Strand Distribution</h3>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{t('admin.strandDistribution')}</h3>
                   <button onClick={() => exportCSV(analytics.strandDistribution, 'strand-distribution.csv', [{ key: 'strand', label: 'Strand' }, { key: 'count', label: 'Students' }])} style={{
                     background: 'none', border: '1px solid var(--border-strong)', borderRadius: 6, padding: '4px 8px',
                     color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
@@ -439,7 +441,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                 {analytics.strandDistribution.length > 0 ? (
                   <BarChart data={analytics.strandDistribution} labelKey="strand" valueKey="count" color={COLORS} />
                 ) : (
-                  <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>No data yet</div>
+                  <div style={{ color: '#475569', fontSize: 12, padding: '20px 0', textAlign: 'center' }}>{t('common.noData')}</div>
                 )}
               </div>
             </div>
@@ -450,12 +452,12 @@ export default function AdminPage({ userRole = 'admin' }) {
           <div style={{ ...CARD, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Users</h2>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{t('admin.users')}</h2>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{total} total</span>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
-                  placeholder="Search users..."
+                  placeholder={t('common.search')}
                   value={search}
                   onChange={e => handleSearch(e.target.value)}
                   style={{ ...INPUT, maxWidth: 200 }}
@@ -467,7 +469,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
-                  Export CSV
+                  {t('common.export')}
                 </button>
               </div>
             </div>
@@ -475,7 +477,7 @@ export default function AdminPage({ userRole = 'admin' }) {
             {loading ? (
               <div style={{ padding: 20 }}><SkeletonLoader height={14} width="40%" style={{ margin: '0 auto' }} /></div>
             ) : visibleUsers.length === 0 ? (
-              <div style={{ color: 'var(--text-muted)', fontSize: 13, padding: 20, textAlign: 'center' }}>No users found.</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: 13, padding: 20, textAlign: 'center' }}>{t('common.noData')}</div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -538,7 +540,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                               background: 'none', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--danger)',
                               fontSize: 11, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
                             }}>
-                              Delete
+                              {t('common.delete')}
                             </button>
                           </td>
                         </tr>
@@ -590,11 +592,12 @@ export default function AdminPage({ userRole = 'admin' }) {
                                   padding: '5px 12px', borderRadius: 8, border: '1px solid rgba(234,179,8,0.3)',
                                   background: 'rgba(234,179,8,0.1)', color: '#fbbf24', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                                 }}>
-                                  Reset Cooldown
+                                  {t('admin.resetCooldown')}
                                 </button>
                                 <button onClick={() => {
                                   setEditUserData({
                                     id: u.id, firstName: u.firstName || '', lastName: u.lastName || '',
+                                    middleInitial: u.middleInitial || '', extensionName: u.extensionName || '',
                                     email: u.email, role: u.role,
                                   })
                                   setEditUserModal(true)
@@ -602,7 +605,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                                   padding: '5px 12px', borderRadius: 8, border: '1px solid rgba(59,130,246,0.3)',
                                   background: 'var(--accent-bg)', color: 'var(--accent-text)', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                                 }}>
-                                  Edit
+                                  {t('common.edit')}
                                 </button>
                               </div>
                             </td>
@@ -650,12 +653,16 @@ export default function AdminPage({ userRole = 'admin' }) {
               border: '1px solid var(--card-border)',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}>
-              <h3 style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 700, margin: '0 0 16px' }}>Edit User</h3>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 700, margin: '0 0 16px' }}>{t('common.edit')} User</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <input value={editUserData.firstName} onChange={e => setEditUserData(p => ({ ...p, firstName: e.target.value }))}
                   placeholder="First Name" style={INPUT} />
                 <input value={editUserData.lastName} onChange={e => setEditUserData(p => ({ ...p, lastName: e.target.value }))}
                   placeholder="Last Name" style={INPUT} />
+                <input value={editUserData.middleInitial || ''} onChange={e => setEditUserData(p => ({ ...p, middleInitial: e.target.value }))}
+                  placeholder="Middle Initial" style={{ ...INPUT, maxWidth: 120 }} />
+                <input value={editUserData.extensionName || ''} onChange={e => setEditUserData(p => ({ ...p, extensionName: e.target.value }))}
+                  placeholder="Extension (Jr., III, etc.)" style={INPUT} />
                 <input value={editUserData.email} onChange={e => setEditUserData(p => ({ ...p, email: e.target.value }))}
                   placeholder="Email" style={INPUT} />
                 <select value={editUserData.role} onChange={e => setEditUserData(p => ({ ...p, role: e.target.value }))}
@@ -664,6 +671,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                   <option value="counselor">Counselor</option>
                   <option value="department_head">Department Head</option>
                   <option value="admin">Admin</option>
+                  {userRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
                 </select>
               </div>
               {editUserError && (
@@ -672,7 +680,7 @@ export default function AdminPage({ userRole = 'admin' }) {
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
                 <button onClick={() => { setEditUserModal(false); setEditUserError('') }} style={{
                   ...BTN_SECONDARY, padding: '8px 16px', fontSize: 13,
-                }}>Cancel</button>
+                }}>{t('common.cancel')}</button>
                 <button onClick={async () => {
                   try {
                     const res = await fetch(`/api/admin/users/${editUserData.id}`, {
@@ -681,6 +689,8 @@ export default function AdminPage({ userRole = 'admin' }) {
                       body: JSON.stringify({
                         firstName: editUserData.firstName,
                         lastName: editUserData.lastName,
+                        middleInitial: editUserData.middleInitial,
+                        extensionName: editUserData.extensionName,
                         email: editUserData.email,
                         role: editUserData.role,
                       }),
@@ -699,7 +709,7 @@ export default function AdminPage({ userRole = 'admin' }) {
                 }} style={{
                   background: '#2563eb', border: 'none', color: '#fff',
                   padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                }}>Save</button>
+                }}>{t('common.save')}</button>
               </div>
             </div>
           </div>

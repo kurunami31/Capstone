@@ -7,6 +7,7 @@ import HollandChart from './HollandChart.jsx'
 import RadarChart from './RadarChart.jsx'
 import ScoreSimulator from './ScoreSimulator.jsx'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 function codeColor(score) {
   if (score >= 80) return '#34d399'
@@ -29,6 +30,7 @@ function HeartIcon({ filled }) {
 }
 
 export default function Results({ studentData, results, systemSettings, activePrograms, onRestart }) {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState([])
   const [showCompare, setShowCompare] = useState(false)
   const [favorites, setFavorites] = useState(new Set())
@@ -115,7 +117,7 @@ export default function Results({ studentData, results, systemSettings, activePr
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontSize: 24, margin: 0, color: 'var(--text-primary)' }}>Your Top Program Matches</h2>
+          <h2 style={{ fontSize: 24, margin: 0, color: 'var(--text-primary)' }}>{t('results.title')}</h2>
           <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: 14 }}>
             {studentData.name} | {studentData.school} | {studentData.strand} Strand | GWA: {studentData.gwa}<GlossaryTooltip term="GWA" />
           </p>
@@ -127,15 +129,15 @@ export default function Results({ studentData, results, systemSettings, activePr
               backgroundColor: 'rgba(99,102,241,0.15)', color: '#818cf8',
               border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, cursor: 'pointer',
             }}>
-              Compare ({selected.length})
+              {t('results.compare')} ({selected.length})
             </button>
           )}
-          <button onClick={() => setShowSimulator(true)} style={simBtn}>Simulate</button>
+          <button onClick={() => setShowSimulator(true)} style={simBtn}>{t('results.simulate')}</button>
           <button onClick={handleShareResults} style={shareBtn}>
-            {shareCopied ? 'Copied!' : 'Share'}
+            {shareCopied ? t('results.copied') : t('results.share')}
           </button>
-          <button onClick={() => generatePDF(studentData, results)} style={pdfBtn}>Download PDF</button>
-          <button onClick={onRestart} style={restartBtn}>Start Over</button>
+          <button onClick={() => generatePDF(studentData, results)} style={pdfBtn}>{t('results.download')}</button>
+          <button onClick={onRestart} style={restartBtn}>{t('results.startOver')}</button>
         </div>
       </div>
 
@@ -181,7 +183,7 @@ export default function Results({ studentData, results, systemSettings, activePr
                   }}
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                  title={favorites.has(r.program.code) ? 'Remove from favorites' : 'Add to favorites'}
+                  title={favorites.has(r.program.code) ? t('results.unfavorite') : t('results.favorite')}
                 >
                   <HeartIcon filled={favorites.has(r.program.code)} />
                 </button>
@@ -196,13 +198,13 @@ export default function Results({ studentData, results, systemSettings, activePr
                     onChange={() => toggleSelect(r.program.code)}
                     style={{ accentColor: '#6366f1', width: 14, height: 14, cursor: 'pointer' }}
                   />
-                  Compare
+                  {t('results.compare')}
                 </label>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: 28, fontWeight: 700, color: codeColor(r.totalScore) }}>
                     {r.totalScore}%
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Overall Match</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('results.overall')}</div>
                 </div>
               </div>
             </div>
@@ -210,19 +212,19 @@ export default function Results({ studentData, results, systemSettings, activePr
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 12 }}>
               <div style={{ flex: 1, minWidth: 60 }}>
                 <div style={statBox}>
-                  <span style={statLabel}>Academic</span>
+                  <span style={statLabel}>{t('results.academic')}</span>
                   <span style={{ ...statValue, color: codeColor(r.breakdown.academic) }}>{r.breakdown.academic}%</span>
                 </div>
               </div>
               <div style={{ flex: 1, minWidth: 60 }}>
                 <div style={statBox}>
-                  <span style={statLabel}>SUAST<GlossaryTooltip term="SUAST" /></span>
+                  <span style={statLabel}>{t('results.suast')}<GlossaryTooltip term="SUAST" /></span>
                   <span style={{ ...statValue, color: codeColor(r.breakdown.suast) }}>{r.breakdown.suast}%</span>
                 </div>
               </div>
               <div style={{ flex: 1, minWidth: 60 }}>
                 <div style={statBox}>
-                  <span style={statLabel}>Personal Fit</span>
+                  <span style={statLabel}>{t('results.personalFit')}</span>
                   <span style={{ ...statValue, color: codeColor(r.breakdown.personalFit) }}>{r.breakdown.personalFit}%</span>
                 </div>
               </div>
@@ -231,7 +233,7 @@ export default function Results({ studentData, results, systemSettings, activePr
                   ...statBox, border: `2px solid ${admissionColor(r.admission.label)}`,
                   backgroundColor: `${admissionColor(r.admission.label)}15`
                 }}>
-                  <span style={statLabel}>Admission Chance</span>
+                  <span style={statLabel}>{t('results.admission')}</span>
                   <span style={{ ...statValue, color: admissionColor(r.admission.label) }}>
                     {r.admission.label}
                   </span>
@@ -256,7 +258,7 @@ export default function Results({ studentData, results, systemSettings, activePr
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {r.program.ched_priority && (
               <div style={{ fontSize: 12, color: 'var(--accent-text)', backgroundColor: 'var(--accent-bg)', border: '1px solid var(--accent-bg)', padding: '4px 10px', borderRadius: 4, display: 'inline-block' }}>
-                CHED Priority Course
+                {t('results.chedPriority')}
               </div>
             )}
 
@@ -281,7 +283,7 @@ export default function Results({ studentData, results, systemSettings, activePr
 
             {r.program.career_paths && r.program.career_paths.length > 0 && (
               <div style={{ marginTop: 12 }}>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 600 }}>Career Paths</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 600 }}>{t('results.careerPaths')}</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {r.program.career_paths.map((career, ci) => (
                     <span key={ci} style={{

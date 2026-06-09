@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 const SKILLS = [
   { key: 'analytical', label: 'Analytical Thinking', desc: 'Breaking down complex problems, analyzing data' },
@@ -10,6 +11,7 @@ const SKILLS = [
 ]
 
 export default function SkillsStep({ data, onUpdate, onNext, onBack }) {
+  const { t } = useTranslation()
   const [ratings, setRatings] = useState(data.skills || {})
 
   const setRating = (key, val) => {
@@ -22,9 +24,9 @@ export default function SkillsStep({ data, onUpdate, onNext, onBack }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>Self-Skills Assessment</h2>
+      <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>{t('skills.title')}</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 20, fontSize: 14 }}>
-        Rate your current skill level in each area from 1 (Beginner) to 5 (Expert).
+        {t('skills.rate')}
       </p>
 
       <div style={{ display: 'grid', gap: 14 }}>

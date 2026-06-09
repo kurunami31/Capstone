@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react'
 import { Joyride } from 'react-joyride'
+import { useTranslation } from '../hooks/useTranslation.js'
 
 const STORAGE_KEY = 'dorsu_onboarding_v2'
+const APP_VERSION = '2.1.0'
 
 export default function OnboardingWalkthrough({ isStaff = false, isLanding = false }) {
+  const { t } = useTranslation()
   const [run, setRun] = useState(false)
 
   useEffect(() => {
-    const done = localStorage.getItem(STORAGE_KEY)
-    if (!done) {
-      const t = setTimeout(() => setRun(true), 600)
-      return () => clearTimeout(t)
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (!stored || stored !== APP_VERSION) {
+      const timeout = setTimeout(() => setRun(true), 600)
+      return () => clearTimeout(timeout)
     }
   }, [])
 
   const done = () => {
-    localStorage.setItem(STORAGE_KEY, '1')
+    localStorage.setItem(STORAGE_KEY, APP_VERSION)
     setRun(false)
   }
 
@@ -23,27 +26,27 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
     {
       target: 'body',
       placement: 'center',
-      title: 'Welcome to DOrSU Recommender!',
-      content: 'This system helps you find the best college programs at Davao Oriental State University based on your unique strengths, grades, and interests.',
+      title: t('tour.welcome'),
+      content: t('tour.welcomeDesc'),
       disableBeacon: true,
     },
     {
       target: '.hero-cta',
-      title: 'Start Your Assessment',
-      content: 'Click the "Get Started" button to begin your 7-step assessment. It takes about 15\u201320 minutes to complete.',
+      title: t('tour.start'),
+      content: t('tour.startDesc'),
       disableBeacon: true,
     },
     {
       target: '.step-card',
-      title: 'How the Assessment Works',
-      content: 'The assessment covers your SHS strand, grades, aptitude exam (SUAST), personality type, career interests, and skills. Each step builds a complete picture of you.',
+      title: t('tour.how'),
+      content: t('tour.howDesc'),
       disableBeacon: true,
     },
     {
       target: 'body',
       placement: 'center',
-      title: "You're All Set!",
-      content: 'After the assessment, you will get a ranked list of recommended programs. Use the sidebar to browse programs, explore careers, and view your history anytime.',
+      title: t('tour.done'),
+      content: t('tour.doneDesc'),
       disableBeacon: true,
     },
   ]
@@ -52,27 +55,27 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
     {
       target: 'body',
       placement: 'center',
-      title: 'Welcome to DOrSU Recommender!',
-      content: 'This system helps you find the best college programs at Davao Oriental State University based on your unique strengths, grades, and interests.',
+      title: t('tour.welcome'),
+      content: t('tour.welcomeDesc'),
       disableBeacon: true,
     },
     {
       target: '.dashboard-start-btn',
-      title: 'Start Your Assessment',
-      content: 'Click the "Start Assessment" button to begin your 7-step assessment. It takes about 15\u201320 minutes to complete.',
+      title: t('tour.start'),
+      content: t('tour.startDesc'),
       disableBeacon: true,
     },
     {
       target: '.dashboard-profile-card',
-      title: 'How the Assessment Works',
-      content: 'The assessment covers your SHS strand, grades, aptitude exam (SUAST), personality type, career interests, and skills. Each step builds a complete picture of you. Your dashboard will track your progress and results.',
+      title: t('tour.how'),
+      content: t('tour.howDesc'),
       disableBeacon: true,
     },
     {
       target: 'body',
       placement: 'center',
-      title: "You're All Set!",
-      content: 'After the assessment, you will get a ranked list of recommended programs. Use the sidebar to browse programs, explore careers, and view your history anytime.',
+      title: t('tour.done'),
+      content: t('tour.doneDesc'),
       disableBeacon: true,
     },
   ]
@@ -83,15 +86,15 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
     {
       target: 'body',
       placement: 'center',
-      title: 'Welcome to the Admin Panel!',
-      content: 'You have access to manage programs, review student assessments, configure system settings, and view analytics.',
+      title: t('tour.adminWelcome'),
+      content: t('tour.adminWelcomeDesc'),
       disableBeacon: true,
     },
     {
       target: 'body',
       placement: 'center',
-      title: 'Sidebar Navigation',
-      content: 'Use the sidebar to manage programs, customize assessment questions, review student assessments, and access the admin dashboard for user management and analytics.',
+      title: t('tour.sidebar'),
+      content: t('tour.sidebarDesc'),
       disableBeacon: true,
     },
   ]
@@ -179,11 +182,11 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
         },
       }}
       locale={{
-        back: 'Back',
+        back: t('onboarding.back'),
         close: 'Close',
-        last: 'Got it!',
-        next: 'Next',
-        skip: 'Skip Tour',
+        last: t('onboarding.gotIt'),
+        next: t('onboarding.next'),
+        skip: t('onboarding.skip'),
       }}
       callback={(data) => {
         if (data.status === 'finished' || data.status === 'skipped') {
