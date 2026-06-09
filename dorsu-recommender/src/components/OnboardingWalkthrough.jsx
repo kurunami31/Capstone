@@ -109,30 +109,45 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
       spotlightClicks
       styles={{
         options: {
-          primaryColor: '#2563eb',
-          textColor: '#e2e8f0',
-          backgroundColor: '#1e293b',
-          arrowColor: '#1e293b',
+          primaryColor: 'var(--accent-blue, #3b82f6)',
+          textColor: 'var(--text-primary, #f1f5f9)',
+          backgroundColor: 'var(--card-bg, #1e293b)',
+          arrowColor: 'var(--card-bg, #1e293b)',
           overlayColor: 'rgba(0,0,0,0.6)',
+          zIndex: 10000,
         },
         tooltipContainer: {
           textAlign: 'left',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          backdropFilter: 'blur(12px)',
+          borderRadius: 16,
+          border: '1px solid var(--card-border, rgba(255,255,255,0.08))',
+        },
+        tooltipContent: {
+          color: 'var(--text-secondary, #94a3b8)',
+          fontSize: 14,
+          lineHeight: 1.5,
+        },
+        tooltipTitle: {
+          color: 'var(--text-primary, #f1f5f9)',
+          fontSize: 18,
+          fontWeight: 700,
         },
         buttonNext: {
-          backgroundColor: '#2563eb',
+          backgroundColor: 'var(--accent-blue, #3b82f6)',
           color: '#fff',
           fontWeight: 600,
           fontSize: 13,
           borderRadius: 8,
+          border: 'none',
         },
         buttonBack: {
-          color: '#94a3b8',
+          color: 'var(--text-secondary, #94a3b8)',
           fontWeight: 600,
           fontSize: 13,
         },
         buttonSkip: {
-          color: '#64748b',
+          color: 'var(--text-muted, #64748b)',
           fontWeight: 600,
           fontSize: 13,
         },
