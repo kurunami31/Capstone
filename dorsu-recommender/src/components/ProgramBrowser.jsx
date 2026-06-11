@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import useMobile from '../hooks/useMobile.js'
 import programs from '../data/programs.json'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
 
@@ -15,6 +16,7 @@ const facultyLogoMap = {
 }
 
 export default function ProgramBrowser({ activePrograms, studentData, systemSettings }) {
+  const isMobile = useMobile()
   const [search, setSearch] = useState('')
   const [faculty, setFaculty] = useState('')
   const [strand, setStrand] = useState('')
@@ -45,7 +47,7 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, var(--gradient-start, #0f172a) 0%, var(--gradient-mid, #1e3a5f) 50%, var(--gradient-end, #0f172a) 100%)', padding: '24px 20px 60px' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', margin: '0 0 4px' }}>Program Browser</h1>
+        <h1 style={{ fontSize: isMobile ? 20 : 22, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', margin: '0 0 4px' }}>Program Browser</h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted, #64748b)', margin: '0 0 20px' }}>
           Explore all {programs.length} programs offered at DOrSU
         </p>
@@ -55,17 +57,17 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
             type="text" placeholder="Search programs..."
             value={search} onChange={e => setSearch(e.target.value)}
               style={{
-                flex: 1, minWidth: 200, padding: '10px 14px', borderRadius: 10,
+                flex: 1, minWidth: isMobile ? 140 : 200, padding: '10px 14px', borderRadius: 10,
                 border: '1px solid var(--input-border, rgba(255,255,255,0.1))',
                 background: 'var(--input-bg, rgba(255,255,255,0.05))', color: 'var(--text-primary, #e2e8f0)',
-                fontSize: 14, outline: 'none', fontFamily: 'inherit',
+                fontSize: isMobile ? 13 : 14, outline: 'none', fontFamily: 'inherit',
               }}
           />
-          <select value={faculty} onChange={e => setFaculty(e.target.value)} style={selectStyle}>
+          <select value={faculty} onChange={e => setFaculty(e.target.value)} style={{ ...selectStyle, minWidth: isMobile ? '100%' : 160, flex: isMobile ? 1 : undefined }}>
             <option value="" style={{ color: '#1e293b' }}>All Faculties</option>
             {faculties.map(f => <option key={f} value={f} style={{ color: '#1e293b' }}>{f}</option>)}
           </select>
-          <select value={strand} onChange={e => setStrand(e.target.value)} style={selectStyle}>
+          <select value={strand} onChange={e => setStrand(e.target.value)} style={{ ...selectStyle, minWidth: isMobile ? '100%' : 160, flex: isMobile ? 1 : undefined }}>
             <option value="" style={{ color: '#1e293b' }}>All Strands</option>
             {allStrands.map(s => <option key={s} value={s} style={{ color: '#1e293b' }}>{s}</option>)}
           </select>
@@ -88,7 +90,7 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
             <p style={{ fontSize: 15, margin: 0 }}>No programs match your filters.</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '240px' : '280px'}, 1fr))`, gap: 14 }}>
             {currentPrograms.map(p => (
               <ProgramCard
                 key={p.code}

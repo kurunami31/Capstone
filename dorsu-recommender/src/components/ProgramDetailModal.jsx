@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import useMobile from '../hooks/useMobile.js'
 import GlossaryTooltip from './GlossaryTooltip.jsx'
 import { generateExplanations, calculateSkillsGap } from '../engine/explanations.js'
 
@@ -18,6 +19,7 @@ function codeColor(score) {
 }
 
 export default function ProgramDetailModal({ result, studentData, onClose }) {
+  const isMobile = useMobile()
   const { program, breakdown = {}, admission = {}, totalScore } = result || {}
   const hasScore = totalScore !== undefined && totalScore !== null
 
@@ -35,14 +37,15 @@ export default function ProgramDetailModal({ result, studentData, onClose }) {
       padding: 24, overflowY: 'auto',
     }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{
-        backgroundColor: 'var(--modal-bg)', borderRadius: 20, padding: 32,
-        maxWidth: 640, width: '100%', maxHeight: '90vh', overflowY: 'auto',
+        backgroundColor: 'var(--modal-bg)', borderRadius: 20, padding: isMobile ? 20 : 32,
+        maxWidth: isMobile ? '100%' : 640, margin: isMobile ? 12 : undefined,
+        width: '100%', maxHeight: '90vh', overflowY: 'auto',
         border: '1px solid var(--card-border)',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>{program.name}</h2>
+            <h2 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>{program.name}</h2>
             <div style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
               {facultyLogoMap[program.faculty] && (
                 <img src={facultyLogoMap[program.faculty]} alt="" style={{ width: 18, height: 18, borderRadius: 3, objectFit: 'cover' }} />

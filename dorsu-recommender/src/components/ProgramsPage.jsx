@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import useMobile from '../hooks/useMobile.js'
 import programs from '../data/programs.json'
 
 const CARD = {
@@ -31,6 +32,7 @@ const BTN_SECONDARY = {
 }
 
 export default function ProgramsPage({ activePrograms }) {
+  const isMobile = useMobile()
   const [localActivePrograms, setLocalActivePrograms] = useState({})
   const [programModal, setProgramModal] = useState(null)
   const [programForm, setProgramForm] = useState({ code: '', name: '', college: '', description: '' })
@@ -60,24 +62,39 @@ export default function ProgramsPage({ activePrograms }) {
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #0f172a 0%, var(--table-header) 50%, #0f172a 100%)',
     }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px 60px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Programs</h1>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Toggle programs on/off for recommendations</span>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px 60px' }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'stretch' : 'center',
+          marginBottom: 16, gap: isMobile ? 8 : 0,
+        }}>
+          <h1 style={{ fontSize: isMobile ? 20 : 22, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Programs</h1>
+          <div style={{
+            display: 'flex', gap: 6,
+            flexWrap: 'wrap', alignItems: 'center',
+          }}>
+            {!isMobile && (
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Toggle programs on/off for recommendations</span>
+            )}
             <button onClick={() => {
               setProgramForm({ code: '', name: '', college: '', description: '' })
               setProgramModal('create')
             }} style={{
               background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
               color: '#4ade80', padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}>
               + Add Program
             </button>
             <button onClick={() => window.open('/api/admin/assessments/export', '_blank')} style={{
-              ...BTN_SECONDARY, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
+              ...BTN_SECONDARY, display: 'flex', alignItems: 'center', gap: 6,
+              whiteSpace: isMobile ? 'normal' : 'nowrap',
+              padding: isMobile ? '6px 10px' : undefined,
+              fontSize: isMobile ? 11 : undefined,
             }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
               </svg>
               Export Assessments

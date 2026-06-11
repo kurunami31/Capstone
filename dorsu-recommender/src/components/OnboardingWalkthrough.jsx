@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Joyride } from 'react-joyride'
+import { Joyride, EVENTS } from 'react-joyride'
 import { useTranslation } from '../hooks/useTranslation.js'
 
 const STORAGE_KEY = 'dorsu_onboarding_v2'
@@ -188,8 +188,8 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
         next: t('onboarding.next'),
         skip: t('onboarding.skip'),
       }}
-      callback={(data) => {
-        if (data.status === 'finished' || data.status === 'skipped') {
+      onEvent={(data) => {
+        if (data.type === EVENTS.TOUR_END) {
           done()
         }
       }}
