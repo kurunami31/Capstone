@@ -1,7 +1,8 @@
-import 'dotenv/config'
-import express from 'express'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+import express from 'express'
 import { readFileSync, writeFileSync } from 'fs'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
@@ -9,10 +10,8 @@ import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
 import { pool, initDB } from './db.js'
 import { sendEmail, notifyAssessmentCompleted, notifyAccountCreated, notifySettingsChanged } from './email.js'
-import { GoogleGenAI } from '@google/genai'
-import * as Sentry from '@sentry/node'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+import * as Sentry from '@sentry/node'
 
 if (process.env.SENTRY_DSN) {
   try {
@@ -451,8 +450,8 @@ app.post('/api/chat', authenticate, async (req, res) => {
 
     await persistChatMessage(req.user.id, 'user', message)
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
-    if (!apiKey) {
+    const groqKey = process.env.GROQ_API_KEY
+    if (!groqKey) {
       const faqReplies = {
         'what is this': 'This is the DOrSU College Program Recommender System, a web-based tool that helps you find the best college programs at Davao Oriental State University based on your SHS strand, grades, aptitude, personality, interests, and skills.',
         'how does it work': 'The assessment has 8 steps: consent, welcome form, SHS strand selection, grade input, SUAST exam simulation, Holland personality quiz, interests, and skills. After completion, you get a ranked list of recommended programs.',
@@ -473,34 +472,47 @@ app.post('/api/chat', authenticate, async (req, res) => {
         return res.json({ reply })
       }
 
-      const fallbackReply = 'I\'m running in offline mode. Please set the GEMINI_API_KEY environment variable to enable AI-powered responses. In the meantime, check the FAQ page for common questions.'
+      const fallbackReply = 'I\'m running in offline mode. Please set the GROQ_API_KEY environment variable to enable AI-powered responses. In the meantime, check the FAQ page for common questions.'
       await persistChatMessage(req.user.id, 'bot', fallbackReply)
       return res.json({ reply: fallbackReply })
     }
 
-    const ai = new GoogleGenAI({ apiKey })
-
-    const contents = []
+    const messages = []
+    if (SYSTEM_PROMPT) {
+      messages.push({ role: 'system', content: SYSTEM_PROMPT })
+    }
     if (history && Array.isArray(history)) {
       for (const h of history) {
         if (h.role && h.text) {
-          contents.push({ role: h.role, parts: [{ text: h.text }] })
+          messages.push({ role: h.role === 'user' ? 'user' : 'assistant', content: h.text })
         }
       }
     }
-    contents.push({ role: 'user', parts: [{ text: message }] })
+    messages.push({ role: 'user', content: message })
 
-    const result = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
-      contents,
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        maxOutputTokens: 500,
-        temperature: 0.7,
+    const groqResp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqKey}`,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages,
+        max_tokens: 500,
+        temperature: 0.7,
+      }),
     })
 
-    let reply = (result.text || 'Sorry, I could not generate a response.')
+    if (!groqResp.ok) {
+      const errText = await groqResp.text()
+      throw new Error(`Groq API error (${groqResp.status}): ${errText}`)
+    }
+
+    const data = await groqResp.json()
+    const raw = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.'
+
+    let reply = raw
       .replace(/\*\*(.+?)\*\*/g, '$1')
       .replace(/\*(.+?)\*/g, '$1')
       .replace(/```[\s\S]*?```/g, '')
