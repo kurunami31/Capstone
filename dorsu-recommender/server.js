@@ -451,7 +451,7 @@ app.post('/api/chat', authenticate, async (req, res) => {
 
     await persistChatMessage(req.user.id, 'user', message)
 
-    const apiKey = process.env.GOOGLE_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
     if (!apiKey) {
       const faqReplies = {
         'what is this': 'This is the DOrSU College Program Recommender System, a web-based tool that helps you find the best college programs at Davao Oriental State University based on your SHS strand, grades, aptitude, personality, interests, and skills.',
@@ -473,7 +473,7 @@ app.post('/api/chat', authenticate, async (req, res) => {
         return res.json({ reply })
       }
 
-      const fallbackReply = 'I\'m running in offline mode. Please set the GOOGLE_API_KEY environment variable to enable AI-powered responses. In the meantime, check the FAQ page for common questions.'
+      const fallbackReply = 'I\'m running in offline mode. Please set the GEMINI_API_KEY environment variable to enable AI-powered responses. In the meantime, check the FAQ page for common questions.'
       await persistChatMessage(req.user.id, 'bot', fallbackReply)
       return res.json({ reply: fallbackReply })
     }
@@ -491,7 +491,7 @@ app.post('/api/chat', authenticate, async (req, res) => {
     contents.push({ role: 'user', parts: [{ text: message }] })
 
     const result = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-1.5-flash',
       contents,
       config: {
         systemInstruction: SYSTEM_PROMPT,
@@ -511,7 +511,9 @@ app.post('/api/chat', authenticate, async (req, res) => {
     await persistChatMessage(req.user.id, 'bot', reply)
     res.json({ reply })
   } catch (err) {
-    console.error('Chat error:', err)
+    console.error('Chat error:', err.message || err)
+    if (err.status) console.error('Chat error status:', err.status)
+    if (err.details) console.error('Chat error details:', JSON.stringify(err.details).slice(0, 500))
     res.status(500).json({ error: 'Failed to get AI response.' })
   }
 })
