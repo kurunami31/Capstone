@@ -2,9 +2,13 @@ import pg from 'pg'
 
 const { Pool } = pg
 
+const dbUrl = new URL(process.env.DATABASE_URL || 'postgresql://localhost:5432/dorsu_recommender')
+const hostname = dbUrl.hostname
+const isRemote = hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '::1'
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://localhost:5432/dorsu_recommender',
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+  connectionString: dbUrl.toString(),
+  ssl: isRemote ? { rejectUnauthorized: false } : false,
 })
 
 async function initDB() {
