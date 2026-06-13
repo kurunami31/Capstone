@@ -410,6 +410,8 @@ function AppContent() {
     mainContent = <FAQPage />
   } else if (showAdmin) {
     mainContent = <AdminPage userRole={user?.role} />
+  } else if (user && isStaff && !showLanding) {
+    mainContent = <LandingPage onGetStarted={handleGetStarted} user={user} />
   } else if (showDashboard) {
     mainContent = <UserDashboard onStartAssessment={handleGetStarted} onViewHistory={handleShowHistory} />
   } else if (showLanding) {
