@@ -129,6 +129,7 @@ app.post('/api/register', async (req, res) => {
     const lowerEmail = email.toLowerCase()
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [lowerEmail])
     if (existing.rows.length > 0) {
+      logActivity('0', 'registration_failed', `Duplicate email: ${lowerEmail}`, req.ip || '')
       return res.status(409).json({ error: 'An account with this email already exists.' })
     }
 
@@ -212,6 +213,7 @@ app.post('/api/login', async (req, res) => {
     }
     loginRateStore[loginIp].count++
     if (loginRateStore[loginIp].count > LOGIN_RATE_MAX) {
+      logActivity('0', 'login_blocked', `Rate limit hit for IP: ${loginIp}`, loginIp)
       return res.status(429).json({ error: 'Too many login attempts. Try again later.' })
     }
 
@@ -230,9 +232,11 @@ app.post('/api/login', async (req, res) => {
 
     if (lowerEmail === 'admin@dorsu.edu.ph' && row.role !== 'super_admin') {
       await pool.query('UPDATE users SET role = $1 WHERE id = $2', ['super_admin', row.id])
+      logActivity(row.id, 'admin_upgrade', 'Auto-upgraded to super_admin', req.ip || '')
       row.role = 'super_admin'
     } else if (ADMIN_EMAILS.includes(lowerEmail) && !['admin', 'super_admin'].includes(row.role)) {
       await pool.query('UPDATE users SET role = $1 WHERE id = $2', ['admin', row.id])
+      logActivity(row.id, 'admin_upgrade', 'Auto-upgraded to admin', req.ip || '')
       row.role = 'admin'
     }
 
@@ -249,6 +253,13 @@ app.post('/api/login', async (req, res) => {
 })
 
 app.post('/api/logout', (req, res) => {
+  try {
+    const token = req.cookies.token
+    if (token) {
+      const decoded = jwt.verify(token, JWT_SECRET)
+      if (decoded?.id) logActivity(decoded.id, 'logout', 'User logged out', req.ip || '')
+    }
+  } catch (_) {}
   res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' })
   res.json({ success: true })
 })
@@ -346,6 +357,7 @@ app.put('/api/profile/password', authenticate, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
 
     if (!(await bcrypt.compare(currentPassword, result.rows[0].password))) {
+      logActivity(req.user.id, 'password_change_failed', 'Incorrect current password', req.ip || '')
       return res.status(401).json({ error: 'Current password is incorrect.' })
     }
 
@@ -469,11 +481,13 @@ app.post('/api/chat', authenticate, async (req, res) => {
 
       if (reply) {
         await persistChatMessage(req.user.id, 'bot', reply)
+        logActivity(req.user.id, 'chat_query', 'FAQ match reply', req.ip || '')
         return res.json({ reply })
       }
 
       const fallbackReply = 'I\'m running in offline mode. Please set the GROQ_API_KEY environment variable to enable AI-powered responses. In the meantime, check the FAQ page for common questions.'
       await persistChatMessage(req.user.id, 'bot', fallbackReply)
+      logActivity(req.user.id, 'chat_query', 'Offline fallback reply', req.ip || '')
       return res.json({ reply: fallbackReply })
     }
 
@@ -521,6 +535,7 @@ app.post('/api/chat', authenticate, async (req, res) => {
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .trim()
     await persistChatMessage(req.user.id, 'bot', reply)
+    logActivity(req.user.id, 'chat_query', 'AI reply', req.ip || '')
     res.json({ reply })
   } catch (err) {
     console.error('Chat error:', err.message || err)
@@ -1104,6 +1119,7 @@ app.put('/api/assessment/progress', authenticate, async (req, res) => {
        ON CONFLICT (user_id) DO UPDATE SET step = $2, data = $3, updated_at = NOW()`,
       [req.user.id, step, JSON.stringify(data)]
     )
+    logActivity(req.user.id, 'assessment_progress', `Step ${step} auto-saved`, req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Save progress error:', err)
@@ -1150,6 +1166,7 @@ app.post('/api/favorites', authenticate, async (req, res) => {
       'INSERT INTO user_favorites (id, user_id, program_code, created_at) VALUES ($1, $2, $3, NOW()) ON CONFLICT (user_id, program_code) DO NOTHING',
       [id, req.user.id, programCode]
     )
+    logActivity(req.user.id, 'favorite_add', `Saved program: ${programCode}`, req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Add favorite error:', err)
@@ -1163,6 +1180,7 @@ app.delete('/api/favorites/:programCode', authenticate, async (req, res) => {
       'DELETE FROM user_favorites WHERE user_id = $1 AND program_code = $2',
       [req.user.id, req.params.programCode]
     )
+    logActivity(req.user.id, 'favorite_remove', `Removed program: ${req.params.programCode}`, req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Remove favorite error:', err)
@@ -1320,7 +1338,9 @@ app.post('/api/achievements/check', authenticate, async (req, res) => {
         const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
         await pool.query('INSERT INTO user_achievements (id, user_id, achievement_key) VALUES ($1, $2, $3)', [id, req.user.id, key])
         const a = await pool.query('SELECT name FROM achievements WHERE key = $1', [key])
-        newlyAwarded.push(a.rows[0]?.name || key)
+        const name = a.rows[0]?.name || key
+        newlyAwarded.push(name)
+        logActivity(req.user.id, 'achievement_unlock', `Earned achievement: ${name}`, req.ip || '')
       }
     }
     res.json({ newlyAwarded })
@@ -1665,6 +1685,7 @@ app.post('/api/forgot-password', async (req, res) => {
         <p style="font-size:12px;color:#94a3b8">DOrSU Program Recommender System</p>
       </div>`,
     })
+    logActivity(user.id, 'forgot_password', 'Password reset email sent', req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Forgot password error:', err)
@@ -1780,6 +1801,7 @@ app.post('/api/resend-verification', authenticate, async (req, res) => {
         <p style="font-size:12px;color:#94a3b8">DOrSU Program Recommender System</p>
       </div>`,
     })
+    logActivity(req.user.id, 'resend_verification', 'Verification email resent', req.ip || '')
     res.json({ success: true })
   } catch (err) {
     console.error('Resend verification error:', err)
