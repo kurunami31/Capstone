@@ -168,18 +168,18 @@ export default function QuestionsManager() {
               border: '1px solid var(--card-bg)',
             }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 2 }}>
-                  <span style={{ color: 'var(--text-input)', fontSize: 13, fontWeight: 600 }}>{q.question_text}</span>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 2, flexWrap: 'wrap' }}>
+                    <span style={{ color: 'var(--text-input)', fontSize: 13, fontWeight: 600 }}>{q.question_text}</span>
                   {!q.active && <span style={{ fontSize: 10, color: 'var(--danger)', background: 'var(--danger-bg)', padding: '1px 6px', borderRadius: 4 }}>Inactive</span>}
                 </div>
-                <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-muted)' }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11, color: 'var(--text-muted)' }}>
                   <span>Key: {q.question_key}</span>
                   <span>Step: {q.step}</span>
                   <span>Type: {q.question_type}</span>
                   <span>Order: {q.sort_order}</span>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 4 }}>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 <button onClick={async () => {
                   await fetch(`/api/admin/questions/${q.id}`, {
                     method: 'PUT', credentials: 'include',

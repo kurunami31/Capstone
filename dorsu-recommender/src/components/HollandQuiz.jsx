@@ -2,11 +2,13 @@ import { useState } from 'react'
 import GlossaryTooltip from './GlossaryTooltip.jsx'
 import hollandQuestions from '../data/holland.json'
 import { useTranslation } from '../hooks/useTranslation.js'
+import useMobile from '../hooks/useMobile.js'
 
 const scaleLabels = ['Strongly\nDisagree', 'Disagree', 'Neutral', 'Agree', 'Strongly\nAgree']
 
 export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
   const { t } = useTranslation()
+  const isMobile = useMobile()
   const [answers, setAnswers] = useState(data.hollandAnswers || {})
   const [step, setStep] = useState(0)
 
@@ -90,7 +92,7 @@ export default function HollandQuiz({ data, onUpdate, onNext, onBack }) {
                   key={val}
                   onClick={() => setAnswer(qi, val)}
                   style={{
-                    flex: 1, minWidth: 0, maxWidth: 60, height: 40, fontSize: 14, fontWeight: 600,
+                    flex: 1, minWidth: 0, maxWidth: isMobile ? 48 : 60, height: isMobile ? 36 : 40, fontSize: isMobile ? 13 : 14, fontWeight: 600,
                     border: `2px solid ${answers[`${currentDim.dimension}_${qi}`] === val ? '#3b82f6' : 'rgba(255,255,255,0.15)'}`,
                     backgroundColor: answers[`${currentDim.dimension}_${qi}`] === val ? 'var(--accent-bg)' : 'var(--card-bg)',
                     color: answers[`${currentDim.dimension}_${qi}`] === val ? 'var(--accent-text)' : 'var(--text-secondary)',

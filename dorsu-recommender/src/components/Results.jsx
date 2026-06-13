@@ -8,6 +8,7 @@ import RadarChart from './RadarChart.jsx'
 import ScoreSimulator from './ScoreSimulator.jsx'
 import ProgramDetailModal from './ProgramDetailModal.jsx'
 import { useTranslation } from '../hooks/useTranslation.js'
+import useMobile from '../hooks/useMobile.js'
 
 function codeColor(score) {
   if (score >= 80) return '#34d399'
@@ -38,6 +39,7 @@ export default function Results({ studentData, results, systemSettings, activePr
   const [detailProgram, setDetailProgram] = useState(null)
   const [showSimulator, setShowSimulator] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
+  const isMobile = useMobile()
 
   const handleShareResults = async () => {
     const lines = ['DOrSU Program Recommender - My Results']
@@ -122,10 +124,10 @@ export default function Results({ studentData, results, systemSettings, activePr
             {studentData.name} | {studentData.school} | {studentData.strand} Strand | GWA: {studentData.gwa}<GlossaryTooltip term="GWA" />
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {selected.length >= 2 && (
             <button onClick={() => setShowCompare(true)} style={{
-              padding: '10px 20px', fontSize: 14, fontWeight: 600,
+              padding: isMobile ? '8px 14px' : '10px 20px', fontSize: isMobile ? 13 : 14, fontWeight: 600,
               backgroundColor: 'rgba(99,102,241,0.15)', color: '#818cf8',
               border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, cursor: 'pointer',
             }}>

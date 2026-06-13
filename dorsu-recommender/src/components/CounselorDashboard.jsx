@@ -82,7 +82,7 @@ export default function CounselorDashboard() {
                     <div style={{ color: 'var(--text-input)', fontSize: 14, fontWeight: 600 }}>{a.studentName}</div>
                     <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>{a.email} — {a.strand || 'No strand'}</div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <span style={{
                       display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: 10, fontWeight: 600,
                       backgroundColor: a.reviewStatus === 'reviewed' ? 'rgba(34,197,94,0.15)' :
@@ -100,7 +100,7 @@ export default function CounselorDashboard() {
 
                 {expandedId === a.id && (
                   <div style={{ padding: '0 16px 16px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, marginBottom: 12 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8, marginBottom: 12 }}>
                       <div>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>GWA</div>
                         <div style={{ color: 'var(--text-input)', fontSize: 13 }}>{a.gwa || 'N/A'}</div>
@@ -140,7 +140,7 @@ export default function CounselorDashboard() {
                       />
                     </div>
 
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                       <select
                         value={editStatus}
                         onChange={e => setEditStatus(e.target.value)}

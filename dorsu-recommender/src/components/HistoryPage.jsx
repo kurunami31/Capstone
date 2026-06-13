@@ -272,7 +272,7 @@ export default function HistoryPage() {
                                     borderRadius: 2, transition: 'width 0.5s ease',
                                   }} />
                                 </div>
-                                <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+                                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 11, color: 'var(--text-muted)' }}>
                                   <span>Academic: {r.breakdown.academic}%</span>
                                   <span>SUAST: {r.breakdown.suast}%</span>
                                   <span>Personal: {r.breakdown.personalFit}%</span>

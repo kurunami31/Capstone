@@ -72,7 +72,7 @@ export default function Sidebar({ user, activePage, onHome, onAssessment, onProf
   if (isStaff) {
     navItems.push({ id: 'programs', label: t('nav.programs'), icon: 'book', action: onPrograms })
     navItems.push({ id: 'settings', label: t('nav.settings'), icon: 'sliders', action: onSettings })
-    navItems.push({ id: 'questions', label: t('nav.faq'), icon: 'helpCircle', action: onQuestions })
+    navItems.push({ id: 'questions', label: t('nav.questions'), icon: 'helpCircle', action: onQuestions })
     navItems.push({ id: 'review', label: t('nav.activity'), icon: 'checkCircle', action: onReview })
     navItems.push({ id: 'admin', label: t('nav.admin'), icon: 'shield', action: onAdmin })
   } else {

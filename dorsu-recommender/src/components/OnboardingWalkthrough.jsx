@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Joyride, EVENTS } from 'react-joyride'
 import { useTranslation } from '../hooks/useTranslation.js'
+import useMobile from '../hooks/useMobile.js'
 
 const STORAGE_KEY = 'dorsu_onboarding_v2'
 const APP_VERSION = '2.1.0'
 
 export default function OnboardingWalkthrough({ isStaff = false, isLanding = false }) {
   const { t } = useTranslation()
+  const isMobile = useMobile()
   const [run, setRun] = useState(false)
 
   useEffect(() => {
@@ -118,7 +120,7 @@ export default function OnboardingWalkthrough({ isStaff = false, isLanding = fal
           arrowColor: '#64748b',
           overlayColor: 'rgba(0,0,0,0.75)',
           zIndex: 10000,
-          width: 400,
+          width: isMobile ? 'auto' : 400,
         },
         tooltip: {
           backgroundColor: '#1e293b',

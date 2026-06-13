@@ -116,7 +116,7 @@ export default function ProgramsPage({ activePrograms }) {
                     <div style={{ color: 'var(--text-input)', fontSize: 14, fontWeight: 600 }}>{prog.name}</div>
                     <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>{prog.code} — {prog.college}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     <button
                       onClick={async () => {
                         if (active && !confirm(`Disable "${prog.name}"? It will no longer be recommended.`)) return

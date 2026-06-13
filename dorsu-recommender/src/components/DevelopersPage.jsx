@@ -1,4 +1,5 @@
 import { useTranslation } from '../hooks/useTranslation.js'
+import useMobile from '../hooks/useMobile.js'
 
 const DEV_IMG = '/developers/'
 
@@ -28,6 +29,7 @@ const developers = [
 
 export default function DevelopersPage() {
   const { t } = useTranslation()
+  const isMobile = useMobile()
 
   return (
     <div style={{
@@ -58,7 +60,7 @@ export default function DevelopersPage() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: `repeat(auto-fit, minmax(${isMobile ? 260 : 300}px, 1fr))`,
           gap: 24,
         }}>
           {developers.map((dev, i) => (

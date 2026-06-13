@@ -5,9 +5,11 @@ import SkeletonLoader, { SkeletonCard } from './SkeletonLoader.jsx'
 import careerTips from '../data/career-tips.json'
 import QuickQuiz from './QuickQuiz.jsx'
 import { useTranslation } from '../hooks/useTranslation.js'
+import useMobile from '../hooks/useMobile.js'
 
 export default function UserDashboard({ onStartAssessment, onViewHistory }) {
   const { t } = useTranslation()
+  const isMobile = useMobile()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState([])
@@ -130,7 +132,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
             borderRadius: 20, padding: 28,
             backdropFilter: 'blur(12px)',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 4 : 0 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                 Assessment Status
               </h2>

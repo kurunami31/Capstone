@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import useMobile from '../hooks/useMobile.js'
 
 const QUESTIONS = [
   { id: 1, question: 'Do you prefer working indoors or outdoors?', a: 'Indoors', b: 'Outdoors', map: { a: ['I', 'C'], b: ['R', 'S'] } },
@@ -19,6 +20,7 @@ const COLORS = {
 }
 
 export default function QuickQuiz({ onClose }) {
+  const isMobile = useMobile()
   const [currentQ, setCurrentQ] = useState(0)
   const [scores, setScores] = useState({ R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 })
   const [done, setDone] = useState(false)
@@ -51,7 +53,7 @@ export default function QuickQuiz({ onClose }) {
       padding: 24,
     }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{
-        backgroundColor: 'var(--modal-bg)', borderRadius: 20, padding: 32,
+        backgroundColor: 'var(--modal-bg)', borderRadius: 20, padding: isMobile ? 20 : 32,
         maxWidth: 440, width: '100%',
         border: '1px solid var(--card-border)',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
