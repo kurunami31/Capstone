@@ -7,7 +7,7 @@ import QuickQuiz from './QuickQuiz.jsx'
 import { useTranslation } from '../hooks/useTranslation.js'
 import useMobile from '../hooks/useMobile.js'
 
-export default function UserDashboard({ onStartAssessment, onViewHistory }) {
+export default function UserDashboard({ onStartAssessment, onViewHistory, systemSettings = {} }) {
   const { t } = useTranslation()
   const isMobile = useMobile()
   const [data, setData] = useState(null)
