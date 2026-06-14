@@ -103,7 +103,16 @@ export default function LandingPage({ onGetStarted, user }) {
               letterSpacing: '0.01em', opacity: loadingStatus ? 0.5 : 1,
             }}
           >
-            {loadingStatus ? 'Checking...' : t('welcome.start')}
+            {loadingStatus ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <span className="spinner" style={{
+                  width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)',
+                  borderTopColor: '#fff', borderRadius: '50%',
+                  animation: 'spin 0.6s linear infinite', display: 'inline-block',
+                }} />
+                Loading...
+              </span>
+            ) : t('welcome.start')}
           </button>
         )}
         <div style={{ height: 120 }} />

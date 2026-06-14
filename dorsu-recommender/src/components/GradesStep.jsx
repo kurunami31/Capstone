@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import GlossaryTooltip from './GlossaryTooltip.jsx'
 import { useTranslation } from '../hooks/useTranslation.js'
+import { secondaryBtn, btnStyle } from '../styles/shared.js'
 
 const CORE = ['math', 'science', 'english', 'filipino']
 const STRAND_SPECIFIC = {
@@ -33,6 +34,9 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
   const gwa = allFilled
     ? Math.round(CORE.reduce((sum, s) => sum + Number(grades[s]), 0) / CORE.length)
     : 0
+
+  const hasWarning = Object.values(grades).some(v => v !== '' && v !== '' && Number(v) < 60)
+    || Object.values(strandGrades).some(v => v !== '' && v !== '' && Number(v) < 60)
 
   useEffect(() => {
     if (allFilled) {
@@ -78,6 +82,16 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
         </div>
       )}
 
+      {hasWarning && (
+        <div style={{
+          padding: '10px 14px', backgroundColor: 'rgba(251,191,36,0.1)',
+          border: '1px solid rgba(251,191,36,0.2)', borderRadius: 8,
+          marginBottom: 16, color: '#fbbf24', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8,
+        }} role="alert">
+          <span>Some grades are below 60. Double-check that these values are correct.</span>
+        </div>
+      )}
+
       <h3 style={{ fontSize: 16, marginBottom: 12, color: 'var(--label-color)' }}>Strand-Specific Subjects ({strand})</h3>
       <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
         {strandSubs.map(s => (
@@ -97,22 +111,11 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
         <button onClick={onBack} style={{ ...secondaryBtn, width: '100%' }}>Back</button>
         <button onClick={onNext} disabled={!allFilled} style={{ ...btnStyle(allFilled), width: '100%' }}>Next</button>
       </div>
+      {!allFilled && (
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginTop: 8 }}>
+          Fill in all core grade fields to continue
+        </p>
+      )}
     </div>
   )
-}
-
-function btnStyle(ready) {
-  return {
-    padding: '12px 40px', fontSize: 15, fontWeight: 600,
-    backgroundColor: ready ? '#2563eb' : 'var(--border-strong)', color: '#fff',
-    border: 'none', borderRadius: 10, cursor: ready ? 'pointer' : 'not-allowed',
-    transition: 'all 0.2s',
-  }
-}
-
-const secondaryBtn = {
-  padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
-  border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
-  transition: 'all 0.2s',
 }

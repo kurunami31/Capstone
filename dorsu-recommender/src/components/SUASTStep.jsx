@@ -17,6 +17,7 @@ const TIERS = [
 
 import GlossaryTooltip from './GlossaryTooltip.jsx'
 import { useTranslation } from '../hooks/useTranslation.js'
+import { primaryBtn, secondaryBtn } from '../styles/shared.js'
 
 export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
   const { t } = useTranslation()
@@ -69,18 +70,4 @@ export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
       </div>
     </div>
   )
-}
-
-const primaryBtn = {
-  padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: '#2563eb', color: '#fff',
-  border: 'none', borderRadius: 10, cursor: 'pointer',
-  transition: 'all 0.2s',
-}
-
-const secondaryBtn = {
-  padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
-  border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
-  transition: 'all 0.2s',
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from '../hooks/useTranslation.js'
+import { secondaryBtn, btnStyle } from '../styles/shared.js'
 
 const SKILLS = [
   { key: 'analytical', label: 'Analytical Thinking', desc: 'Breaking down complex problems, analyzing data' },
@@ -62,28 +63,25 @@ export default function SkillsStep({ data, onUpdate, onNext, onBack }) {
         ))}
       </div>
 
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <button onClick={() => { setRatings({}); onUpdate({ skills: {} }) }} style={{
+          ...secondaryBtn, fontSize: 13, padding: '8px 16px',
+        }}>
+          Clear All
+        </button>
+      </div>
+
       <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginTop: 24 }}>
         <button onClick={onBack} style={{ ...secondaryBtn, width: '100%' }}>Back</button>
         <button onClick={onNext} disabled={!allRated} style={{ ...btnStyle(allRated), width: '100%' }}>
           See My Results
         </button>
       </div>
+      {!allRated && (
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginTop: 8 }}>
+          Rate all skills to continue
+        </p>
+      )}
     </div>
   )
-}
-
-function btnStyle(ready) {
-  return {
-    padding: '12px 40px', fontSize: 15, fontWeight: 600,
-    backgroundColor: ready ? '#059669' : 'var(--border-strong)', color: '#fff',
-    border: 'none', borderRadius: 10, cursor: ready ? 'pointer' : 'not-allowed',
-    transition: 'all 0.2s',
-  }
-}
-
-const secondaryBtn = {
-  padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
-  border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
-  transition: 'all 0.2s',
 }

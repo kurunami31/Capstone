@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import GlossaryTooltip from './GlossaryTooltip.jsx'
 import { useTranslation } from '../hooks/useTranslation.js'
+import { primaryBtn, secondaryBtn } from '../styles/shared.js'
 
-const iconSvg = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--text-secondary)', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }
+const iconSvg = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--text-secondary)', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true, focusable: 'false' }
 
 function ClusterIcon({ name }) {
   switch (name) {
@@ -51,8 +52,9 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
   const [ratings, setRatings] = useState(data.interests || {})
 
   const setRating = (key, val) => {
-    setRatings(r => ({ ...r, [key]: val }))
-    onUpdate({ interests: { ...ratings, [key]: val } })
+    const next = { ...ratings, [key]: val }
+    setRatings(next)
+    onUpdate({ interests: next })
   }
 
   return (
@@ -71,25 +73,44 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
           }}>
             <ClusterIcon name={c.key} />
             <div style={{ flex: 1, fontWeight: 500, color: 'var(--text-primary)' }}>{c.label}</div>
-            <div className="full-mobile" style={{ display: 'flex', gap: 4 }}>
-              {[1, 2, 3, 4, 5].map(val => (
-                <button
-                  key={val}
-                  onClick={() => setRating(c.key, val)}
-                  style={{
-                    flex: 1, minWidth: 0, height: 36, fontSize: 13, fontWeight: 600,
-                    border: `2px solid ${ratings[c.key] === val ? '#3b82f6' : 'rgba(255,255,255,0.15)'}`,
-                    backgroundColor: ratings[c.key] === val ? 'var(--accent-bg)' : 'var(--card-bg)',
-                    color: ratings[c.key] === val ? 'var(--accent-text)' : 'var(--text-secondary)',
-                    borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s',
-                  }}
-                >
-                  {val}
-                </button>
-              ))}
+            <div className="full-mobile" style={{ display: 'flex', gap: 4, flexDirection: 'column', alignItems: 'stretch' }}>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {[1, 2, 3, 4, 5].map(val => (
+                  <button
+                    key={val}
+                    onClick={() => setRating(c.key, val)}
+                    aria-label={`${c.label}: ${LABELS[val - 1]}`}
+                    style={{
+                      flex: 1, minWidth: 0, height: 44, fontSize: 13, fontWeight: 600,
+                      border: `2px solid ${ratings[c.key] === val ? '#3b82f6' : 'rgba(255,255,255,0.15)'}`,
+                      backgroundColor: ratings[c.key] === val ? 'var(--accent-bg)' : 'var(--card-bg)',
+                      color: ratings[c.key] === val ? 'var(--accent-text)' : 'var(--text-secondary)',
+                      borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s',
+                    }}
+                  >
+                    {val}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {[1, 2, 3, 4, 5].map(val => (
+                  <span key={val} style={{
+                    flex: 1, textAlign: 'center', fontSize: 9, color: 'var(--text-muted)',
+                    minWidth: 0,
+                  }}>{LABELS[val - 1]}</span>
+                ))}
+              </div>
             </div>
           </div>
         ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <button onClick={() => { setRatings({}); onUpdate({ interests: {} }) }} style={{
+          ...secondaryBtn, fontSize: 13, padding: '8px 16px',
+        }}>
+          Clear All
+        </button>
       </div>
 
       <div className="stack-mobile" style={{ display: 'flex', gap: 12, marginTop: 24 }}>
@@ -98,18 +119,4 @@ export default function InterestStep({ data, onUpdate, onNext, onBack }) {
       </div>
     </div>
   )
-}
-
-const primaryBtn = {
-  padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: '#2563eb', color: '#fff',
-  border: 'none', borderRadius: 10, cursor: 'pointer',
-  transition: 'all 0.2s',
-}
-
-const secondaryBtn = {
-  padding: '12px 40px', fontSize: 15, fontWeight: 600,
-  backgroundColor: 'var(--card-bg)', color: 'var(--text-secondary)',
-  border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
-  transition: 'all 0.2s',
 }
