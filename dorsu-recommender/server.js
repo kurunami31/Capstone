@@ -434,6 +434,14 @@ const providerCallbackRoutes = {
   },
 }
 
+// Expose configured OAuth providers to frontend
+app.get('/api/auth/providers', (_, res) => {
+  res.json({
+    google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.OAUTH_REDIRECT_URL),
+    github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET && process.env.OAUTH_REDIRECT_URL),
+  })
+})
+
 // Register OAuth routes only if provider is configured
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.OAUTH_REDIRECT_URL) {
   app.get('/api/auth/google', providerRedirectRoutes.google)
