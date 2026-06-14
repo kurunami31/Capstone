@@ -107,6 +107,26 @@ export default function SettingsPage({ settings }) {
             )
           })()}
         </div>
+        <div style={{ ...CARD, padding: 20, marginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Assessment Cooldown</h2>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Days students must wait before retaking</span>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <label style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Retake Cooldown (days)</label>
+              <span style={{ color: 'var(--accent-text)', fontSize: 13, fontWeight: 600 }}>
+                {parseInt(localSettings.retake_cooldown_days) || 120}
+              </span>
+            </div>
+            <input
+              type="range" min={1} max={365} step={1}
+              value={parseInt(localSettings.retake_cooldown_days) || 120}
+              onChange={e => setLocalSettings(prev => ({ ...prev, retake_cooldown_days: e.target.value }))}
+              style={{ width: '100%', accentColor: '#3b82f6' }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )

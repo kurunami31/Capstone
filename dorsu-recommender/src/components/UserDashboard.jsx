@@ -36,7 +36,7 @@ export default function UserDashboard({ onStartAssessment, onViewHistory }) {
     ? Math.floor((Date.now() - new Date(data.lastAssessment.createdAt).getTime()) / (1000 * 60 * 60 * 24))
     : null
 
-  const cooldownDays = 120
+  const cooldownDays = parseInt(systemSettings.retake_cooldown_days || '120')
   const canTakeAssessment = !data?.lastAssessment || daysSinceLast >= cooldownDays
   const daysLeft = canTakeAssessment ? 0 : cooldownDays - daysSinceLast
 

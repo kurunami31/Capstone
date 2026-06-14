@@ -1218,7 +1218,7 @@
   },
   {
     "code": "DSU-BSAGRIM-031",
-    "name": "BS Agribussiness Management",
+    "name": "BS Agribusiness Management",
     "faculty": "Faculty of Agriculture and Life Sciences",
     "ched_priority": false,
     "compatible_strands": [
@@ -1335,7 +1335,8 @@
       "Tutor",
       "Preschool Teacher"
     ],
-    "is_board_program": true
+    "is_board_program": true,
+    "board_exam": "Licensure Exam for Teachers (LET)"
   },
   {
     "code": "DSU-BSNED-033",
@@ -1396,11 +1397,12 @@
       "Behavior Therapist",
       "Tutor"
     ],
-    "is_board_program": true
+    "is_board_program": true,
+    "board_exam": "Licensure Exam for Teachers (LET)"
   },
   {
     "code": "DSU-BSEDFIL-034",
-    "name": "BSed—Major in Filipino",
+    "name": "BSEd — Major in Filipino",
     "faculty": "Faculty of Teacher Education",
     "ched_priority": false,
     "compatible_strands": [
@@ -1456,7 +1458,8 @@
       "Curriculum Developer",
       "Tutor"
     ],
-    "is_board_program": true
+    "is_board_program": true,
+    "board_exam": "Licensure Exam for Teachers (LET)"
   },
   {
     "code": "DSU-BTLE-035",
@@ -1518,6 +1521,7 @@
       "Tutor",
       "Curriculum Developer"
     ],
-    "is_board_program": true
+    "is_board_program": true,
+    "board_exam": "Licensure Exam for Teachers (LET)"
   }
 ]

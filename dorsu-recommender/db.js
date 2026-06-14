@@ -95,6 +95,7 @@ async function initDB() {
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['interest_match_weight', '0.30'])
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['skills_match_weight', '0.20'])
   await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['results_count', '10'])
+  await pool.query(`INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, ['retake_cooldown_days', '120'])
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS assessment_progress (
@@ -203,6 +204,22 @@ async function initDB() {
     )
   `)
   await pool.query('CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id)').catch(() => {})
+
+  await pool.query(`ALTER TABLE users ALTER COLUMN password DROP NOT NULL`).catch(() => {})
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS oauth_accounts (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      provider TEXT NOT NULL,
+      provider_id TEXT NOT NULL,
+      email TEXT NOT NULL DEFAULT '',
+      avatar TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(provider, provider_id)
+    )
+  `)
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_oauth_accounts_user_id ON oauth_accounts(user_id)').catch(() => {})
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS achievements (

@@ -413,7 +413,7 @@ function AppContent() {
   } else if (user && isStaff && !showLanding) {
     mainContent = <LandingPage onGetStarted={handleGetStarted} user={user} />
   } else if (showDashboard) {
-    mainContent = <UserDashboard onStartAssessment={handleGetStarted} onViewHistory={handleShowHistory} />
+    mainContent = <UserDashboard onStartAssessment={handleGetStarted} onViewHistory={handleShowHistory} systemSettings={systemSettings} />
   } else if (showLanding) {
     mainContent = <LandingPage onGetStarted={handleGetStarted} user={user} />
   } else {

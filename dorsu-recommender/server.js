@@ -264,6 +264,186 @@ app.post('/api/logout', (req, res) => {
   res.json({ success: true })
 })
 
+// ─── OAuth helpers ────────────────────────────────────────────────────────────────
+function generateOAuthState() {
+  return crypto.randomBytes(16).toString('hex')
+}
+
+const OAUTH_PROVIDERS = {
+  google: {
+    authorizeUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+    tokenUrl: 'https://oauth2.googleapis.com/token',
+    userInfoUrl: 'https://www.googleapis.com/oauth2/v2/userinfo',
+    clientId: () => process.env.GOOGLE_CLIENT_ID,
+    clientSecret: () => process.env.GOOGLE_CLIENT_SECRET,
+    scope: 'openid email profile',
+    callbackPath: '/api/auth/google/callback',
+    parseUser: (body) => ({
+      providerId: body.id,
+      email: body.email,
+      firstName: body.given_name || body.name || '',
+      lastName: body.family_name || '',
+      avatar: body.picture || '',
+    }),
+  },
+  github: {
+    authorizeUrl: 'https://github.com/login/oauth/authorize',
+    tokenUrl: 'https://github.com/login/oauth/access_token',
+    userInfoUrl: 'https://api.github.com/user',
+    emailsUrl: 'https://api.github.com/user/emails',
+    clientId: () => process.env.GITHUB_CLIENT_ID,
+    clientSecret: () => process.env.GITHUB_CLIENT_SECRET,
+    scope: 'read:user user:email',
+    callbackPath: '/api/auth/github/callback',
+    parseUser: (body, emails) => {
+      const primaryEmail = body.email || (emails || []).find(e => e.primary)?.email || ''
+      const nameParts = (body.name || '').split(' ')
+      return {
+        providerId: String(body.id),
+        email: primaryEmail,
+        firstName: nameParts[0] || body.login || '',
+        lastName: nameParts.slice(1).join(' ') || '',
+        avatar: body.avatar_url || '',
+      }
+    },
+  },
+}
+
+async function handleOAuthCallback(providerName, code, res) {
+  try {
+    const provider = OAUTH_PROVIDERS[providerName]
+    if (!provider) throw new Error('Unknown provider')
+
+    const body = new URLSearchParams({
+      client_id: provider.clientId(),
+      client_secret: provider.clientSecret(),
+      code,
+      redirect_uri: `${process.env.OAUTH_REDIRECT_URL || ''}${provider.callbackPath}`,
+      grant_type: 'authorization_code',
+    })
+    if (providerName === 'github') body.set('accept', 'json')
+
+    const tokenRes = await fetch(provider.tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+      body: body.toString(),
+    })
+    const tokenData = await tokenRes.json()
+    const accessToken = tokenData.access_token
+    if (!accessToken) throw new Error('Failed to get access token')
+
+    const userRes = await fetch(provider.userInfoUrl, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    const userData = await userRes.json()
+
+    let emails = []
+    if (provider.emailsUrl) {
+      try {
+        const emailsRes = await fetch(provider.emailsUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        emails = await emailsRes.json()
+      } catch {}
+    }
+
+    const { providerId, email, firstName, lastName, avatar } = provider.parseUser(userData, emails)
+
+    const existingLink = await pool.query(
+      'SELECT user_id FROM oauth_accounts WHERE provider = $1 AND provider_id = $2',
+      [providerName, providerId]
+    )
+
+    let userId
+    if (existingLink.rows.length > 0) {
+      userId = existingLink.rows[0].user_id
+    } else if (email) {
+      const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()])
+      if (existingUser.rows.length > 0) {
+        userId = existingUser.rows[0].id
+        await pool.query(
+          'INSERT INTO oauth_accounts (id, user_id, provider, provider_id, email, avatar) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING',
+          [Date.now().toString(36) + Math.random().toString(36).slice(2, 8), userId, providerName, providerId, email.toLowerCase(), avatar]
+        )
+      }
+    }
+
+    if (!userId) {
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+      const safeEmail = email ? email.toLowerCase() : `${providerId}@${providerName}.oauth`
+      await pool.query(
+        `INSERT INTO users (id, email, first_name, last_name, avatar, role, email_verified, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, 'user', true, NOW(), NOW())`,
+        [id, safeEmail, firstName || '', lastName || '', avatar || '']
+      )
+      await pool.query(
+        'INSERT INTO oauth_accounts (id, user_id, provider, provider_id, email, avatar) VALUES ($1, $2, $3, $4, $5, $6)',
+        [Date.now().toString(36) + Math.random().toString(36).slice(2, 8), id, providerName, providerId, safeEmail, avatar]
+      )
+      userId = id
+    }
+
+    const userRow = await pool.query(
+      'SELECT id, email, first_name, last_name, avatar, role, created_at, updated_at FROM users WHERE id = $1',
+      [userId]
+    )
+    if (userRow.rows.length === 0) throw new Error('User not found after OAuth login')
+
+    const user = mapUser(userRow.rows[0])
+    const token = generateToken(user)
+    setTokenCookie(res, token)
+    logActivity(userId, `${providerName}_login`, `User logged in via ${providerName}`, req?.ip || '')
+    return true
+  } catch (err) {
+    console.error(`${providerName} OAuth error:`, err)
+    return false
+  }
+}
+
+const providerRedirectRoutes = {
+  google: (req, res) => {
+    const state = generateOAuthState()
+    res.cookie('oauth_state', state, { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000 })
+    const url = `${OAUTH_PROVIDERS.google.authorizeUrl}?client_id=${OAUTH_PROVIDERS.google.clientId()}&redirect_uri=${process.env.OAUTH_REDIRECT_URL}/api/auth/google/callback&scope=${OAUTH_PROVIDERS.google.scope}&state=${state}&response_type=code&access_type=online`
+    res.redirect(url)
+  },
+  github: (req, res) => {
+    const state = generateOAuthState()
+    res.cookie('oauth_state', state, { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000 })
+    const url = `${OAUTH_PROVIDERS.github.authorizeUrl}?client_id=${OAUTH_PROVIDERS.github.clientId()}&redirect_uri=${process.env.OAUTH_REDIRECT_URL}/api/auth/github/callback&scope=${OAUTH_PROVIDERS.github.scope}&state=${state}`
+    res.redirect(url)
+  },
+}
+
+const providerCallbackRoutes = {
+  google: async (req, res) => {
+    const { code, state } = req.query
+    if (!code) return res.redirect('/?error=oauth_cancelled')
+    if (state && state !== req.cookies.oauth_state) return res.redirect('/?error=oauth_invalid_state')
+    res.clearCookie('oauth_state')
+    const success = await handleOAuthCallback('google', code, res)
+    res.redirect(success ? '/' : '/?error=oauth_failed')
+  },
+  github: async (req, res) => {
+    const { code, state } = req.query
+    if (!code) return res.redirect('/?error=oauth_cancelled')
+    if (state && state !== req.cookies.oauth_state) return res.redirect('/?error=oauth_invalid_state')
+    res.clearCookie('oauth_state')
+    const success = await handleOAuthCallback('github', code, res)
+    res.redirect(success ? '/' : '/?error=oauth_failed')
+  },
+}
+
+// Register OAuth routes only if provider is configured
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.OAUTH_REDIRECT_URL) {
+  app.get('/api/auth/google', providerRedirectRoutes.google)
+  app.get('/api/auth/google/callback', providerCallbackRoutes.google)
+}
+if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET && process.env.OAUTH_REDIRECT_URL) {
+  app.get('/api/auth/github', providerRedirectRoutes.github)
+  app.get('/api/auth/github/callback', providerCallbackRoutes.github)
+}
+
 app.get('/api/me', authenticate, async (req, res) => {
   try {
     const result = await pool.query(
@@ -986,9 +1166,11 @@ app.post('/api/assessment/save', authenticate, async (req, res) => {
         [req.user.id]
       )
       if (last.rows.length > 0) {
+        const cooldownSetting = await pool.query("SELECT value FROM system_settings WHERE key = 'retake_cooldown_days'")
+        const cooldownDays = parseInt(cooldownSetting.rows[0]?.value || '120')
         const daysSince = (Date.now() - new Date(last.rows[0].created_at).getTime()) / (1000 * 60 * 60 * 24)
-        if (daysSince < 120) {
-          const daysLeft = Math.ceil(120 - daysSince)
+        if (daysSince < cooldownDays) {
+          const daysLeft = Math.ceil(cooldownDays - daysSince)
           return res.status(429).json({ error: `Please wait ${daysLeft} more day${daysLeft === 1 ? '' : 's'} before retaking.` })
         }
       }
