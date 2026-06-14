@@ -381,6 +381,11 @@ async function handleOAuthCallback(providerName, code, res) {
         [Date.now().toString(36) + Math.random().toString(36).slice(2, 8), id, providerName, providerId, safeEmail, avatar]
       )
       userId = id
+    } else {
+      await pool.query(
+        'UPDATE users SET avatar = $1, updated_at = NOW() WHERE id = $2',
+        [avatar || '', userId]
+      )
     }
 
     const userRow = await pool.query(
