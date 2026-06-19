@@ -225,7 +225,18 @@ app.post('/api/login', async (req, res) => {
     )
 
     const row = result.rows[0]
-    if (!row || !(await bcrypt.compare(password, row.password))) {
+    if (!row) {
+      logActivity('0', 'login_failed', `Failed login attempt for: ${lowerEmail}`, req.ip || '')
+      return res.status(401).json({ error: 'Invalid email or password.' })
+    }
+    if (row.password === null) {
+      logActivity('0', 'login_failed', `OAuth-only login attempt: ${lowerEmail}`, req.ip || '')
+      return res.status(401).json({
+        error: 'This account uses Google/GitHub. Sign in with your OAuth provider, or set a password via "Forgot Password".',
+        oauthOnly: true,
+      })
+    }
+    if (!(await bcrypt.compare(password, row.password))) {
       logActivity('0', 'login_failed', `Failed login attempt for: ${lowerEmail}`, req.ip || '')
       return res.status(401).json({ error: 'Invalid email or password.' })
     }
