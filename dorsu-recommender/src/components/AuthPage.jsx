@@ -41,6 +41,7 @@ export default function AuthPage() {
   const [redirectCountdown, setRedirectCountdown] = useState(0)
   const [smtpConfigured, setSmtpConfigured] = useState(true)
   const [oauthProviders, setOauthProviders] = useState({})
+  const [devLink, setDevLink] = useState('')
   const cooldownRef = useRef(null)
   const redirectRef = useRef(null)
 
@@ -111,6 +112,9 @@ export default function AuthPage() {
         if (data.cooldown) {
           setCooldown(data.cooldown)
         }
+        if (data.devLink) {
+          setDevLink(data.devLink)
+        }
       } else if (mode === 'reset') {
         if (confirmPassword !== newPassword) {
           throw new Error('Passwords do not match.')
@@ -171,6 +175,7 @@ export default function AuthPage() {
     setTokenExpired(false)
     setRedirectCountdown(0)
     setCooldown(0)
+    setDevLink('')
     setNewPassword('')
     setConfirmPassword('')
   }
@@ -203,7 +208,7 @@ export default function AuthPage() {
               <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 6 }}>
                 {mode === 'login' ? 'Sign in to continue to the program recommender.' :
                  mode === 'register' ? 'Register to start your college program assessment.' :
-                 mode === 'forgot' && !smtpConfigured ? 'Password reset is not available because the email system is not configured. Contact the administrator for assistance.' :
+                 mode === 'forgot' && !smtpConfigured ? 'The email system is not configured. A reset link will appear on screen instead.' :
                  mode === 'forgot' && !forgotSent ? 'Enter your email to receive a reset link.' :
                  mode === 'forgot' && forgotSent ? 'Check your email for the reset link.' :
                  mode === 'verify' ? error || 'Your email has been verified! You can now sign in.' :
@@ -301,7 +306,7 @@ export default function AuthPage() {
                   placeholder={mode === 'register' ? 'DOrSU email or personal email' : 'you@example.com'}
                   style={inputStyle}
                   autoFocus={mode === 'login' || mode === 'forgot'}
-                  disabled={forgotSent || (mode === 'forgot' && !smtpConfigured)}
+                  disabled={forgotSent}
                 />
               </div>
             )}
@@ -464,19 +469,18 @@ export default function AuthPage() {
 
             <button
               type="submit"
-              disabled={submitting || forgotSent || (mode === 'forgot' && (!smtpConfigured || cooldown > 0))}
+              disabled={submitting || forgotSent || (mode === 'forgot' && cooldown > 0)}
               style={{
                 width: '100%', padding: '14px 0', fontSize: 15, fontWeight: 700,
                 backgroundColor: '#2563eb', color: '#fff',
-                border: 'none', borderRadius: 10, cursor: (submitting || forgotSent || (mode === 'forgot' && (!smtpConfigured || cooldown > 0))) ? 'not-allowed' : 'pointer',
-                opacity: (submitting || forgotSent || (mode === 'forgot' && (!smtpConfigured || cooldown > 0))) ? 0.6 : 1,
+                border: 'none', borderRadius: 10, cursor: (submitting || forgotSent || (mode === 'forgot' && cooldown > 0)) ? 'not-allowed' : 'pointer',
+                opacity: (submitting || forgotSent || (mode === 'forgot' && cooldown > 0)) ? 0.6 : 1,
                 transition: 'all 0.2s',
               }}
             >
               {submitting ? 'Please wait...' :
                mode === 'login' ? 'Sign In' :
                mode === 'register' ? 'Create Account' :
-               mode === 'forgot' && !smtpConfigured ? 'Unavailable' :
                mode === 'forgot' && !forgotSent ? 'Send Reset Link' :
                mode === 'forgot' && forgotSent ? 'Email Sent' :
                mode === 'reset' && !resetDone ? 'Reset Password' :
@@ -532,6 +536,33 @@ export default function AuthPage() {
 
           {mode === 'forgot' && forgotSent && (
             <div style={{ textAlign: 'center', marginTop: 16 }}>
+              {devLink ? (
+                <>
+                  <div style={{
+                    marginBottom: 14, padding: '12px', borderRadius: 8,
+                    backgroundColor: 'rgba(251,191,36,0.1)',
+                    border: '1px solid rgba(251,191,36,0.2)',
+                  }}>
+                    <p style={{ fontSize: 13, color: '#fbbf24', margin: '0 0 10px' }}>
+                      Email system is not configured on this server. Use the link below to reset your password:
+                    </p>
+                    <a href={devLink} style={{
+                      display: 'inline-block', padding: '10px 20px',
+                      background: '#2563eb', color: '#fff', borderRadius: 8,
+                      textDecoration: 'none', fontSize: 14, fontWeight: 600,
+                    }}>
+                      Click to Reset Password
+                    </a>
+                  </div>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+                    (Also printed in the server console)
+                  </p>
+                </>
+              ) : (
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                  Check your email for the reset link.
+                </p>
+              )}
               {cooldown > 0 && (
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
                   You can request another link in {cooldown}s
