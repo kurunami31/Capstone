@@ -1896,8 +1896,10 @@ app.post('/api/forgot-password', async (req, res) => {
       console.log(resetUrl)
       console.log('-----------------------------------------------')
     }
+    const oauthPwCheck = await pool.query('SELECT password FROM users WHERE id = $1', [user.id])
+    const isOauthUser = oauthPwCheck.rows[0].password === null
     logActivity(user.id, 'forgot_password', emailSent ? 'Password reset email sent' : 'SMTP unavailable, dev link shown', req.ip || '')
-    res.json({ success: true, devLink: !emailSent ? resetUrl : undefined })
+    res.json({ success: true, devLink: !emailSent ? resetUrl : undefined, oauthUser: isOauthUser })
   } catch (err) {
     console.error('Forgot password error:', err)
     res.status(500).json({ error: 'Server error.' })
