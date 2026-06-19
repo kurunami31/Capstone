@@ -1,5 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
+
+function getStrength(pw) {
+  let s = 0
+  if (pw.length >= 8) s++
+  if (pw.length >= 12) s++
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++
+  if (/\d/.test(pw)) s++
+  if (/[^a-zA-Z0-9]/.test(pw)) s++
+  return s
+}
+
+function strengthLabel(score) {
+  if (score <= 1) return { label: 'Weak', color: '#f87171', pct: 25 }
+  if (score <= 2) return { label: 'Fair', color: '#fbbf24', pct: 50 }
+  if (score <= 3) return { label: 'Good', color: '#60a5fa', pct: 75 }
+  return { label: 'Strong', color: '#34d399', pct: 100 }
+}
 
 export default function AuthPage() {
   const { login, register } = useAuth()
@@ -12,14 +29,20 @@ export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPwd, setShowPwd] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [forgotSent, setForgotSent] = useState(false)
   const [resetDone, setResetDone] = useState(false)
+  const [tokenExpired, setTokenExpired] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+  const [redirectCountdown, setRedirectCountdown] = useState(0)
   const [smtpConfigured, setSmtpConfigured] = useState(true)
   const [oauthProviders, setOauthProviders] = useState({})
+  const cooldownRef = useRef(null)
+  const redirectRef = useRef(null)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -45,6 +68,7 @@ export default function AuthPage() {
         .then(r => r.json())
         .then(data => {
           if (!data.valid) {
+            setTokenExpired(true)
             setError('This reset link is invalid or has expired.')
           }
         })
@@ -59,6 +83,11 @@ export default function AuthPage() {
       .then(r => r.json())
       .then(d => setOauthProviders(d))
       .catch(() => {})
+
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current)
+      if (redirectRef.current) clearInterval(redirectRef.current)
+    }
   }, [])
 
   const handleSubmit = async (e) => {
@@ -76,22 +105,25 @@ export default function AuthPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         })
-        if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error || 'Failed to send reset email.')
-        }
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to send reset email.')
         setForgotSent(true)
+        if (data.cooldown) {
+          setCooldown(data.cooldown)
+        }
       } else if (mode === 'reset') {
+        if (confirmPassword !== newPassword) {
+          throw new Error('Passwords do not match.')
+        }
         const res = await fetch('/api/reset-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: resetToken, password: newPassword }),
         })
-        if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error || 'Failed to reset password.')
-        }
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to reset password.')
         setResetDone(true)
+        setRedirectCountdown(5)
       }
     } catch (err) {
       setError(err.message)
@@ -100,11 +132,47 @@ export default function AuthPage() {
     }
   }
 
+  useEffect(() => {
+    if (cooldown > 0 && !cooldownRef.current) {
+      cooldownRef.current = setInterval(() => {
+        setCooldown(prev => {
+          if (prev <= 1) {
+            clearInterval(cooldownRef.current)
+            cooldownRef.current = null
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+  }, [forgotSent])
+
+  useEffect(() => {
+    if (redirectCountdown > 0 && !redirectRef.current) {
+      redirectRef.current = setInterval(() => {
+        setRedirectCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(redirectRef.current)
+            redirectRef.current = null
+            switchMode('login')
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+  }, [resetDone])
+
   const switchMode = (m) => {
     setMode(m || (mode === 'login' ? 'register' : 'login'))
     setError('')
     setForgotSent(false)
     setResetDone(false)
+    setTokenExpired(false)
+    setRedirectCountdown(0)
+    setCooldown(0)
+    setNewPassword('')
+    setConfirmPassword('')
   }
 
   return (
@@ -139,6 +207,7 @@ export default function AuthPage() {
                  mode === 'forgot' && !forgotSent ? 'Enter your email to receive a reset link.' :
                  mode === 'forgot' && forgotSent ? 'Check your email for the reset link.' :
                  mode === 'verify' ? error || 'Your email has been verified! You can now sign in.' :
+                 mode === 'reset' && tokenExpired ? error || 'This link has expired.' :
                  mode === 'reset' && !resetDone ? 'Enter your new password.' :
                  'Your password has been reset successfully.'}
               </p>
@@ -237,38 +306,96 @@ export default function AuthPage() {
               </div>
             )}
 
-            {mode === 'reset' && (
-              <div style={{ marginBottom: 22 }}>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
-                  New Password
-                </label>
-                <div style={{ position: 'relative' }}>
+            {mode === 'reset' && !resetDone && !tokenExpired && (
+              <>
+                <div style={{ marginBottom: 8 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
+                    New Password
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showPwd ? 'text' : 'password'}
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      placeholder="At least 8 characters"
+                      style={{ ...inputStyle, paddingRight: 40 }}
+                      autoFocus
+                    />
+                    <button type="button" onClick={() => setShowPwd(!showPwd)} style={{
+                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+                      color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                    }}>
+                      {showPwd ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {newPassword && (
+                    <div style={{ marginTop: 6 }}>
+                      <div style={{ height: 4, backgroundColor: 'var(--track-bg)', borderRadius: 2, overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%', width: `${strengthLabel(getStrength(newPassword)).pct}%`,
+                          backgroundColor: strengthLabel(getStrength(newPassword)).color,
+                          borderRadius: 2, transition: 'all 0.3s',
+                        }} />
+                      </div>
+                      <div style={{ fontSize: 11, color: strengthLabel(getStrength(newPassword)).color, marginTop: 3 }}>
+                        {strengthLabel(getStrength(newPassword)).label}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div style={{ marginBottom: 22 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>
+                    Confirm Password
+                  </label>
                   <input
                     type={showPwd ? 'text' : 'password'}
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    placeholder="At least 8 characters"
-                    style={{ ...inputStyle, paddingRight: 40 }}
-                    autoFocus
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter password"
+                    style={inputStyle}
                   />
-                  <button type="button" onClick={() => setShowPwd(!showPwd)} style={{
-                    position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                    background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-                    color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
-                  }}>
-                    {showPwd ? (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                        <line x1="1" y1="1" x2="23" y2="23"/>
-                      </svg>
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    )}
-                  </button>
                 </div>
+              </>
+            )}
+
+            {mode === 'reset' && tokenExpired && (
+              <div style={{ textAlign: 'center', marginBottom: 22 }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: '50%',
+                  backgroundColor: 'rgba(251,191,36,0.1)', color: '#fbbf24',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 16px', fontSize: 28,
+                }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 16 }}>
+                  This reset link has expired. Please request a new one.
+                </p>
+                <button
+                  onClick={() => switchMode('forgot')}
+                  style={{
+                    padding: '10px 24px', fontSize: 14, fontWeight: 600,
+                    backgroundColor: '#2563eb', color: '#fff',
+                    border: 'none', borderRadius: 8, cursor: 'pointer',
+                  }}
+                >
+                  Request New Link
+                </button>
               </div>
             )}
 
@@ -337,12 +464,12 @@ export default function AuthPage() {
 
             <button
               type="submit"
-              disabled={submitting || forgotSent || (mode === 'forgot' && !smtpConfigured)}
+              disabled={submitting || forgotSent || (mode === 'forgot' && (!smtpConfigured || cooldown > 0))}
               style={{
                 width: '100%', padding: '14px 0', fontSize: 15, fontWeight: 700,
                 backgroundColor: '#2563eb', color: '#fff',
-                border: 'none', borderRadius: 10, cursor: (submitting || forgotSent || (mode === 'forgot' && !smtpConfigured)) ? 'not-allowed' : 'pointer',
-                opacity: (submitting || forgotSent || (mode === 'forgot' && !smtpConfigured)) ? 0.6 : 1,
+                border: 'none', borderRadius: 10, cursor: (submitting || forgotSent || (mode === 'forgot' && (!smtpConfigured || cooldown > 0))) ? 'not-allowed' : 'pointer',
+                opacity: (submitting || forgotSent || (mode === 'forgot' && (!smtpConfigured || cooldown > 0))) ? 0.6 : 1,
                 transition: 'all 0.2s',
               }}
             >
@@ -405,6 +532,11 @@ export default function AuthPage() {
 
           {mode === 'forgot' && forgotSent && (
             <div style={{ textAlign: 'center', marginTop: 16 }}>
+              {cooldown > 0 && (
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                  You can request another link in {cooldown}s
+                </p>
+              )}
               <button
                 onClick={() => switchMode('login')}
                 style={{
@@ -419,6 +551,19 @@ export default function AuthPage() {
 
           {mode === 'reset' && resetDone && (
             <div style={{ textAlign: 'center', marginTop: 16 }}>
+              <div style={{
+                width: 56, height: 56, borderRadius: '50%',
+                backgroundColor: 'rgba(52,211,153,0.1)', color: '#34d399',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 12px', fontSize: 28,
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 16 }}>
+                Your password has been reset successfully.
+              </p>
               <button
                 onClick={() => switchMode('login')}
                 style={{
@@ -426,7 +571,7 @@ export default function AuthPage() {
                   padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer',
                 }}
               >
-                Sign In
+                {redirectCountdown > 0 ? `Sign In (${redirectCountdown})` : 'Sign In'}
               </button>
             </div>
           )}
