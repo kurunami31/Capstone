@@ -1868,7 +1868,7 @@ app.post('/api/forgot-password', async (req, res) => {
     )
 
     const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${token}`
-    await sendEmail({
+    const emailSent = await sendEmail({
       to: user.email,
       subject: 'Reset Your Password — DOrSU Recommender',
       html: `<div style="font-family:sans-serif;max-width:500px">
@@ -1880,8 +1880,13 @@ app.post('/api/forgot-password', async (req, res) => {
         <p style="font-size:12px;color:#94a3b8">DOrSU Program Recommender System</p>
       </div>`,
     })
-    logActivity(user.id, 'forgot_password', 'Password reset email sent', req.ip || '')
-    res.json({ success: true })
+    if (!emailSent) {
+      console.log('--- PASSWORD RESET LINK (SMTP unavailable) ---')
+      console.log(resetUrl)
+      console.log('-----------------------------------------------')
+    }
+    logActivity(user.id, 'forgot_password', emailSent ? 'Password reset email sent' : 'SMTP unavailable, dev link shown', req.ip || '')
+    res.json({ success: true, devLink: !emailSent ? resetUrl : undefined })
   } catch (err) {
     console.error('Forgot password error:', err)
     res.status(500).json({ error: 'Server error.' })
