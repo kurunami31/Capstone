@@ -320,7 +320,7 @@ const OAUTH_PROVIDERS = {
   },
 }
 
-async function handleOAuthCallback(providerName, code, res) {
+async function handleOAuthCallback(providerName, code, req, res) {
   try {
     const provider = OAUTH_PROVIDERS[providerName]
     if (!provider) throw new Error('Unknown provider')
@@ -410,6 +410,7 @@ async function handleOAuthCallback(providerName, code, res) {
     setTokenCookie(res, token)
     logActivity(userId, `${providerName}_login`, `User logged in via ${providerName}`, req?.ip || '')
     return true
+    return true
   } catch (err) {
     console.error(`${providerName} OAuth error:`, err)
     return false
@@ -437,7 +438,7 @@ const providerCallbackRoutes = {
     if (!code) return res.redirect('/?error=oauth_cancelled')
     if (state && state !== req.cookies.oauth_state) return res.redirect('/?error=oauth_invalid_state')
     res.clearCookie('oauth_state')
-    const success = await handleOAuthCallback('google', code, res)
+    const success = await handleOAuthCallback('google', code, req, res)
     res.redirect(success ? '/' : '/?error=oauth_failed')
   },
   github: async (req, res) => {
@@ -445,7 +446,7 @@ const providerCallbackRoutes = {
     if (!code) return res.redirect('/?error=oauth_cancelled')
     if (state && state !== req.cookies.oauth_state) return res.redirect('/?error=oauth_invalid_state')
     res.clearCookie('oauth_state')
-    const success = await handleOAuthCallback('github', code, res)
+    const success = await handleOAuthCallback('github', code, req, res)
     res.redirect(success ? '/' : '/?error=oauth_failed')
   },
 }
