@@ -33,6 +33,7 @@ export default function AuthPage() {
   const [showPwd, setShowPwd] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
+  const [oauthOnlyError, setOauthOnlyError] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [forgotSent, setForgotSent] = useState(false)
   const [resetDone, setResetDone] = useState(false)
@@ -97,7 +98,18 @@ export default function AuthPage() {
     setSubmitting(true)
     try {
       if (mode === 'login') {
-        await login(email, password, rememberMe)
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, rememberMe }),
+        })
+        const data = await res.json()
+        if (data.oauthOnly) {
+          setOauthOnlyError(true)
+          throw new Error(data.error)
+        }
+        if (!res.ok) throw new Error(data.error || 'Login failed')
+        window.location.reload()
       } else if (mode === 'register') {
         await register({ firstName, lastName, middleInitial, extensionName, email, password })
       } else if (mode === 'forgot') {
@@ -170,6 +182,7 @@ export default function AuthPage() {
   const switchMode = (m) => {
     setMode(m || (mode === 'login' ? 'register' : 'login'))
     setError('')
+    setOauthOnlyError(false)
     setForgotSent(false)
     setResetDone(false)
     setTokenExpired(false)
@@ -218,8 +231,18 @@ export default function AuthPage() {
               </p>
           </div>
 
-          {(mode === 'login' && (oauthProviders.google || oauthProviders.github)) && (
+          {(mode === 'login' && (oauthProviders.google || oauthProviders.github || oauthOnlyError)) && (
             <div style={{ marginBottom: 20 }}>
+              {oauthOnlyError && (
+                <div style={{
+                  marginBottom: 14, padding: '10px 14px', textAlign: 'center',
+                  backgroundColor: 'rgba(251,191,36,0.1)',
+                  border: '1px solid rgba(251,191,36,0.2)', borderRadius: 8,
+                  color: '#fbbf24', fontSize: 13, lineHeight: 1.5,
+                }}>
+                  This account uses Google/GitHub. Sign in with your OAuth provider, or set a password via <button onClick={() => switchMode('forgot')} style={{ background: 'none', border: 'none', color: '#60a5fa', fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>Forgot Password</button>.
+                </div>
+              )}
               {oauthProviders.google && (
                 <a href="/api/auth/google" style={{ textDecoration: 'none', display: 'block' }}>
                   <button type="button" style={{
