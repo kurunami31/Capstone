@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function ProfilePage() {
@@ -11,6 +11,7 @@ export default function ProfilePage() {
   const [email, setEmail] = useState(user?.email || '')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
+  const [confirmPwd, setConfirmPwd] = useState('')
   const [showCurrentPwd, setShowCurrentPwd] = useState(false)
   const [showNewPwd, setShowNewPwd] = useState(false)
   const [profileMsg, setProfileMsg] = useState('')
@@ -20,6 +21,8 @@ export default function ProfilePage() {
   const [avatarUpdating, setAvatarUpdating] = useState(false)
   const [saving, setSaving] = useState(false)
   const [changingPwd, setChangingPwd] = useState(false)
+  const [hasPassword, setHasPassword] = useState(null)
+  const [oauthProviders, setOauthProviders] = useState([])
   const fileRef = useRef(null)
 
   const handleAvatarChange = async (e) => {
@@ -95,6 +98,42 @@ export default function ProfilePage() {
       setPwdMsg('Password changed successfully.')
       setCurrentPassword('')
       setNewPassword('')
+    } catch (err) {
+      setPwdErr(err.message)
+    } finally {
+      setChangingPwd(false)
+    }
+  }
+
+  useEffect(() => {
+    fetch('/api/profile/auth-methods', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => {
+        setHasPassword(d.hasPassword)
+        setOauthProviders(d.oauthProviders || [])
+      })
+      .catch(() => {})
+  }, [])
+
+  const handleSetPassword = async () => {
+    if (!newPassword || newPassword.length < 8) { setPwdErr('Password must be at least 8 characters.'); return }
+    if (newPassword !== confirmPwd) { setPwdErr('Passwords do not match.'); return }
+    setChangingPwd(true)
+    setPwdMsg('')
+    setPwdErr('')
+    try {
+      const res = await fetch('/api/profile/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ newPassword }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to set password')
+      setPwdMsg('Password set successfully. You can now sign in with email too.')
+      setNewPassword('')
+      setConfirmPwd('')
+      setHasPassword(true)
     } catch (err) {
       setPwdErr(err.message)
     } finally {
@@ -242,65 +281,114 @@ export default function ProfilePage() {
             borderRadius: 20, padding: 32,
             backdropFilter: 'blur(12px)',
           }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>Change Password</h2>
-
-            <div style={{ marginBottom: 18 }}>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>Current Password</label>
-              <div style={{ position: 'relative' }}>
-                <input type={showCurrentPwd ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Enter current password" style={{ width: '100%', padding: '11px 14px', paddingRight: 40, fontSize: 14, backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)', borderRadius: 8, color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }} />
-                <button type="button" onClick={() => setShowCurrentPwd(!showCurrentPwd)} style={{
-                  position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+            {hasPassword === null ? (
+              <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>Loading...</p>
+            ) : hasPassword ? (
+              <>
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>Change Password</h2>
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>Current Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <input type={showCurrentPwd ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Enter current password" style={{ width: '100%', padding: '11px 14px', paddingRight: 40, fontSize: 14, backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)', borderRadius: 8, color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }} />
+                    <button type="button" onClick={() => setShowCurrentPwd(!showCurrentPwd)} style={{
+                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                    }}>
+                      {showCurrentPwd ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>New Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <input type={showNewPwd ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="At least 8 characters" style={{ width: '100%', padding: '11px 14px', paddingRight: 40, fontSize: 14, backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)', borderRadius: 8, color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }} />
+                    <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} style={{
+                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                    }}>
+                      {showNewPwd ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                {pwdMsg && <div style={{ padding: '10px 14px', backgroundColor: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8, color: '#86efac', fontSize: 13, marginBottom: 18 }}>{pwdMsg}</div>}
+                {pwdErr && <div style={{ padding: '10px 14px', backgroundColor: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, color: '#fca5a5', fontSize: 13, marginBottom: 18 }}>{pwdErr}</div>}
+                <button onClick={handlePasswordChange} disabled={changingPwd} style={{
+                  padding: '12px 0', width: '100%', fontSize: 15, fontWeight: 700,
+                  backgroundColor: 'transparent', color: 'var(--text-primary)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: 10, cursor: changingPwd ? 'not-allowed' : 'pointer',
+                  opacity: changingPwd ? 0.6 : 1,
                 }}>
-                  {showCurrentPwd ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                      <line x1="1" y1="1" x2="23" y2="23"/>
-                    </svg>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                  )}
+                  {changingPwd ? 'Changing...' : 'Change Password'}
                 </button>
-              </div>
-            </div>
-            <div style={{ marginBottom: 18 }}>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>New Password</label>
-              <div style={{ position: 'relative' }}>
-                <input type={showNewPwd ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="At least 8 characters" style={{ width: '100%', padding: '11px 14px', paddingRight: 40, fontSize: 14, backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)', borderRadius: 8, color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }} />
-                <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} style={{
-                  position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+              </>
+            ) : (
+              <>
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>Set Password</h2>
+                {oauthProviders.length > 0 && (
+                  <div style={{ marginBottom: 18, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    You currently sign in via <strong>{oauthProviders.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')}</strong>.
+                    Setting a password lets you also sign in with email.
+                  </div>
+                )}
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>New Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <input type={showNewPwd ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="At least 8 characters" style={{ width: '100%', padding: '11px 14px', paddingRight: 40, fontSize: 14, backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)', borderRadius: 8, color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }} />
+                    <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} style={{
+                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                    }}>
+                      {showNewPwd ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: 'var(--label-color)' }}>Confirm Password</label>
+                  <input type={showNewPwd ? 'text' : 'password'} value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="Re-enter password" style={{ width: '100%', padding: '11px 14px', fontSize: 14, backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)', borderRadius: 8, color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }} />
+                </div>
+                {pwdMsg && <div style={{ padding: '10px 14px', backgroundColor: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8, color: '#86efac', fontSize: 13, marginBottom: 18 }}>{pwdMsg}</div>}
+                {pwdErr && <div style={{ padding: '10px 14px', backgroundColor: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, color: '#fca5a5', fontSize: 13, marginBottom: 18 }}>{pwdErr}</div>}
+                <button onClick={handleSetPassword} disabled={changingPwd} style={{
+                  padding: '12px 0', width: '100%', fontSize: 15, fontWeight: 700,
+                  backgroundColor: '#2563eb', color: '#fff', border: 'none',
+                  borderRadius: 10, cursor: changingPwd ? 'not-allowed' : 'pointer',
+                  opacity: changingPwd ? 0.6 : 1,
                 }}>
-                  {showNewPwd ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                      <line x1="1" y1="1" x2="23" y2="23"/>
-                    </svg>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                  )}
+                  {changingPwd ? 'Setting...' : 'Set Password'}
                 </button>
-              </div>
-            </div>
-
-            {pwdMsg && <div style={{ padding: '10px 14px', backgroundColor: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8, color: '#86efac', fontSize: 13, marginBottom: 18 }}>{pwdMsg}</div>}
-            {pwdErr && <div style={{ padding: '10px 14px', backgroundColor: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, color: '#fca5a5', fontSize: 13, marginBottom: 18 }}>{pwdErr}</div>}
-
-            <button onClick={handlePasswordChange} disabled={changingPwd} style={{
-              padding: '12px 0', width: '100%', fontSize: 15, fontWeight: 700,
-              backgroundColor: 'transparent', color: 'var(--text-primary)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 10, cursor: changingPwd ? 'not-allowed' : 'pointer',
-              opacity: changingPwd ? 0.6 : 1,
-            }}>
-              {changingPwd ? 'Changing...' : 'Change Password'}
-            </button>
+              </>
+            )}
           </div>
         )}
 
