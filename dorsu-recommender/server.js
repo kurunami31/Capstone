@@ -560,9 +560,15 @@ app.put('/api/profile/password', authenticate, async (req, res) => {
     const result = await pool.query('SELECT password FROM users WHERE id = $1', [req.user.id])
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
 
-    if (!(await bcrypt.compare(currentPassword, result.rows[0].password))) {
-      logActivity(req.user.id, 'password_change_failed', 'Incorrect current password', req.ip || '')
-      return res.status(401).json({ error: 'Current password is incorrect.' })
+    const existingPw = result.rows[0].password
+    if (existingPw !== null) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required.' })
+      }
+      if (!(await bcrypt.compare(currentPassword, existingPw))) {
+        logActivity(req.user.id, 'password_change_failed', 'Incorrect current password', req.ip || '')
+        return res.status(401).json({ error: 'Current password is incorrect.' })
+      }
     }
 
     if (!newPassword || newPassword.length < 8) {
@@ -589,6 +595,20 @@ app.put('/api/profile/password', authenticate, async (req, res) => {
   } catch (err) {
     console.error('Password change error:', err)
     res.status(500).json({ error: 'Server error changing password.' })
+  }
+})
+
+app.get('/api/profile/auth-methods', authenticate, async (req, res) => {
+  try {
+    const userPw = await pool.query('SELECT password FROM users WHERE id = $1', [req.user.id])
+    const oauth = await pool.query('SELECT provider FROM oauth_accounts WHERE user_id = $1', [req.user.id])
+    res.json({
+      hasPassword: userPw.rows[0]?.password !== null && userPw.rows[0]?.password !== undefined,
+      oauthProviders: oauth.rows.map(r => r.provider),
+    })
+  } catch (err) {
+    console.error('Auth methods error:', err)
+    res.status(500).json({ error: 'Server error.' })
   }
 })
 
