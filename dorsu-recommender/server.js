@@ -42,8 +42,8 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim
 
 const rateLimitStore = {}
 const loginRateStore = {}
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000
-const LOGIN_RATE_MAX = 5
+const RATE_LIMIT_WINDOW = 3 * 60 * 1000
+const LOGIN_RATE_MAX = 3
 const AUTH_RATE_LIMIT_MAX = 100
 const UNAUTH_RATE_LIMIT_MAX = 60
 
