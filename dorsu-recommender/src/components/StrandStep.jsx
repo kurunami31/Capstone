@@ -59,7 +59,7 @@ export default function StrandStep({ data, onUpdate, onNext, onBack }) {
         <button
           onClick={onNext}
           disabled={!data.strand}
-          style={{ ...btnStyle(data.strand), flex: 1 }}
+          style={{ ...btnStyle(data.strand), flex: 1, padding: '12px 0' }}
         >
           Next
         </button>
