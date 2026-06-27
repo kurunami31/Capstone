@@ -32,10 +32,12 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
         const q = search.toLowerCase()
         if (!p.name.toLowerCase().includes(q) && !(p.description || '').toLowerCase().includes(q) && !p.code.toLowerCase().includes(q)) return false
       }
-      if (faculty && p.faculty !== faculty) return false
-      if (strand) {
-        const compat = [...(p.compatible_strands || []), ...(p.alternative_strands || [])]
-        if (!compat.includes(strand)) return false
+      const matchesFaculty = !faculty || p.faculty === faculty
+      const matchesStrand = !strand || [...(p.compatible_strands || []), ...(p.alternative_strands || [])].includes(strand)
+      if (faculty && strand) {
+        if (!matchesFaculty && !matchesStrand) return false
+      } else {
+        if (!matchesFaculty || !matchesStrand) return false
       }
       return true
     })
