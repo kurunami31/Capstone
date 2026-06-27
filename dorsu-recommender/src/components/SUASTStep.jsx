@@ -19,6 +19,18 @@ import GlossaryTooltip from './GlossaryTooltip.jsx'
 import { useTranslation } from '../hooks/useTranslation.js'
 import { primaryBtn, secondaryBtn } from '../styles/shared.js'
 
+const TIER_SCORES = { very_high: 5, high: 4, moderate: 3, low: 2, not_taken: 0 }
+
+function tierColor(val) {
+  switch (val) {
+    case 'very_high': return '#34d399'
+    case 'high': return '#60a5fa'
+    case 'moderate': return '#fbbf24'
+    case 'low': return '#f87171'
+    default: return '#475569'
+  }
+}
+
 export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
   const { t } = useTranslation()
   const tiers = data.suastTiers || {}
@@ -33,8 +45,42 @@ export default function SUASTStep({ data, onUpdate, onNext, onBack }) {
     color: 'var(--text-primary)', outline: 'none',
   }
 
+  const taken = SUBTESTS.filter(s => tiers[s.key] && tiers[s.key] !== 'not_taken')
+  const avgScore = taken.length > 0
+    ? Math.round(taken.reduce((sum, s) => sum + (TIER_SCORES[tiers[s.key]] || 0), 0) / taken.length * 20)
+    : null
+
   return (
     <div>
+      {avgScore !== null && (
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 10, marginBottom: 16,
+          padding: '14px 16px', borderRadius: 10,
+          background: 'var(--modal-bg, #1e293b)',
+          border: '1px solid var(--border-strong)',
+          backdropFilter: 'blur(8px)',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>Composite Score</span>
+            <span style={{ fontWeight: 700, fontSize: 18, color: '#fbbf24' }}>{avgScore}%</span>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {SUBTESTS.map(s => {
+              const val = tiers[s.key] || 'not_taken'
+              return (
+                <span key={s.key} style={{
+                  fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6,
+                  backgroundColor: tierColor(val) + '20',
+                  color: tierColor(val),
+                }}>
+                  {s.label.split(' ')[0]} {val === 'not_taken' ? '—' : TIERS.find(t => t.value === val)?.label.split(' ')[0]}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <h2 style={{ fontSize: 22, marginBottom: 8, color: 'var(--text-primary)' }}>{t('suast.title')}<GlossaryTooltip term="SUAST" /></h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 4, fontSize: 14 }}>
         Estimate your performance on the DOrSU State University Aptitude and Scholarship Test (SUAST).
