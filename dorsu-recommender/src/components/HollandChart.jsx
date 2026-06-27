@@ -45,8 +45,8 @@ export default function HollandChart({ scores }) {
                   transition: 'width 0.5s ease',
                 }} />
               </div>
-              <div style={{ width: 32, textAlign: 'right', fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>
-                {score}
+              <div style={{ width: 40, textAlign: 'right', fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>
+                {score}%
               </div>
             </div>
           )

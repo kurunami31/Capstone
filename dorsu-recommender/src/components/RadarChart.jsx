@@ -54,14 +54,14 @@ export default function RadarChart({ scores, size, labels, colors }) {
         const a = -Math.PI / 2 + i * angle
         const x = cx + r * d.value * Math.cos(a)
         const y = cy + r * d.value * Math.sin(a)
-        const lx = cx + (r + 22) * Math.cos(a)
-        const ly = cy + (r + 22) * Math.sin(a)
+        const lx = cx + (r + 26) * Math.cos(a)
+        const ly = cy + (r + 26) * Math.sin(a)
 
         return (
           <g key={i}>
             <circle cx={x} cy={y} r={3} fill={d.color} stroke="var(--modal-bg)" strokeWidth="1.5" />
             <text
-              x={lx} y={ly}
+              x={lx} y={ly - 5}
               textAnchor="middle"
               dominantBaseline="middle"
               fill="var(--text-secondary)"
@@ -70,6 +70,17 @@ export default function RadarChart({ scores, size, labels, colors }) {
               fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
             >
               {d.label}
+            </text>
+            <text
+              x={lx} y={ly + 6}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="var(--text-muted)"
+              fontSize={9}
+              fontWeight={500}
+              fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+            >
+              {Math.round(scores?.[dims[i]] || 0)}%
             </text>
           </g>
         )
