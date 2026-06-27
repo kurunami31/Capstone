@@ -19,7 +19,7 @@ export default function Welcome({ onStart, onBack }) {
       <div style={{ maxWidth: 400, margin: '0 auto' }}>
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: 13, color: 'var(--label-color)' }}>
-            {t('welcome.school')} <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 400 }}>(optional)</span>
+            {t('welcome.school')}
           </label>
           <input
             value={school}
