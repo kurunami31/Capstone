@@ -3,15 +3,9 @@ import { useTranslation } from '../hooks/useTranslation.js'
 
 export default function Welcome({ onStart, onBack }) {
   const [school, setSchool] = useState('')
-  const [error, setError] = useState('')
   const { t } = useTranslation()
 
   const handleStart = () => {
-    if (!school.trim()) {
-      setError('School name is required')
-      return
-    }
-    setError('')
     onStart(school.trim())
   }
 
@@ -25,25 +19,19 @@ export default function Welcome({ onStart, onBack }) {
       <div style={{ maxWidth: 400, margin: '0 auto' }}>
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: 13, color: 'var(--label-color)' }}>
-            {t('welcome.school')} <span style={{ color: 'var(--danger)' }}>*</span>
+            {t('welcome.school')} <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 400 }}>(optional)</span>
           </label>
           <input
             value={school}
-            onChange={e => { setSchool(e.target.value); if (error) setError('') }}
+            onChange={e => setSchool(e.target.value)}
             placeholder={t('welcome.schoolPlaceholder')}
-            aria-required="true"
-            aria-invalid={!!error}
             style={{
               width: '100%', padding: '11px 14px', borderRadius: 8, fontSize: 14,
-              backgroundColor: 'var(--track-bg)', border: `1px solid ${error ? 'var(--danger)' : 'var(--border-strong)'}`,
+              backgroundColor: 'var(--track-bg)', border: '1px solid var(--border-strong)',
               color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
             }}
           />
-          {error && (
-            <p style={{ color: 'var(--danger)', fontSize: 12, marginTop: 4 }} role="alert">
-              {error}
-            </p>
-          )}
+
         </div>
 
         <button
