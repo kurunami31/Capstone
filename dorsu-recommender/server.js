@@ -1321,6 +1321,58 @@ app.get('/api/assessments/:id/details', authenticate, async (req, res) => {
   }
 })
 
+// ---- Share assessment ----
+app.post('/api/share/assessment/:id', authenticate, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id FROM assessments WHERE id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    )
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Assessment not found.' })
+    const token = Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
+    await pool.query(
+      `INSERT INTO shared_assessments (assessment_id, token, created_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (assessment_id) DO UPDATE SET token = $2, created_at = NOW()`,
+      [req.params.id, token]
+    )
+    const url = `${req.protocol}://${req.get('host')}/api/share/${token}`
+    res.json({ token, url })
+  } catch (err) {
+    console.error('Share assessment error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
+app.get('/api/share/:token', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT a.id, a.strand, a.gwa, a.holland_code, a.top_programs, a.full_data, a.created_at,
+              u.first_name, u.last_name
+       FROM shared_assessments sa
+       JOIN assessments a ON a.id = sa.assessment_id
+       JOIN users u ON u.id = a.user_id
+       WHERE sa.token = $1`,
+      [req.params.token]
+    )
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Share link not found or expired.' })
+    const row = result.rows[0]
+    res.json({
+      id: row.id,
+      student: `${row.first_name} ${row.last_name}`,
+      strand: row.strand,
+      gwa: row.gwa,
+      hollandCode: row.holland_code,
+      topPrograms: JSON.parse(row.top_programs || '[]'),
+      fullData: row.full_data,
+      createdAt: row.created_at,
+    })
+  } catch (err) {
+    console.error('Get shared assessment error:', err)
+    res.status(500).json({ error: 'Server error.' })
+  }
+})
+
 // ---- Save/resume assessment progress ----
 app.get('/api/assessment/progress', authenticate, async (req, res) => {
   try {

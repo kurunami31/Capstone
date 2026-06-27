@@ -107,6 +107,15 @@ async function initDB() {
   `)
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS shared_assessments (
+      assessment_id TEXT PRIMARY KEY REFERENCES assessments(id),
+      token TEXT NOT NULL UNIQUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_shared_assessments_token ON shared_assessments(token)').catch(() => {})
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS counselor_notes (
       id TEXT PRIMARY KEY,
       assessment_id TEXT NOT NULL REFERENCES assessments(id),
