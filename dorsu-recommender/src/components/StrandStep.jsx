@@ -10,7 +10,6 @@ const STRANDS = [
 
 import GlossaryTooltip from './GlossaryTooltip.jsx'
 import { useTranslation } from '../hooks/useTranslation.js'
-import { btnStyle } from '../styles/shared.js'
 
 export default function StrandStep({ data, onUpdate, onNext, onBack }) {
   const { t } = useTranslation()
@@ -50,7 +49,7 @@ export default function StrandStep({ data, onUpdate, onNext, onBack }) {
             style={{
               flex: 1, marginTop: 24, padding: '12px 0', fontSize: 15, fontWeight: 600,
               backgroundColor: 'transparent', color: 'var(--text-secondary)',
-              border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, cursor: 'pointer',
+              border: '1px solid var(--border-strong)', borderRadius: 10, cursor: 'pointer',
             }}
           >
             Back
@@ -59,7 +58,14 @@ export default function StrandStep({ data, onUpdate, onNext, onBack }) {
         <button
           onClick={onNext}
           disabled={!data.strand}
-          style={{ ...btnStyle(data.strand), flex: 1, padding: '12px 0' }}
+          style={{
+            flex: 1, marginTop: 24, padding: '12px 0', fontSize: 15, fontWeight: 600,
+            backgroundColor: data.strand ? '#2563eb' : 'transparent',
+            color: data.strand ? '#fff' : 'var(--text-muted)',
+            border: data.strand ? 'none' : '1px solid var(--border-strong)',
+            borderRadius: 10, cursor: data.strand ? 'pointer' : 'not-allowed',
+            transition: 'all 0.2s',
+          }}
         >
           Next
         </button>
