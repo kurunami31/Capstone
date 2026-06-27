@@ -88,8 +88,7 @@ function AppContent() {
     suastTiers: {}, hollandAnswers: {}, hollandScores: [],
     interests: {}, skills: {},
   })
-  const [savedProgress, setSavedProgress] = useState(null)
-  const [showResumePrompt, setShowResumePrompt] = useState(false)
+
   const [emailVerified, setEmailVerified] = useState(true)
   const [smtpConfigured, setSmtpConfigured] = useState(false)
   const [verifMsg, setVerifMsg] = useState('')
@@ -109,13 +108,18 @@ function AppContent() {
       .catch(() => {})
   }, [user])
 
-  // Check for saved progress on mount
+  // Check for saved progress on mount and auto-resume
   useEffect(() => {
     if (!user) return
     fetch('/api/assessment/progress', { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
-        if (data.progress) setSavedProgress(data.progress)
+        if (data.progress && data.progress.step > 0) {
+          setStudentData(data.progress.data)
+          setStep(data.progress.step)
+          setShowDashboard(false)
+          setShowLanding(false)
+        }
       })
       .catch(err => console.error('Failed to check saved progress', err))
   }, [user])
@@ -201,23 +205,7 @@ function AppContent() {
   }
   const isStaff = ['admin', 'super_admin', 'department_head', 'counselor'].includes(user?.role)
   const handleGetStarted = () => {
-    if (savedProgress && savedProgress.step > 0) {
-      setShowResumePrompt(true)
-    } else {
-      setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowProgramBrowser(false); setShowCareerExplorer(false); setStep(0)
-    }
-  }
-  const handleResume = () => {
-    setStudentData(savedProgress.data)
-    setStep(savedProgress.step)
-    setShowLanding(false)
-    setShowResumePrompt(false)
-  }
-  const handleNewAssessment = () => {
-    setSavedProgress(null)
-    setShowResumePrompt(false)
-    setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowProgramBrowser(false); setShowCareerExplorer(false); setStep(0)
-    fetch('/api/assessment/progress', { method: 'DELETE', credentials: 'include' }).catch(err => console.error('Failed to delete saved progress on new assessment', err))
+    setShowLanding(false); setShowProfile(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowProgramBrowser(false); setShowCareerExplorer(false); setStep(0)
   }
   const handleShowProfile = () => { setShowProfile(true); setShowLanding(false); setShowFAQ(false); setShowAdmin(false); setShowHistory(false); setShowPrograms(false); setShowSettings(false); setShowQuestions(false); setShowReview(false); setShowDashboard(false); setShowNotifications(false); setShowProgramBrowser(false); setShowCareerExplorer(false); setShowDevelopers(false) }
   const handleBackFromProfile = () => setShowProfile(false)
@@ -448,41 +436,7 @@ function AppContent() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {showResumePrompt && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 24,
-        }}>
-          <div style={{
-              backgroundColor: 'var(--modal-bg, #1e293b)', borderRadius: 20, padding: 32, maxWidth: 400, width: '100%',
-            border: '1px solid var(--card-border, rgba(255,255,255,0.08))',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          }}>
-            <h3 style={{ color: 'var(--text-primary, #f1f5f9)', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>
-              {t('common.confirm')}
-            </h3>
-            <p style={{ color: '#94a3b8', fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}>
-              You have an incomplete assessment from your last session. Would you like to continue where you stopped?
-            </p>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={handleNewAssessment} style={{
-                padding: '10px 20px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
-                backgroundColor: 'transparent', color: '#94a3b8', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-              }}>
-                {t('results.startOver')}
-              </button>
-              <button onClick={handleResume} style={{
-                padding: '10px 20px', borderRadius: 10, border: 'none',
-                backgroundColor: '#2563eb', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-              }}>
-                {t('common.resume')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
       {verificationBanner}
       <Sidebar
         user={user}
