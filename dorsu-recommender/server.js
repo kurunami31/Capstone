@@ -119,11 +119,14 @@ app.post('/api/register', async (req, res) => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: 'Invalid email format.' })
     }
-    if (firstName.trim().length < 1 || lastName.trim().length < 1) {
-      return res.status(400).json({ error: 'First name and last name are required.' })
+    if (firstName.trim().length < 2 || lastName.trim().length < 2) {
+      return res.status(400).json({ error: 'First name and last name must be at least 2 characters.' })
     }
     if (firstName.trim().length > 50) return res.status(400).json({ error: 'First name must be 50 characters or fewer.' })
     if (lastName.trim().length > 50) return res.status(400).json({ error: 'Last name must be 50 characters or fewer.' })
+    const nameRegex = /^[A-Za-z\s.\-']+$/
+    if (!nameRegex.test(firstName.trim())) return res.status(400).json({ error: 'First name can only contain letters, spaces, periods, hyphens, and apostrophes.' })
+    if (!nameRegex.test(lastName.trim())) return res.status(400).json({ error: 'Last name can only contain letters, spaces, periods, hyphens, and apostrophes.' })
     if (email.length > 255) return res.status(400).json({ error: 'Email must be 255 characters or fewer.' })
 
     const lowerEmail = email.toLowerCase()
@@ -495,16 +498,20 @@ app.put('/api/profile', authenticate, async (req, res) => {
     let idx = 1
 
     if (firstName !== undefined) {
-      if (firstName.trim().length < 1) return res.status(400).json({ error: 'First name is required.' })
-      if (firstName.trim().length > 50) return res.status(400).json({ error: 'First name must be 50 characters or fewer.' })
+      const f = firstName.trim()
+      if (f.length < 2) return res.status(400).json({ error: 'First name must be at least 2 characters.' })
+      if (f.length > 50) return res.status(400).json({ error: 'First name must be 50 characters or fewer.' })
+      if (!/^[A-Za-z\s.\-']+$/.test(f)) return res.status(400).json({ error: 'First name can only contain letters, spaces, periods, hyphens, and apostrophes.' })
       updates.push(`first_name = $${idx++}`)
-      values.push(firstName.trim())
+      values.push(f)
     }
     if (lastName !== undefined) {
-      if (lastName.trim().length < 1) return res.status(400).json({ error: 'Last name is required.' })
-      if (lastName.trim().length > 50) return res.status(400).json({ error: 'Last name must be 50 characters or fewer.' })
+      const l = lastName.trim()
+      if (l.length < 2) return res.status(400).json({ error: 'Last name must be at least 2 characters.' })
+      if (l.length > 50) return res.status(400).json({ error: 'Last name must be 50 characters or fewer.' })
+      if (!/^[A-Za-z\s.\-']+$/.test(l)) return res.status(400).json({ error: 'Last name can only contain letters, spaces, periods, hyphens, and apostrophes.' })
       updates.push(`last_name = $${idx++}`)
-      values.push(lastName.trim())
+      values.push(l)
     }
     if (middleInitial !== undefined) {
       if (middleInitial.trim().length > 10) return res.status(400).json({ error: 'Middle initial must be 10 characters or fewer.' })

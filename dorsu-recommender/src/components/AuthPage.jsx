@@ -111,7 +111,14 @@ export default function AuthPage() {
         if (!res.ok) throw new Error(data.error || 'Login failed')
         window.location.reload()
       } else if (mode === 'register') {
-        await register({ firstName, lastName, middleInitial, extensionName, email, password })
+        const nameRegex = /^[A-Za-z\s.\-']+$/
+        if (!firstName.trim()) throw new Error('First name is required.')
+        if (!lastName.trim()) throw new Error('Last name is required.')
+        if (firstName.trim().length < 2) throw new Error('First name must be at least 2 characters.')
+        if (lastName.trim().length < 2) throw new Error('Last name must be at least 2 characters.')
+        if (!nameRegex.test(firstName)) throw new Error('First name can only contain letters, spaces, periods, hyphens, and apostrophes.')
+        if (!nameRegex.test(lastName)) throw new Error('Last name can only contain letters, spaces, periods, hyphens, and apostrophes.')
+        await register({ firstName: firstName.trim(), lastName: lastName.trim(), middleInitial, extensionName, email, password })
       } else if (mode === 'forgot') {
         const res = await fetch('/api/forgot-password', {
           method: 'POST',
