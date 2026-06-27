@@ -66,7 +66,7 @@ function AppContent() {
       .then(r => r.json()).then(setActivePrograms).catch(err => console.error('Failed to fetch active programs', err))
   }, [user])
 
-  const [consented, setConsented] = useState(false)
+  const [consented, setConsented] = useState(() => localStorage.getItem('dorsu_consented') === 'true')
   const [showLanding, setShowLanding] = useState(false)
   const [showDashboard, setShowDashboard] = useState(true)
   const [showNotifications, setShowNotifications] = useState(false)
@@ -252,7 +252,7 @@ function AppContent() {
 
   if (!user) return <AuthPage />
 
-  if (!consented) return <ConsentPage onConsent={() => setConsented(true)} />
+  if (!consented) return <ConsentPage onConsent={() => { localStorage.setItem('dorsu_consented', 'true'); setConsented(true) }} />
 
   // Email verification banner — only shown when email is unverified AND SMTP is configured
   const verificationBanner = smtpConfigured && !emailVerified ? (
