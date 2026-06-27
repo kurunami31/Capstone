@@ -309,10 +309,15 @@ function AppContent() {
     const pct = Math.round((step / totalSteps) * 100)
     return (
       <div style={{ padding: '20px 0 12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>
-            {t('assessment.step', { current: step, total: totalSteps })}
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+          <div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>
+              {t('assessment.step', { current: step, total: totalSteps })}
+            </span>
+            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', marginTop: 2 }}>
+              {t(STEP_LABEL_KEYS[step] || step)}
+            </div>
+          </div>
           <span style={{ fontSize: 12, color: '#64748b' }}>{t('assessment.complete', { pct })}</span>
         </div>
         {autoSaveStatus && (
