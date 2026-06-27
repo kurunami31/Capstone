@@ -22,10 +22,12 @@ export default function GradesStep({ data, onUpdate, onNext, onBack }) {
   const [strandGrades, setStrandGrades] = useState(data.strandSpecificGrades || {})
 
   const updateGrade = (subj, val) => {
+    if (val !== '' && !/^\d*\.?\d{0,3}$/.test(val)) return
     const n = val === '' ? '' : Math.min(100, Math.max(0, Number(val)))
     setGrades(g => ({ ...g, [subj]: n }))
   }
   const updateStrandGrade = (subj, val) => {
+    if (val !== '' && !/^\d*\.?\d{0,3}$/.test(val)) return
     const n = val === '' ? '' : Math.min(100, Math.max(0, Number(val)))
     setStrandGrades(g => ({ ...g, [subj]: n }))
   }
