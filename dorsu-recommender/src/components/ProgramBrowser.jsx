@@ -33,7 +33,7 @@ export default function ProgramBrowser({ activePrograms, studentData, systemSett
         if (!p.name.toLowerCase().includes(q) && !(p.description || '').toLowerCase().includes(q) && !p.code.toLowerCase().includes(q)) return false
       }
       const matchesFaculty = !faculty || p.faculty === faculty
-      const matchesStrand = !strand || !(p.incompatible_strands || []).includes(strand)
+      const matchesStrand = !strand || [...(p.compatible_strands || []), ...(p.alternative_strands || [])].includes(strand)
       if (faculty && strand) {
         if (!matchesFaculty && !matchesStrand) return false
       } else {
