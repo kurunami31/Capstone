@@ -48,7 +48,7 @@ export default function StrandStep({ data, onUpdate, onNext, onBack }) {
           <button
             onClick={onBack}
             style={{
-              marginTop: 24, padding: '12px 30px', fontSize: 15, fontWeight: 600,
+              flex: 1, marginTop: 24, padding: '12px 0', fontSize: 15, fontWeight: 600,
               backgroundColor: 'transparent', color: 'var(--text-secondary)',
               border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, cursor: 'pointer',
             }}
@@ -59,7 +59,7 @@ export default function StrandStep({ data, onUpdate, onNext, onBack }) {
         <button
           onClick={onNext}
           disabled={!data.strand}
-          style={btnStyle(data.strand)}
+          style={{ ...btnStyle(data.strand), flex: 1 }}
         >
           Next
         </button>
