@@ -9,6 +9,9 @@ const isRemote = hostname !== 'localhost' && hostname !== '127.0.0.1' && hostnam
 const pool = new Pool({
   connectionString: dbUrl.toString(),
   ssl: isRemote ? { rejectUnauthorized: false } : false,
+  max: 1,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 5000,
 })
 
 async function initDB() {
