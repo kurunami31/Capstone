@@ -2,17 +2,27 @@ import pg from 'pg'
 
 const { Pool } = pg
 
-const dbUrl = new URL(process.env.DATABASE_URL || 'postgresql://localhost:5432/dorsu_recommender')
-const hostname = dbUrl.hostname
-const isRemote = hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '::1'
+if (!process.env.DATABASE_URL) {
+  console.error('FATAL: DATABASE_URL environment variable is not set.')
+}
 
-const pool = new Pool({
-  connectionString: dbUrl.toString(),
-  ssl: isRemote ? { rejectUnauthorized: false } : false,
-  max: 1,
-  idleTimeoutMillis: 10000,
-  connectionTimeoutMillis: 5000,
-})
+let pool
+try {
+  const dbUrl = new URL(process.env.DATABASE_URL || 'postgresql://localhost:5432/dorsu_recommender')
+  const hostname = dbUrl.hostname
+  const isRemote = hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '::1'
+
+  pool = new Pool({
+    connectionString: dbUrl.toString(),
+    ssl: isRemote ? { rejectUnauthorized: false } : false,
+    max: 1,
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 15000,
+  })
+} catch (err) {
+  console.error('FATAL: Failed to create database pool:', err.message)
+  throw err
+}
 
 async function initDB() {
   await pool.query(`
