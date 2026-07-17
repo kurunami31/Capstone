@@ -2355,9 +2355,15 @@ dbInit.then(async () => {
     console.log(`   Password: ${adminPwd}`)
     console.log('===================================')
     console.log('')
-  } else if (existing.rows[0].role !== 'super_admin') {
-    await pool.query('UPDATE users SET role = $1 WHERE email = $2', ['super_admin', ADMIN_EMAIL])
-    console.log(`Upgraded ${ADMIN_EMAIL} to super_admin.`)
+  } else {
+    if (process.env.ADMIN_PASSWORD) {
+      const hashed = await bcrypt.hash(process.env.ADMIN_PASSWORD, SALT_ROUNDS)
+      await pool.query('UPDATE users SET password = $1, role = $2 WHERE email = $3', [hashed, 'super_admin', ADMIN_EMAIL])
+      console.log(`Updated password for ${ADMIN_EMAIL} from ADMIN_PASSWORD env var.`)
+    } else if (existing.rows[0].role !== 'super_admin') {
+      await pool.query('UPDATE users SET role = $1 WHERE email = $2', ['super_admin', ADMIN_EMAIL])
+      console.log(`Upgraded ${ADMIN_EMAIL} to super_admin.`)
+    }
   }
 
   const progCount = await pool.query('SELECT COUNT(*)::int AS cnt FROM program_settings')
