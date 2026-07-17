@@ -2336,7 +2336,8 @@ if (process.env.SENTRY_DSN) {
   app.use(Sentry.expressErrorHandler())
 }
 
-initDB().then(async () => {
+export const dbInit = initDB()
+dbInit.then(async () => {
   const ADMIN_EMAIL = 'admin@dorsu.edu.ph'
   const existing = await pool.query('SELECT id, role FROM users WHERE email = $1', [ADMIN_EMAIL])
   if (existing.rows.length === 0) {
@@ -2359,7 +2360,6 @@ initDB().then(async () => {
     console.log(`Upgraded ${ADMIN_EMAIL} to super_admin.`)
   }
 
-  // Auto-populate program_settings with all programs enabled by default
   const progCount = await pool.query('SELECT COUNT(*)::int AS cnt FROM program_settings')
   if (progCount.rows[0].cnt === 0) {
     for (const prog of programs) {
