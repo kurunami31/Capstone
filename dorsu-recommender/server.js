@@ -2341,7 +2341,7 @@ dbInit.then(async () => {
   const ADMIN_EMAIL = 'admin@dorsu.edu.ph'
   const existing = await pool.query('SELECT id, role FROM users WHERE email = $1', [ADMIN_EMAIL])
   if (existing.rows.length === 0) {
-    const adminPwd = 'Admin' + Math.random().toString(36).slice(2, 6).toUpperCase()
+    const adminPwd = process.env.ADMIN_PASSWORD || 'Admin' + Math.random().toString(36).slice(2, 6).toUpperCase()
     const hashed = await bcrypt.hash(adminPwd, SALT_ROUNDS)
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
     await pool.query(
